@@ -189,3 +189,9 @@
    cross-site request forgery
       恶意网站欺骗浏览器向另一个网站发出请求的攻击类型。
       可以通过正确验证请求而不是依赖会话 cookie 等环境权限来防止
+
+
+.. raw:: latex
+
+   \renewcommand{\indexname}{Index}
+   \printindex
