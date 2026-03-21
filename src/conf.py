@@ -82,14 +82,33 @@ pygments_style = "sphinx"
 todo_include_todos = True
 
 # https://alabaster.readthedocs.io/en/latest/customization.html#theme-options
-html_theme = "alabaster"
+# html_theme = "alabaster"
+# html_theme_options = {
+#     "show_relbars": True,
+#     "fixed_sidebar": True,
+#     "github_user": "grill-glitch",
+#     "github_repo": "book",
+#     "github_button": True,
+#     "github_type": "star",
+# }
+
+# Use Read the Docs theme
+html_theme = "sphinx_rtd_theme"
 html_theme_options = {
-    "show_relbars": True,
-    "fixed_sidebar": True,
-    "github_user": "grill-glitch",
-    "github_repo": "book",
-    "github_button": True,
-    "github_type": "star",
+    "canonical_url": "https://crypto.notarobot.ggff.net/",
+    "analytics_id": "UA-139987-1",  # 可选：Google Analytics
+    "logo_only": False,
+    "display_version": True,
+    "prev_next_buttons_location": "bottom",
+    "style_external_links": False,
+    "vcs_pageview_mode": "",
+    "style_nav_header_background": "#2980B9",
+    # Table of contents options
+    "collapse_navigation": False,
+    "sticky_navigation": True,
+    "navigation_depth": 4,
+    "includehidden": True,
+    "titles_only": False
 }
 
 html_show_sourcelink = False
