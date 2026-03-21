@@ -1,265 +1,215 @@
-Block ciphers
--------------
+分组密码
+---------
 
-   Few false ideas have more firmly gripped the minds of so many intelligent men
-   than the one that, if they just tried, they could invent a cipher that no one
-   could break.
+   "少数几个错误的想法比任何其他东西更牢固地占据了许多聪明人的头脑，
+   那就是，如果他们尝试，他们可以发明一种没有人能破解的密码。
 
        *David Kahn*
 
 .. _description-1:
 
-Description
-~~~~~~~~~~~
+描述
+~~~~
 
-A :term:`block cipher` is an algorithm that encrypts blocks of a
-fixed length. The encryption function :math:`E` transforms
-plaintext blocks :math:`P` into ciphertext blocks :math:`C` by using a
-secret key :math:`k`:
+:term:`分组密码` 是一种加密固定长度块的算法。加密函数 :math:`E` 使用
+秘密密钥 :math:`k` 将明文块 :math:`P` 转换为密文块 :math:`C`：
 
 .. math::
 
    C = E(k, P)
 
-Plaintext and ciphertext blocks are sequences of bits and always match in size. The 
-block cipher's *block size* is a fixed size. :term:`Keyspace` is the set of all possible keys.
+明文和密文块是位的序列，并且始终大小匹配。分组密码的*分组大小*是
+固定大小。:term:`keyspace` 是所有可能密钥的集合。
 
-Once we encrypt plaintext blocks into ciphertext blocks, they are later
-decrypted to recover original plaintext block. The original plaintext block
-:math:`P` is produced using a decryption function :math:`D`. It takes the
-ciphertext block :math:`C` and the key :math:`k` (same as the one used to
-encrypt the block) as inputs.
+一旦我们将明文块加密为密文块，它们稍后被解密以恢复原始明文块。
+原始明文块 :math:`P` 使用解密函数 :math:`D` 产生。它接收密文块
+:math:`C` 和密钥 :math:`k`（与用于加密块的密钥相同）作为输入。
 
 .. math::
 
    P = D(k, C)
 
-Or, visually represented in blocks:
+或者，以块形式直观表示：
 
 .. figure:: Illustrations/BlockCipher/BlockCipher.svg
    :align: center
 
-A block cipher is an example of a :term:`symmetric-key encryption` scheme, also
-known as a :term:`secret-key encryption` scheme. The same secret
-key is used for both encryption and decryption. Later in the book, we contrast this
-with :term:`public-key encryption` algorithms, which have a distinct key for
-encryption and decryption.
+分组密码是 :term:`symmetric-key encryption` 方案的示例，也称为
+:term:`secret-key encryption` 方案。相同的秘密密钥用于加密和解密。
+在本书后面，我们将其与具有用于加密和解密的 distinct 密钥的
+:term:`public-key encryption` 算法进行对比。
 
-A block cipher is a *keyed permutation*. It is a *permutation* because 
-the block cipher maps each possible block to another block. It is 
-also a *keyed* permutation because the key determines exactly which 
-blocks map to which. It is important for the block cipher to be a permutation because the
-recipient must map blocks back to the original blocks.
+分组密码是*密钥置换*。它是*置换*，因为分组密码将每个可能的块映射
+到另一个块。它也是*密钥的*置换，因为密钥确定哪些块映射到哪些块。
+分组密码必须是置换这一点很重要，因为接收者必须将块映射回原始块。
 
-We illustrate this by looking at a block cipher with an impractical,
-tiny 4-bit block size. :math:`2^4 = 16` possible blocks. Since each
-of the blocks map to a hexadecimal digit, we represent the blocks
-by that digit. :numref:`fig-BlockCipherBlocks`
-illustrates blocks that the cipher operates on.
-
+我们通过查看一个具有不切实际的小 4 位分组大小的分组密码来说明
+这一点。:math:`2^4 = 16` 个可能的块。由于每个块映射到十六进制数字，
+我们使用该数字表示块。:numref:`fig-BlockCipherBlocks`
+说明了密码操作的块。
 
 .. _fig-BlockCipherBlocks:
 
 .. figure:: Illustrations/BlockCipher/AllNodes.svg
    :align: center
 
-   All 16 nodes operated on by the block cipher. Each node is designated by a hexadecimal digit.
+   分组密码操作的所有 16 个节点。每个节点由十六进制数字指定。
 
-Once we select a secret key, the block cipher uses it to determine
-the encryption of any given block. We illustrate that
-relationship with an arrow. The tail of the arrow has the block
-encrypted with :math:`E` under key :math:`k` and the arrowhead is mapped to the block.
+一旦我们选择了一个秘密密钥，分组密码就使用它来确定任何给定块的
+加密。我们用箭头说明这种关系。箭头的尾部是用密钥 :math:`k` 下的
+:math:`E` 加密的块，箭头指向映射到的块。
 
 .. _fig-BlockCipherEncryption:
 
 .. figure:: Illustrations/BlockCipher/Encryption.svg
    :align: center
 
-   An encryption permutation made by a block cipher under a particular key :math:`k`.
+   由特定密钥 :math:`k` 下分组密码产生的加密置换。
 
-In :numref:`fig-BlockCipherEncryption`, note
-that the permutation is not just one big cycle. It contains a large cycle of
-7 elements, and several smaller cycles of 4, 3 and 2 elements each. It is
-also perfectly possible that an element encrypts to itself. This is to
-be expected when selecting random permutations, which is approximately
-what a block cipher is doing; it doesn't demonstrate a bug in the block
-cipher.
+在 :numref:`fig-BlockCipherEncryption` 中，注意
+置换不仅仅是一个大循环。它包含一个 7 元素的大循环，以及几个较小的
+4、3 和 2 元素循环。一个元素加密到自身也完全可能。这是在选择随机
+置换时预期的；这不证明分组密码中有错误。
 
-When you decrypt instead of encrypt, the block cipher 
-computes the inverse permutation. In :numref:`fig-BlockCipherDecryption`,
-we get the same illustration. The difference between the illustrations is that all arrowheads point
-in the opposite direction.
+当您加密而不是解密时，分组密码计算逆置换。在
+:numref:`fig-BlockCipherDecryption` 中，我们得到相同的插图。
+插图之间的区别是所有箭头指向相反的方向。
 
 .. _fig-BlockCipherDecryption:
 
 .. figure:: Illustrations/BlockCipher/Decryption.svg
    :align: center
 
-   The decryption permutation produced by the block cipher under the same key
-   :math:`k`. It is the inverse of the encryption permutation in that all arrowheads
-   reverse.
+   相同密钥 :math:`k` 下分组密码产生的解密置换。它是加密置换的逆，
+   因为所有箭头反向。
 
-
-The key defines which blocks map to which blocks. 
-A different key would lead to a different set of
-arrows, as you can see in :numref:`fig-BlockCipherEncryptionDifferentKey`.
+密钥定义了哪些块映射到哪些块。不同的密钥会导致不同的箭头集，
+如 :numref:`fig-BlockCipherEncryptionDifferentKey` 所示。
 
 .. _fig-BlockCipherEncryptionDifferentKey:
 
 .. figure:: Illustrations/BlockCipher/Encryption2.svg
    :align: center
 
-   An encryption permutation produced by the block cipher under a different key.
+   在Different密钥下分组密码产生的加密置换。
 
-In this illustration, you'll even notice that there are two permutations
-of length 1: an element that maps to itself. This is again something to
-be expected when selecting random permutations.
+在此插图中，您甚至会注意到有两个长度为 1 的置换：映射到自身的元素。
+这在选择随机置换时再次是预期的。
 
-Knowing a bunch of (input, output) pairs for a given key shouldn't give
-you any information about any other (input, output) pairs under that
-key [#]_. As long as we're talking about a hypothetical perfect block
-cipher, there's no easier way to decrypt a block other than to
-“brute-force” the key: i.e. just try every single one of them until you
-find the right one.
+对于给定密钥，知道一堆（输入，输出）对不应该给您关于该密钥下任何
+其他（输入，输出）对的信息 [#]_。只要我们在谈论假设的完美分组密码，
+除了"暴力破解"密钥：即尝试每一个密钥直到找到正确的密钥，没有更简单
+的方法来解密块。
 
 .. [#]
-   The attentive reader may have noticed that this breaks in the
-   extremes: if you know all but one of the pairs, then you know the
-   last one by exclusion.
+   细心的读者可能已经注意到这在极端情况下失效：如果您知道除了
+   一对之外的所有对，那么您可以通过排除知道最后一对。
 
-Our toy illustration block cipher only has 4 bit blocks, or
-:math:`2^4 = 16` possibilities. Real, modern block ciphers have much
-larger block sizes, such as 128 bits, or :math:`2^{128}` (slightly more
-than :math:`10^{38.5}`) possible blocks. Mathematics tells us that there
-are :math:`n!` (pronounced “:math:`n` factorial”) different permutations
-of an :math:`n` element set. It's defined as the product of all of the
-numbers from 1 up to and including :math:`n`:
+我们的小插图分组密码只有 4 位分组，或 :math:`2^4 = 16` 种可能性。
+真实的、现代分组密码有更大的分组大小，例如 128 位，或
+:math:`2^{128}`（略多于 :math:`10^{38.5}`）个可能的块。数学告诉
+我们，:math:`n` 元素集有 :math:`n!`（读作"：math:`n` 阶乘"）种不
+同的置换。它被定义为从 1 到并包括 :math:`n` 的所有数字的乘积：
 
 .. math::
 
    n! = 1 \cdot 2 \cdot 3 \cdot \ldots \cdot (n - 1) \cdot n
 
-Factorials grow incredibly quickly. For example, :math:`5! = 120`,
-:math:`10! = 3628800`, and the rate continues to increase. The number of permutations
-of the set of blocks of a cipher with a 128 bit block size is
-:math:`(2^{128})!`. Just :math:`2^{128}` is large already (it takes 39
-digits to write it down), so :math:`(2^{128})!` is a mind-bogglingly
-huge number, impossible to comprehend. Common key sizes are only in the
-range of 128 to 256 bits, so there are only between :math:`2^{128}` and
-:math:`2^{256}` permutations a cipher can perform. That's just a tiny
-fraction of all possible permutations of the blocks, but that's okay:
-that tiny fraction is still nowhere near small enough for an attacker to
-just try them all.
+阶乘增长 incredibly 快。例如，:math:`5! = 120`，
+:math:`10! = 3628800`，并且速率继续增加。具有 128 位分组大小的分
+组密码块集的置换数量是 :math:`(2^{128})!`。仅 :math:`2^{128}` 已
+经很大了（写下来需要 39 位），所以 :math:`(2^{128})!` 是一个难以
+置信的巨大数字，无法理解。常见的密钥大小仅在 128 到 256 位范围内，
+所以密码可以执行的置换只有 :math:`2^{128}` 到 :math:`2^{256}` 个。
+这只是所有可能的块置换的一小部分，但这没关系：那一小部分仍然不
+够小，攻击者不能只是尝试它们全部。
 
-Of course, a block cipher should be as easy to compute as possible, as
-long as it doesn't sacrifice any of the above properties.
+当然，分组密码应该尽可能易于计算，只要不牺牲上述任何属性。
 
 AES
 ~~~
 
-The most common block cipher in current use is AES.
+当前使用最常见的分组密码是 AES。
 
-Contrary to its predecessor DES (which we'll look at in more detail in
-the next chapter), AES was selected through a public, peer-reviewed
-competition following an open call for proposals. This competition
-involved several rounds where all of the contestants were presented,
-subject to extensive cryptanalysis, and voted upon. The AES process was
-well-received among cryptographers, and similar processes are generally
-considered to be the preferred way to select cryptographic standards.
+与它的前身 DES（我们将在下一章更详细地看到）相反，AES 是通过公开
+征集提案后进行的公开、同行评审竞赛选择的。这次竞赛涉及多个轮次，
+在所有参赛者被展示、接受广泛密码分析并投票期间。AES 过程在密码学
+家中受到好评，类似的流程通常被认为是选择密码标准的首选方式。
 
-Prior to being chosen as the Advanced Encryption Standard, the algorithm
-was known as Rijndael, a name derived from the two last names of the
-Belgian cryptographers that designed it: Vincent Rijmen and Joan Daemen.
-The Rijndael algorithm defined a family of block ciphers, with block
-sizes and key sizes that could be any multiple of 32 bits between 128
-bits and 256 bits. :cite:`daemen:aes` When Rijndael became
-AES through the FIPS standardization process, the parameters were
-restricted to a block size of 128 bits and keys sizes of 128, 192 and
-256 bits. :cite:`fips:aes`
+在被选为高级加密标准之前，该算法被称为 Rijndael，这个名字源自设计
+它的两位比利时密码学家的姓氏：Vincent Rijmen 和 Joan Daemen。
+Rijndael 算法定义了一族分组密码，分组大小和密钥大小可以是 128 位
+和 256 位之间的 32 位的任何倍数。:cite:`daemen:aes` 当 Rijndael
+通过 FIPS 标准化过程成为 AES 时，参数被限制为 128 位分组大小和
+128、192 和 256 位密钥大小。:cite:`fips:aes`
 
-There are no practical attacks known against AES. While there have been
-some developments in the last few years, most of them involve
-related-key attacks :cite:`cryptoeprint:2009:317`, some of
-them only on reduced-round versions of AES
-:cite:`cryptoeprint:2009:374`.  [#]_
+目前没有已知的对 AES 的实际攻击。尽管近几年有一些进展，其中大多数
+涉及相关密钥攻击 :cite:`cryptoeprint:2009:317`，其中一些只在
+AES 的简化轮次版本上。
+:cite:`cryptoeprint:2009:374` [#]_
 
 .. [#]
-   Symmetric algorithms usually rely on a round function to be repeated
-   a number of times. Typically each invocation involves a “round key”
-   derived from the main key. A reduced-round version is intentionally
-   easier to attack. These attacks can give insight as to how resistant
-   the full cipher is.
+   对称算法通常依赖于重复一定次数的轮函数。通常每次调用涉及一个从
+   主密钥派生的"轮密钥"。简化轮次版本故意更容易攻击。这些攻击可以
+   洞察完整密码的抵抗程度。
 
-   A related key attack involves making some predictions about how AES
-   will behave under several different keys with some specific
-   mathematical relation. These relations are fairly simple, such as
-   XORing with an attacker-chosen constant. If an attacker is allowed to
-   encrypt and decrypt a large number of blocks with these related keys,
-   they can attempt to recover the original key with significantly less
-   computation than would ordinarily be necessary to crack it.
+   相关密钥攻击涉及对 AES 在具有某些特定数学关系的几个不同密钥下
+   的行为做出一些预测。这些关系相当简单，例如与攻击者选择的常量进行
+   XOR。如果允许攻击者使用这些相关密钥加密和解密大量块，他们可以尝
+   试用比通常破解它所需的计算量显著少的计算来恢复原始密钥。
 
-   While a theoretically ideal block cipher wouldn't be vulnerable to a
-   related key attack, these attacks aren't considered practical
-   concerns. In practice cryptographic keys are generated via a
-   cryptographically secure pseudorandom number generator, or a
-   similarly secure :term:`key agreement` scheme or key derivation scheme (we'll
-   see more about those later). Therefore, the odds of selecting two
-   such related keys by accident is nonexistent. These attacks are
-   interesting from an academic perspective: they can help provide
-   insight in the workings of the cipher, guiding cryptographers in
-   designing future ciphers and attacks against current ciphers.
+   虽然理论上理想的分组密码不会容易受到相关密钥攻击，但这些攻击不
+   被视为实际关注点。实际上，密码密钥是通过密码学安全的伪随机数生
+   成器或类似安全的 :term:`key agreement` 方案或密钥派生方案生成的
+   （我们将在后面看到更多关于这些）。因此，偶然选择两个此类相关密钥
+   的几率是不存在的。这些攻击从学术角度是令人感兴趣的：它们可以帮
+   助洞察密码的工作，指导密码学家设计未来密码和攻击当前密码。
 
-A closer look at Rijndael
-^^^^^^^^^^^^^^^^^^^^^^^^^
+详细了解 Rijndael
+^^^^^^^^^^^^^^^^^^^^^
 
 .. canned_admonition::
    :from_template: advanced
 
-AES consists of several independent steps. At a high level, AES is a
-:term:`substitution-permutation network`.
+AES 由几个独立的步骤组成。在高层面上，AES 是一个 :term:`substitution-permutation network`。
 
-Key schedule
-''''''''''''
+密钥调度
+''''''''''
 
-AES requires separate keys for each round in the next steps. The key
-schedule is the process which AES uses to derive 128-bit keys for each
-round from one master key.
+AES 为下一步中的每一轮需要单独的密钥。密钥调度是 AES 用于从主密钥
+为每一轮派生 128 位密钥的过程。
 
-First, the key is separated into 4 byte columns. The key is rotated and
-then each byte is run through an S-box (substitution box) that maps it
-to something else. Each column is then XORed with a round constant. The
-last step is to XOR the result with the previous round key.
+首先，密钥被分成 4 字节列。密钥被旋转，然后每个字节通过 S 盒（替
+换盒）运行，将其映射到其他东西。然后每列与轮常量进行 XOR。最后一
+步是将结果与前一轮密钥进行 XOR。
 
-The other columns are then XORed with the previous round key to produce
-the remaining columns.
+然后其他列与前一轮密钥进行 XOR 以产生剩余的列。
 
 SubBytes
 ''''''''
 
-SubBytes is the step that applies the S-box (substitution box) in AES.
-The S-box itself substitutes a byte with another byte, and this S-box is
-applied to each byte in the AES state.
+SubBytes 是在 AES 中应用 S 盒（替换盒）的步骤。S 盒本身将字节替换
+为另一个字节，并且这个 S 盒应用到 AES 状态中的每个字节。
 
-It works by taking the multiplicative inverse over the Galois field, and
-then applying an affine transformation so that there are no values
-:math:`x` so that :math:`x \xor S(x) = 0` or :math:`x \xor S(x)=\texttt{0xff}`.
-To rephrase: there are no values of :math:`x` that the substitution box maps to
-:math:`x` itself, or :math:`x` with all bits flipped. This makes the cipher
-resistant to linear cryptanalysis, unlike the earlier DES algorithm,
-whose fifth S-box caused serious security problems.  [#]_
+它通过获取 Galois 域上的乘法逆元来工作，然后应用仿射变换，使得没
+有值 :math:`x` 使得 :math:`x \xor S(x) = 0` 或
+:math:`x \xor S(x)=\texttt{0xff}`。
+换句话说：没有 S 盒映射到
+:math:`x` 本身或 :math:`x` 所有位翻转的值。这使密码对线性密码分析
+具有抵抗力，不像早期的 DES 算法，其第五个 S 盒导致严重的安全问题。
+[#]_
 
 .. figure:: Illustrations/AES/SubBytes.svg
    :align: center
 
 .. [#]
-   In its defense, linear attacks were not publicly known back when DES
-   was designed.
+   为 DES 设计时，线性攻击在公开未知。
 
 ShiftRows
 '''''''''
 
-After having applied the SubBytes step to the 16 bytes of the block, AES
-shifts the rows in the :math:`4 \times 4` array:
+在将 SubBytes 步骤应用于块的 16 个字节后，AES 在 :math:`4 \times 4`
+数组中移位行：
 
 .. figure:: Illustrations/AES/ShiftRows.svg
    :align: center
@@ -267,9 +217,9 @@ shifts the rows in the :math:`4 \times 4` array:
 MixColumns
 ''''''''''
 
-MixColumns multiplies each column of the state with a fixed polynomial.
+MixColumns 将状态的每一列与固定多项式相乘。
 
-ShiftRows and MixColumns represent the diffusion properties of AES.
+ShiftRows 和 MixColumns 代表 AES 的扩散属性。
 
 .. figure:: Illustrations/AES/MixColumns.svg
    :align: center
@@ -277,99 +227,77 @@ ShiftRows and MixColumns represent the diffusion properties of AES.
 AddRoundKey
 '''''''''''
 
-As the name implies, the AddRoundKey step adds the bytes from the round
-key produced by the key schedule to the state of the cipher.
+顾名思义，AddRoundKey 步骤将由密钥调度产生的轮密钥字节添加到密码
+状态。
 
 .. figure:: Illustrations/AES/AddRoundKey.svg
    :align: center
 
-DES and 3DES
+DES 和 3DES
 ~~~~~~~~~~~~
 
-The DES is one of the oldest block ciphers that saw widespread use. It
-was published as an official FIPS standard in 1977. It is no longer
-considered secure, mainly due to its tiny key size of 56 bits. (The DES
-algorithm actually takes a 64 bit key input, but the remaining 8 bits
-are only used for parity checking, and are discarded immediately.) It
-shouldn't be used in new systems. On modern hardware, DES can be brute
-forced in less than a day. :cite:`sciengines:breakdes`
+DES 是最古老的广泛使用的分组密码之一。它于 1977 年作为官方 FIPS 标
+准发布。它不再被认为是安全的，主要是由于其微小的 56 位密钥大小。
+（DES 算法实际上接受 64 位密钥输入，但剩余的 8 位仅用于奇偶校验，
+并被立即丢弃。）它不应该在新系统中使用。在现代硬件上，DES 可以在
+不到一天内被暴力破解。:cite:`sciengines:breakdes`
 
-In an effort to extend the life of the DES algorithm, in a way that
-allowed much of the spent hardware development effort to be reused,
-people came up with 3DES: a scheme where input is first encrypted, then
-decrypted, then encrypted again:
+为了延长 DES 算法的寿命，以一种允许重用大量已花费的硬件开发工作的
+方式，人们想出了 3DES：一个方案，其中输入首先被加密，然后被解密，
+然后再次被加密：
 
 .. math::
 
    C = E_{DES}(k_1, D_{DES}(k_2, E_{DES}(k_3, p)))
 
-This scheme provides two improvements:
+这个方案提供了两个改进：
 
--  By applying the algorithm three times, the cipher becomes harder to
-   attack directly through cryptanalysis.
--  By having the option of using many more total key bits, spread over
-   the three keys, the set of all possible keys becomes much larger,
-   making brute-forcing impractical.
+- 通过三次应用算法，密码通过密码分析直接攻击变得 harder。
+- 通过选择使用更多的总密钥位的选项，分布在三个密钥上，所有可能
+  密钥的集合变得大得多，使得暴力破解不切实际。
 
-The three keys could all be chosen independently (yielding 168 key
-bits), or :math:`k_3 = k_1` (yielding 112 key bits), or
-:math:`k_1 = k_2 = k_3`, which, of course, is just plain old DES (with
-56 key bits). In the last keying option, the middle decryption reverses
-the first encryption, so you really only get the effect of the last
-encryption. This is intended as a backwards compatibility mode for
-existing DES systems. If 3DES had been defined as
-:math:`E(k_1, E(k_2, E(k_3, p)))`, it would have been impossible to use
-3DES implementations for systems that required compatibility with DES.
-This is particularly important for hardware implementations, where it is
-not always possible to provide a secondary, regular “single DES”
-interface next to the primary 3DES interface.
+三个密钥可以都独立选择（产生 168 位密钥），或 :math:`k_3 = k_1`
+（产生 112 位密钥），或 :math:`k_1 = k_2 = k_3`，那当然就是普通
+的 DES（56 位密钥）。在最后一种密钥选项中，中间解密反转了第一次加
+密，所以您实际上只获得最后一次加密的效果。这是为现有 DES 系统设计
+的向后兼容模式。如果 3DES 被定义为
+:math:`E(k_1, E(k_2, E(k_3, p)))`，那么将不可能在需要与 DES 兼
+容的系统中使用 3DES 实现。这对于硬件实现尤为重要，因为不可能在主要
+的 3DES 接口旁边提供次要的、常规的"单 DES"接口。
 
-Some attacks on 3DES are known, reducing their effective security. While
-breaking 3DES with the first keying option is currently impractical,
-3DES is a poor choice for any modern cryptosystem. The security margin
-is already small, and continues to shrink as cryptographic attacks
-improve and processing power grows.
+已知对 3DES 有一些攻击，降低了它们的有效安全性。虽然目前破解具有
+第一密钥选项的 3DES 是不切实际的，但 3DES 是任何现代密码系统的
+糟糕选择。安全裕度已经很小，并且随着密码攻击的改进和计算能力的增
+长而继续缩小。
 
-Far better alternatives, such as AES, are available. Not only are they
-more secure than 3DES, they are also generally much, much faster. On the
-same hardware and in the same :term:`mode of operation` (we'll explain what that
-means in the next chapter), AES-128 only takes 12.6 cycles per byte,
-while 3DES takes up to 134.5 cycles per byte.
-:cite:`cryptopp:bench` Despite being worse from a security
-point of view, it is literally an order of magnitude slower.
+far 更好的替代方案，如 AES，是可用的。它们不仅比 3DES 更安全，而
+且通常也更快得多。在相同的硬件和相同的 :term:`mode of operation`（我们将在下一章解释这意味着什么）中，AES-128 仅需每字节 12.6 个周
+期，而 3DES 需要高达每字节 134.5 个周期。:cite:`cryptopp:bench`
+尽管从安全角度来看更差，它 literally 慢了一个数量级。
 
-While more iterations of DES might increase the security margin, they
-aren't used in practice. First of all, the process has never been
-standardized beyond three iterations. Also, the performance only becomes
-worse as you add more iterations. Finally, increasing the key bits has
-diminishing security returns, only increasing the security level of the
-resulting algorithm by a smaller amount as the number of key bits
-increases. While 3DES with keying option 1 has a key length of 168 bits,
-the effective security level is estimated at only 112 bits.
+虽然 DES 的更多迭代可能会增加安全裕度，但它们在实践中不使用。首先，
+该过程从未在三次迭代之外标准化。此外，添加更多迭代时性能只会变得更
+糟。最后，增加密钥位具有递减的安全回报，随着密钥位数量的增加，仅
+将结果算法的安全级别增加较小的量。虽然具有密钥选项 1 的 3DES 具
+有 168 位的密钥长度，但有效安全级别估计仅为 112 位。
 
-Even though 3DES is significantly worse in terms of performance and
-slightly worse in terms of security, 3DES is still the workhorse of the
-financial industry. With a plethora of standards already in existence
-and new ones continuing to be created, in such an extremely
-technologically conservative industry where Fortran and Cobol still
-reign supreme on massive mainframes, it will probably continue to be
-used for many years to come, unless there are some large cryptanalytic
-breakthroughs that threaten the security of 3DES.
+尽管 3DES 在性能和安全性方面都明显较差，但 3DES 仍然是金融业的支
+柱。有了大量的标准已经存在并继续创建，在如此极端技术保守的行业中，
+Fortran 和 Cobol 仍然在大规模主机上占主导地位，它可能会继续使用多
+年，除非有一些大的密码分析突破威胁 3DES 的安全性。
 
 .. _remaining-problems-1:
 
-Remaining problems
-~~~~~~~~~~~~~~~~~~
+剩余问题
+~~~~~~~~
 
-Even with block ciphers, there are still some unsolved problems.
+即使有分组密码，仍然有一些未解决的问题。
 
-For example, we can only send messages of a very limited length: the
-block length of the block cipher. Obviously, we'd like to be able to
-send much larger messages, or, ideally, streams of indeterminate size.
-We'll address this problem with a :ref:`stream cipher <stream-ciphers>`.
+例如，我们只能发送非常有限长度的消息：分组密码的分组长度。显然，
+我们希望能够发送大得多的消息，或者理想情况下，不定大小的流。我们
+将通过 :ref:`stream cipher <stream-ciphers>` 解决这个问题。
 
-Although we have reduced the key size drastically (from the total size
-of all data ever sent under a one-time pad scheme versus a few bytes for
-most block ciphers), we still need to address the issue of agreeing on
-those few key bytes, potentially over an insecure channel. We'll address
-this problem in a later chapter with a :ref:`key exchange protocol <key-exchange>`.
+虽然我们已经大大减少了密钥大小（从一次性密码方案下发送的所有数据
+的总大小与大多数分组密码的几个字节相比），我们仍然需要解决协商那
+些少数密钥字节的问题，潜在的不安全渠道上。我们将在后面的章节中使用
+:ref:`key exchange protocol <key-exchange>` 解决这个问题。

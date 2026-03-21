@@ -1,118 +1,88 @@
-Hash functions
---------------
+哈希函数
+--------
 
 .. _description-5:
 
-Description
-~~~~~~~~~~~
+描述
+~~~~
 
-Hash functions are functions that take an input of indeterminate length
-and produce a fixed-length value, also known as a “digest”.
+哈希函数是接受不定长度输入并产生固定长度值的函数，也称为"摘要"。
 
-Simple hash functions have many applications. Hash tables, a common data
-structure, rely on them. These simple hash functions really only
-guarantee one thing: for two identical inputs, they'll produce an
-identical output. Importantly, there's no guarantee that two identical
-outputs imply that the inputs were the same. That would be impossible:
-there's only a finite amount of digests, since they're fixed size, but
-there's an infinite amount of inputs. A good hash function is also quick
-to compute.
+简单的哈希函数有许多应用。常见数据结构哈希表依赖于它们。这些简单的
+哈希函数真正保证的只有一件事：对于两个相同的输入，它们将产生相同的
+输出。重要的是，没有保证两个相同的输出意味着输入是相同的。那将是不
+可能的：由于摘要是固定大小，所以只有有限数量的摘要，但有无限数量的
+输入。好的哈希函数也快速计算。
 
-Since this is a book on cryptography, we're particularly interested in
-*cryptographic* hash functions. Cryptographic hash functions can be used
-to build secure (symmetric) message authentication algorithms,
-(asymmetric) signature algorithms, and various other tools such as
-random number generators. We'll see some of these systems in detail in
-future chapters.
+由于这是一本关于密码学的书，我们对*密码学*哈希函数特别感兴趣。
+密码学哈希函数可用于构建安全的（对称）消息认证算法、（非对称）签
+名算法以及各种其他工具，如随机数生成器。我们将在后面的章节中详细
+看到其中一些系统。
 
-Cryptographic hash functions have much stronger properties than regular
-hash functions, such as one that you might find in a hash table. For a
-cryptographic hash function, we want it to be impossibly hard to:
+密码学哈希函数比普通哈希函数具有强得多的属性。对于密码学哈希函数，
+我们希望它非常困难：
 
-#. modify a message without changing the hash.
-#. generate a message that has a given hash.
-#. find two different messages with the same hash.
+#. 修改消息而不改变哈希。
+#. 生成具有给定哈希的消息。
+#. 找到具有相同哈希的两个不同消息。
 
-The first property implies that cryptographic hash functions will
-exhibit something known as the “avalanche effect”. Changing even a
-single bit in the input will produce an avalanche of changes through the
-entire digest: each bit of the digest will have approximately 50% chance
-of flipping. That doesn't mean that every change *will* cause
-approximately half of the bits to flip, but the cryptographic hash
-function does guarantee that the odds of that happening are extremely
-large. More importantly it is impossibly hard to find such collisions or
-near-collisions.
+第一个属性意味着密码学哈希函数将表现出所谓的"雪崩效应"。即使输入中
+改变单个位，也会在整个摘要中产生变化的雪崩：摘要的每个位将有大约
+50%的翻转机会。这并不意味着*每个*变化*将*导致大约一半的位翻转，
+但密码学哈希函数确实保证了这种情况发生的几率非常大。更重要的是，
+找到这样的碰撞或近碰撞是极其困难的。
 
-The second property, which states that it should be difficult to find a
-message :math:`m` that has a given hash value :math:`h`, is called
-*pre-image resistance*. This makes a hash function a one-way function:
-it's very easy to compute a hash for a given message, but it's very hard
-to compute a message for a given hash.
+第二个属性，指出应该难以找到具有给定哈希值 :math:`h` 的消息 :math:`m`，
+称为*预像抗性*。这使得哈希函数成为单向函数：很容易为给定消息计算
+哈希，但很难为给定哈希计算消息。
 
-The third property talks about finding messages with the same hash
-value, comes in two flavors. In the first one, there's a given message
-:math:`m`, and it should be difficult to find another message
-:math:`m^{\prime}` with the same hash value: that's called *second
-pre-image resistance*. The second one is stronger, stating that it
-should be hard to find any two messages :math:`m, m^{\prime}` that have
-the same hash value. This is called *collision resistance*. Because
-collision resistance is a stronger form of second pre-image resistance,
-they're sometimes also called weak and strong collision resistance.
+第三个属性关于找到具有相同哈希值的消息，分为两种类型。在第一种中，
+有给定的消息 :math:`m`，应该难以找到另一个具有相同哈希值的消息
+:math:`m^{\prime}`：这称为*第二预像抗性*。第二种更强，指出应该
+难以找到任何两个具有相同哈希值的消息 :math:`m, m^{\prime}`。这称为
+*碰撞抗性*。由于碰撞抗性是第二预像抗性的更强形式，它们有时也称为
+弱和强碰撞抗性。
 
-These concepts are often named from the point of view of an attack,
-rather than the resistance to an attack. For example, you'll often hear
-about a collision attack, which is an attack that attempts to generate a
-hash collision, or a second pre-image attack, which attempts to find a
-second pre-image that hashes to the same value as a given pre-image, et
-cetera.
+这些概念通常从攻击的角度命名，而不是从对攻击的抵抗来命名。
+例如，您经常会听到碰撞攻击，即尝试生成哈希碰撞的攻击，或第二预像
+攻击，即尝试找到对给定预像哈希值相同的第二预像，等等。
 
-TODO: Maybe link to
-http://www.cs.ucdavis.edu/~rogaway/papers/relates.pdf for further
-reading
+TODO: 也许链接到
+http://www.cs.ucdavis.edu/~rogaway/papers/relates.pdf 以供进一步阅读
 
 MD5
 ~~~
 
-MD5 is a hash function designed by Ronald Rivest in 1991 as an extension
-of MD4. This hash function outputs 128-bit digests. Over the course of
-the years, the cryptographic community has repeatedly uncovered MD5's
-weaknesses. In 1993, Bert den Boer and Antoon Bosselaers published a
-paper demonstrating “pseudo-collisions” for the compression function of
-MD5. :cite:`denboer:md5` Dobbertin expanded upon this
-research and was able to produce collisions for the compression
-function. In 2004, based on Dobbertin's work, Xiaoyun Wang, Dengguo
-Feng, Xuejia Lai and Hongbo Yu showed that MD5 is vulnerable to real
-collision attacks. :cite:`cryptoeprint:2005:067` The last
-straw came when Xiaoyun Wang et al. managed to generate colliding X.509
-certificates and then presented a distinguishing attack on HMAC-MD5.
+MD5 是由 Ronald Rivest 在 1991 年设计的哈希函数，作为 MD4 的扩展。
+该哈希函数输出 128 位摘要。多年来，密码学社区不断发现 MD5 的弱点。
+1993 年，Bert den Boer 和 Antoon Bosselaers 发表了一篇论文，演示了
+MD5 压缩函数的"伪碰撞"。
+:cite:`denboer:md5` Dobbertin 在此基础上进行了研究，并能够产生
+压缩函数的碰撞。2004 年，基于 Dobbertin 的工作，王小云、邓国锋、
+来学嘉和余洪波表明 MD5 容易受到真正的碰撞攻击。
+:cite:`cryptoeprint:2005:067` 最后一根稻草是当王小云等人设法生成
+碰撞的 X.509 证书，然后展示了对 HMAC-MD5 的区分攻击。
 :cite:`cryptoeprint:2005:067`
 :cite:`eurocrypt-2009-23793`
 
-Nowadays, it is not recommended to use MD5 for generating digital
-signatures, but it is important to note that HMAC-MD5 is still a secure
-form of message authentication; however, it probably shouldn't be
-implemented in new cryptosystems.
+ nowadays，不推荐使用 MD5 生成数字签名，但重要的是要注意 HMAC-MD5
+仍然是安全的消息认证形式；然而，它可能不应该在新密码系统中实现。
 
-Five steps are required to compute an MD5 message digest:
+计算 MD5 消息摘要需要五个步骤：
 
-#. Add padding. First, 1 bit is appended to the message and then 0 bits
-   are added to the end until the length is :math:`448 \pmod {512}`.
-#. Fill up the remaining 64 bits with the the length of the original
-   message modulo :math:`2^{64}`, so that the entire message is a
-   multiple of 512 bits.
-#. Initialize the state as four 32-bit words, A, B, C and D. These are
-   initialized with constants defined in the spec.
-#. Process the input in 512 bit blocks; for each block, run four
-   “rounds” consisting of 16 similar operations each. The operations all
-   consist of shifts, modular addition, and a specific nonlinear
-   function, different for each round.
+#. 添加填充。首先，向消息附加 1 位，然后添加 0 位，直到长度为
+   :math:`448 \pmod {512}`。
+#. 用原始消息的长度模 :math:`2^{64}` 填充剩余的 64 位，使整个消息是
+   512 位的倍数。
+#. 将状态初始化为四个 32 位字 A、B、C 和 D。这些用规范中定义的常量
+   初始化。
+#. 处理 512 位块的输入；对于每个块，运行四"轮"，每轮包含 16 个类似
+   操作。这些操作都由移位、模加和每个轮次不同的特定非线性函数组成。
 
-Once done, :math:`A \| B \| C \| D` is the output of the hash. This
-padding style combined with the concatenation at the end is what makes
-MD5 vulnerable to length extension attacks; more on that later.
+完成后，:math:`A \| B \| C \| D` 是哈希的输出。这种填充样式与末尾的
+连接是使 MD5 容易受到长度扩展攻击的原因；更多内容在后面。
 
-In Python one can use the hashlib module to create an MD5 digest as
-follows:
+在 Python 中，可以使用 hashlib 模块创建 MD5 摘要，如下所示：
 
 .. code:: python
 
@@ -122,21 +92,17 @@ follows:
 SHA-1
 ~~~~~
 
-SHA-1 is another hash function from the MD4 family designed by the NSA,
-which produces a 160-bit digest. Just like MD5, SHA-1 is no longer
-considered secure for digital signatures. Many software companies and
-browsers, including Google Chrome, have started to retire support of the
-signature algorithm of SHA-1. On February 23, 2017 researchers from CWI
-Amsterdam and Google managed to produce a collision on the full SHA-1
-function. :cite:`Shattered` In the past methods to cause
-collisions on reduced versions of SHA-1 have been published, including
-one by Xiaoyun Wang. “The SHAppening” demonstrated freestart collisions
-for SHA-1. A freestart collision allows one to pick the initial value
-known as the :term:`initialization vector` at the start of the compression
-function. :cite:`cryptoeprint:2015:967`
+SHA-1 是 NSA 设计的另一个来自 MD4 系列的哈希函数，产生 160 位摘要。
+就像 MD5 一样，SHA-1 不再被认为用于数字签名是安全的。许多软件公司
+和浏览器，包括 Google Chrome，已经开始停止支持 SHA-1 的签名算法。
+2017 年 2 月 23 日，来自阿姆斯特丹 CWI 和 Google 的研究人员成功
+产生了完整 SHA-1 函数的碰撞。
+:cite:`Shattered` 过去已经发表了在 SHA-1 简化版本上造成碰撞的
+方法，包括王小云的一个。"The SHAppening" 展示了 SHA-1 的自由起始
+碰撞。自由起始碰撞允许您在压缩函数开始时选择称为 :term:`initialization vector` 的初始值。
+:cite:`cryptoeprint:2015:967`
 
-Once again the hashlib Python module can be used to generate a SHA-1
-hash:
+同样，可以使用 Python 模块 hashlib 生成 SHA-1 哈希：
 
 .. code:: python
 
@@ -146,26 +112,23 @@ hash:
 SHA-2
 ~~~~~
 
-SHA-2 is a family of hash functions including SHA-224, SHA-256, SHA-384,
-SHA-512, SHA-512/224 and SHA-512/256 and their digest sizes 224, 256,
-384, 512, 224 and 256 respectively. These hash functions are based on
-the Merkle–Damgård construction and can be used for digital signatures,
-message authentication and random number generators. SHA-2 not only
-performs better than SHA-1, it also provides better security, because of
-its increase in collision resistance.
+SHA-2 是包括 SHA-224、SHA-256、SHA-384、SHA-512、SHA-512/224 和
+SHA-512/256 及其摘要大小分别为 224、256、384、512、224 和 256 的
+哈希函数族。这些哈希函数基于 Merkle–Damgård 构造，可用于数字签名、
+消息认证和随机数生成器。SHA-2 不仅性能优于 SHA-1，而且由于其碰撞
+抗性的提高，也提供了更好的安全性。
 
-SHA-224 and SHA-256 were designed for 32-bit processor registers, while
-SHA-384 and SHA-512 for 64-bit registers. The 32-bit register variants
-will therefore run faster on a 32-bit CPU and the 64-bit variants will
-perform better on a 64-bit CPU. SHA-512/224 and SHA-512/256 are
-truncated versions of SHA-512 allowing use of 64-bit words with an
-output size equivalent to the 32-bit register variants (i.e., 224 and
-256 digest sizes and better performance on a 64-bit CPU).
+SHA-224 和 SHA-256 是为 32 位处理器寄存器设计的，而 SHA-384 和
+SHA-512 是为 64 位寄存器设计的。因此，32 位寄存器变体将在 32 位 CPU
+上运行更快，64 位变体将在 64 位 CPU 上表现更好。SHA-512/224 和
+SHA-512/256 是 SHA-512 的截断版本，允许使用 64 位字，输出大小与
+32 位寄存器变体（即 224 和 256 摘要大小和更好的 64 位 CPU 性能）
+相当。
 
-The following is a table that gives a good overview of the SHA-2 family:
+下表给出了 SHA-2 系列的概述：
 
 ============= =============== ========== ========= ===========
-Hash function Message size    Block size Word size Digest size
+哈希函数      消息大小        块大小    字大小    摘要大小
 ============= =============== ========== ========= ===========
 SHA-224       < 2\ :sup:`64`  512        32        224
 SHA-256       < 2\ :sup:`64`  512        32        256
@@ -175,8 +138,7 @@ SHA-512/224   < 2\ :sup:`128` 1024       64        224
 SHA-512/256   < 2\ :sup:`128` 1024       64        256
 ============= =============== ========== ========= ===========
 
-You can hash an empty string with the hashlib module and compare digest
-sizes as follows:
+您可以使用 hashlib 模块哈希空字符串并比较摘要大小，如下所示：
 
 .. code:: python
 
@@ -190,33 +152,29 @@ sizes as follows:
    >>> len(hashlib.sha512(b"").hexdigest())
    128
 
-Attacks on SHA-2
+对 SHA-2 的攻击
 ^^^^^^^^^^^^^^^^
 
-Several (pseudo-)collision and preimage attacks have been demonstrated
-using SHA-256 and SHA-512 with less rounds. It is important to note that
-by removing a certain amount of rounds one can't attack the entire
-algorithm. For instance, Somitra Kumar Sanadhya and Palash Sarkar were
-able to cause collisions with SHA-256 using 24 of 64 rounds (removing
-the last 40 rounds). :cite:`eprint-2008-18172`
+已经使用较少轮的 SHA-256 和 SHA-512 演示了几种（伪）碰撞和预像攻击。
+需要注意的是，通过移除一定数量的轮次，您不能攻击整个算法。例如，
+Somitra Kumar Sanadhya 和 Palash Sarkar 能够使用 SHA-256 的 24 轮（去
+除最后 40 轮）造成碰撞。
+:cite:`eprint-2008-18172`
 
-Keccak and SHA-3
-~~~~~~~~~~~~~~~~
+Keccak 和 SHA-3
+~~~~~~~~~~~~~~
 
-Keccak is a family of sponge functions designed by Guido Bertoni, Joan
-Daemen, Gilles Van Assche and Michaël Peeters, which won NIST's Secure
-Hash Algorithm Competition in 2012. Keccak has since been standardized
-in form of the SHA3-224, SHA3-256, SHA3-384 and SHA3-512 hash functions.
+Keccak 是由 Guido Bertoni、Joan Daemen、Gilles Van Assche 和 Michaël
+Peeters 设计的海绵函数族，在 2012 年赢得了 NIST 的安全哈希算法竞赛。
+Keccak 此后以 SHA3-224、SHA3-256、SHA3-384 和 SHA3-512 哈希函数的
+形式进行了标准化。
 
-Although SHA-3 sounds like it might come from the same family as SHA-2,
-the two are designed very differently. SHA-3 is very efficient in
-hardware :cite:`SHA-3-hardware`, but is relatively slow in
-software in comparison to SHA-2. :cite:`SHA-3-finalists`
-Later in the book, you will find the security aspects of SHA-3, such as
-preventing length extension attacks.
+虽然 SHA-3 听起来可能与 SHA-2 来自同一系列，但两者的设计非常不同。
+SHA-3 在硬件中非常高效 :cite:`SHA-3-hardware`，但与 SHA-2 相比在
+软件中相对较慢。:cite:`SHA-3-finalists` 在本书后面，您将了解 SHA-3
+的安全方面，例如防止长度扩展攻击。
 
-The SHA-3 hash functions were introduced in Python version 3.6 and can
-be used as follows:
+SHA-3 哈希函数在 Python 3.6 版本中引入，可以如下使用：
 
 .. code:: python
 
@@ -228,259 +186,197 @@ be used as follows:
 
 .. _password storage:
 
-Password storage
-~~~~~~~~~~~~~~~~
+密码存储
+~~~~~~~~
 
-One of the most common use cases for cryptographic hash functions, and
-unfortunately one which is also completely and utterly broken, is
-password storage.
+密码学哈希函数最常见的用例之一，不幸也是一个完全和彻底错误的用例，
+就是密码存储。
 
-Suppose you have a service where people log in using a username and a
-password. You'd have to store the password somewhere, so that next time
-the user logs in, you can verify the password they supplied.
+假设您有一个用户使用用户名和密码登录的服务。您必须将密码存储在某处，
+以便下次用户登录时，您可以验证他们提供的密码。
 
-Storing the password directly has several issues. Besides an obvious
-timing attack in the string comparison, if the password database were to
-be compromised, an attacker would be able to just go ahead and read all
-of the passwords. Since many users re-use passwords, that's a
-catastrophic failure. Most user databases also contain their e-mail
-addresses, so it would be very easy to hi-jack a bunch of your user's
-accounts that are unrelated to this service.
+直接存储密码有几个问题。除了字符串比较中的明显时序攻击外，如果密码
+数据库被泄露，攻击者将能够直接读取所有密码。由于许多用户重复使用
+密码，这是灾难性的失败。大多数用户数据库还包含他们的电子邮件地址，
+因此很容易劫持许多与该服务无关的用户帐户。
 
-Hash functions to the rescue
+哈希函数来救援
+^^^^^^^^^^^^^^^^
+
+一个明显的方法是使用密码学安全哈希函数对密码进行哈希处理。由于
+哈希函数易于计算，每当用户提供其密码时，您只需计算该密码的哈希值，
+并将其与存储在数据库中的值进行比较。
+
+如果攻击者窃取了用户数据库，他们只能看到哈希值，而不是实际密码。
+由于攻击者无法反转哈希函数，他们无法将这些哈希值还原为原始密码。
+或者人们是这么认为的。
+
+彩虹表
+^^^^^^
+
+结果证明这种推理有缺陷。人们实际使用的密码数量非常有限。即使有非常
+好的密码实践，它们是 10 到 20 个字符之间的字符串，主要由可以在
+常见键盘上输入的内容组成。但实际上，人们使用更糟糕的密码：基于真实
+单词的东西（``password``、``swordfish``），由很少的符号和符号类型
+组成（``1234``），或具有上述内容的可预测修改（``passw0rd``）。
+
+更糟糕的是，哈希函数到处都是一样的。如果用户在两个网站上使用相同
+的密码，并且两者都使用 MD5 对密码进行哈希处理，那么密码数据库中的
+值将是相同的。甚至不需要按用户：许多密码非常普遍（``password``），
+所以许多用户将使用相同的密码。
+
+请记住，哈希函数易于计算。如果我们简单地尝试许多这些密码，创建巨大
+的将密码映射到其哈希值的表，会怎样？
+
+这正是一些人所做的，这些表的效果和您预期的一样有效，完全破坏了任何
+脆弱的密码存储。这样的表称为*彩虹表*。这是因为它们本质上是哈希函数
+输出的排序列表。这些输出将或多或少随机分布。当以十六进制格式书写时，
+这使一些人想起了 HTML 中使用的颜色规范，例如 ``#52f211``，这是酸橙绿。
+
+盐
+^^^
+
+彩虹表如此有效的原因是因为每个人都在使用少数几个哈希函数之一。相同
+的密码在任何地方都会产生相同的哈希。
+
+这个问题通常通过使用 :term:`盐`\s 解决。通过在哈希之前将密码与一些随机值
+混合（附加或 prepending） ，您可以从相同的哈希函数产生完全不同的
+哈希值。它有效地将哈希函数变成了相关哈希函数族，除了完全不同的输
+出值外，具有几乎相同的安全性和性能属性。
+
+.. [#]
+   虽然您也可以使用 XOR 来做到这一点，但这是不必要地更容易出错，
+   并且不能提供更好的结果。除非您将密码和 :term:`盐` 都零填充，
+   否则可能会截断其中之一。
+
+:term:`盐` 值与密码哈希一起存储在数据库中。当用户使用密码进行身份验证时，
+您只需将 :term:`salt` 与密码结合，对其进行哈希处理，然后与存储的哈希
+进行比较。
+
+如果您选择足够大的（例如 160 位/32 字节）、密码学随机的 :term:`salt`，
+您已经完全击溃了像彩虹表这样的提前攻击。为了成功发起彩虹表攻击，
+攻击者必须为每个这些 :term:`salt` 值准备一个单独的表。由于即使是单个表
+通常也相当大，存储大量表是不可能的。即使攻击者能够存储所有这些数据，
+他们仍然必须首先计算它。计算单个表需要相当数量的时间；计算
+:math:`2^{160}` 个不同的表是不可能的。
+
+许多系统对所有用户使用单一的 :term:`salt`。虽然这防止了提前的彩虹表
+攻击，但仍然允许攻击者在知道 :term:`salt` 的值后同时攻击所有密码。
+攻击者只需计算该 :term:`salt` 的单个彩虹表，然后将结果与数据库中的
+哈希密码进行比较。虽然这可以通过为每个用户使用不同的 :term:`salt` 来
+防止，但今天使用具有每用户 :term:`salt` 的密码学哈希的系统仍然被认为
+从根本上是有缺陷的；它们只是*更难*破解，但一点也不安全。
+
+也许 :term:`salt`\s 最大的问题是许多程序员突然相信他们正在做正确的事。
+他们听说过破碎的密码存储方案，他们知道该怎么做，所以他们忽略了
+有关密码数据库如何可能被泄露的所有讨论。他们不是那些以明文存储密码、
+或忘记 :term:`salt` 他们的哈希、或为不同用户重复使用 :term:`salt`\s 的人。
+是那些不知道自己在做什么的其他人有这些问题。不幸的是，这不是真的。
+也许这就是为什么破碎的密码存储方案仍然是常态。
+
+现代对弱密码系统的攻击
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+对于现代攻击，:term:`salt`\s 基本上没有帮助。现代攻击利用这样一个事实：
+正在使用的哈希函数易于计算。使用更快的硬件，特别是视频卡，我们可
+以简单地枚举所有密码，无论 :term:`salt` 如何。
+
+TODO: 关于 GPU 更具体的性能数字
+
+:term:`Salt <salt>`\s 可能会使预计算攻击不可能，但它们对实际知道
+:term:`salt` 的攻击者几乎没有作用。您可能倾向于采取的一种方法是尝试
+将 :term:`salt` 隐藏在攻击者之外。这通常不是很有用：如果攻击者能够
+访问数据库，隐藏 :term:`salt` 的尝试不太可能成功。像许多无效的自制
+密码方案一样，这只针对极其不可能的事件提供保护。与其尝试修复破碎的
+方案，不如首先使用一个好的密码存储。
+
+那么我们从这里走向何方？
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-An obvious approach would be to hash the password using a
-cryptographically secure hash function. Since the hash function is easy
-to compute, whenever the user provides their password, you can just
-compute the hash value of that, and compare that to what you stored in
-the database.
+为了保护密码，您需要一个（低熵）:ref:`key derivation function <key derivation function>`。
+我们将在后面的章节中更详细地讨论它们。
 
-If an attacker were to steal the user database, they could only see the
-hash values, and not the actual passwords. Since the hash function is
-impossible for an attacker to inverse, they wouldn't be able to turn
-those back into the original passwords. Or so people thought.
+虽然密钥派生函数可以使用密码学哈希函数构建，但它们的性能属性非常
+不同。这是一个常见模式：虽然密码学哈希函数是构建安全工具（如密钥派
+生函数或消息认证算法） incredibly 重要的原语，但它们经常被*滥用*
+作为这些工具本身。在本章的其余部分，我们将看到密码学哈希函数如何
+被使用和滥用的其他示例。
 
-Rainbow tables
-^^^^^^^^^^^^^^
+长度扩展攻击
+~~~~~~~~~~~~
 
-It turns out that this reasoning is flawed. The amount of passwords that
-people actually use is very limited. Even with very good password
-practices, they're strings somewhere between 10 and 20 characters,
-consisting mostly of things that you can type on common keyboards. In
-practice though, people use even worse passwords: things based on real
-words (``password``, ``swordfish``), consisting of few symbols and few
-symbol types (``1234``), or with predictable modifications of the above
-(``passw0rd``).
+在许多哈希函数中，特别是前几代，哈希函数保持的内部状态用作摘要值。
+在一些设计不良的系统中，这会导致一个关键缺陷：如果攻击者知道
+:math:`H(M_1)`，则非常简单地计算 :math:`H(M_1 \| M_2)`，而实际上
+不知道 :math:`M_1` 的值。由于您知道 :math:`H(M_1)`，您就知道哈希函数
+在哈希 :math:`M_1` 后的状态。您可以使用它来重建哈希函数，并要求它
+哈希更多字节。将从某处（如 :math:`H(M_1)`）获得的已知状态设置为哈
+希函数的状态称为*固定*。
 
-To make matters worse, hash functions are the same everywhere. If a user
-re-uses the same password on two sites, and both of them hash the
-password using MD5, the values in the password database will be the
-same. It doesn't even have to be per-user: many passwords are extremely
-common (``password``), so many users will use the same one.
+对于大多数现实世界的哈希函数，情况稍微复杂一些。它们通常有一个攻击者
+需要重新创建的填充步骤。MD5 和 SHA-1 有相同的填充步骤。它相当简单，
+所以我们将走过它：
 
-Keep in mind that a hash function is easy to evaluate. What if we simply
-try many of those passwords, creating huge tables mapping passwords to
-their hash values?
+#. 向消息添加 1 位。
+#. 添加 0 位，直到长度为 :math:`448 \pmod {512}`。
+#. 取消息的总长度（在填充之前），并将其作为 64 位整数添加。
 
-That's exactly what some people did, and the tables were just as
-effective as you'd expect them to be, completely breaking any vulnerable
-password store. Such tables are called *rainbow tables*. This is because
-they're essentially sorted lists of hash function outputs. Those outputs
-will be more or less randomly distributed. When written down in
-hexadecimal formats, this reminded some people of color specifications
-like the ones used in HTML, e.g. ``#52f211``, which is lime green.
+为了使攻击者能够计算 :math:`H(M_1 \| M_2)`（给定 :math:`H(M_1)`），
+攻击者还需要伪造该填充。攻击者实际上将计算 :math:`H(M_1 \| G \| M_2)`，
+其中 :math:`G` 是*粘合填充*，这样称呼是因为它*粘合*两个消息在一起。
+困难的部分是知道消息 :math:`M_1` 的长度。
 
-Salts
-^^^^^
+然而，在许多系统中，攻击者实际上可以对 :math:`M_1` 的长度做出相当有
+根据的猜测。例如，考虑常见的（破碎的）秘密前缀认证码示例。人们发送
+消息 :math:`M_i`，使用 :math:`A_i = H(S \| M_i)` 进行认证，其中
+:math:`S` 是共享秘密。我们将在后面的部分看到（并破坏）这个 MAC 算法。
 
-The reason rainbow tables were so incredibly effective was because
-everyone was using one of a handful of hash functions. The same password
-would result in the same hash everywhere.
+接收者计算相同的函数并验证代码是否正确非常容易。感谢雪崩效应，
+对消息 :math:`M_i` 的任何更改都将急剧改变 :math:`A_i` 的值。不幸的是，
+攻击者很容易伪造消息。由于 MAC 通常与原始消息一起发送，攻击者知道
+原始消息的长度。然后，攻击者只需要猜测秘密的长度，这通常是协议的一
+部分，而且即使不是，攻击者可能会在一百次尝试内成功。与猜测秘密本身
+相比，这对于任何合理选择的秘密是不可能的。
 
-This problem was generally solved by using :term:`salt`\s. By mixing (appending
-or prepending [#]_) the password with some random value before hashing
-it, you could produce completely different hash values out of the same
-hash function. It effectively turns a hash function into a whole family
-of related hash functions, with virtually identical security and
-performance properties, except with completely different output values.
+可以使用密码学哈希函数设计安全的认证码：这个不是。我们将在后面的
+章节中看到更好的。
 
-.. [#]
-   While you could also do this with XOR, it's needlessly more
-   error-prone, and doesn't provide better results. Unless you zero-pad
-   both the password and the :term:`salt`, you might be truncating either one.
+一些哈希函数，特别是较新的函数如 SHA-3 竞赛决赛入围者，不具有此属性。
+摘要是从内部状态计算的，而不是直接使用内部状态。
 
-The :term:`salt` value is stored next to the password hash in the database. When
-the user authenticates using the password, you just combine the :term:`salt`
-with the password, hash it, and compare it against the stored hash.
+这使得 SHA-3 时代的哈希函数不仅更防错，而且能够为消息认证产生更简
+单的方案。（我们将在后面的章节中详细说明这些。）虽然长度扩展攻击
+仅影响了最初滥用密码学哈希函数的系统，但无论如何防止它们是有价值
+的。人们最终会犯错，我们不妨在我们能的地方减轻风险。
 
-If you pick a sufficiently large (say, 160 bits/32 bytes),
-cryptographically random :term:`salt`, you've completely defeated ahead-of-time
-attacks like rainbow tables. In order to successfully mount a rainbow
-table attack, an attacker would have to have a separate table for each
-of those :term:`salt` values. Since even a single table was usually quite large,
-storing a large amount of them would be impossible. Even if an attacker
-would be able to store all that data, they'd still have to compute it
-first. Computing a single table takes a decent amount of time; computing
-:math:`2^{160}` different tables is impossible.
+TODO: 说明为什么这可以防止中间相遇攻击？
 
-Many systems used a single :term:`salt` for all users. While that prevented an
-ahead-of-time rainbow table attack, it still allowed attackers to attack
-all passwords simultaneously, once they knew the value of the :term:`salt`. An
-attacker would simply compute a single rainbow table for that :term:`salt`, and
-compare the results with the hashed passwords from the database. While
-this would have been prevented by using a different :term:`salt` for each user,
-systems that use a cryptographic hash with a per-user :term:`salt` are still
-considered fundamentally broken today; they are just *harder* to crack,
-but not at all secure.
+哈希树
+~~~~~~
 
-Perhaps the biggest problem with :term:`salt`\s is that many programmers were
-suddenly convinced they were doing the right thing. They'd heard of
-broken password storage schemes, and they knew what to do instead, so
-they ignored all talk about how a password database could be
-compromised. They weren't the ones storing passwords in plaintext, or
-forgetting to :term:`salt` their hashes, or re-using :term:`salt`\s for different users.
-It was all of those other people that didn't know what they were doing
-that had those problems. Unfortunately, that's not true. Perhaps that's
-why broken password storage schemes are still the norm.
-
-Modern attacks on weak password systems
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-To a modern attack, :term:`salt`\s quite simply don't help. Modern attacks take
-advantage of the fact that the hash function being used is easy to
-compute. Using faster hardware, in particular video cards, we can simply
-enumerate all of the passwords, regardless of :term:`salt`.
-
-TODO: more concrete performance numbers about GPUs
-
-:term:`Salt <salt>`\s may make precomputed attacks impossible, but they do very little
-against an attacker that actually knows the :term:`salt`. One approach you might
-be inclined to take is to attempt to hide the :term:`salt` from the attacker.
-This typically isn't very useful: if an attacker can manage to access
-the database, attempts to hide the :term:`salt` are unlikely to be successful.
-Like many ineffective home-grown crypto schemes, this only protects
-against an incredibly improbable event. It would be much more useful to
-just use a good password store to begin with, than trying to fix a
-broken one.
-
-So where do we go from here?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-In order to protect passwords, you need a (low-entropy) :ref:`key
-derivation function <key derivation function>`. We'll discuss them in
-more detail in a future chapter.
-
-While key derivation functions can be built using cryptographic hash
-functions, they have very different performance properties. This is a
-common pattern: while cryptographic hash functions are incredibly
-important primitives for building secure tools (such as key derivation
-functions or message authentication algorithms), they are routinely
-abused *as* those tools themselves. In the rest of this chapter, we will
-see other examples of how cryptographic hash functions can be used and
-abused.
-
-Length extension attacks
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-In many hash functions, particularly the previous generations, the
-internal state kept by the hash function is used as the digest value. In
-some poorly engineered systems, that causes a critical flaw: if an
-attacker knows :math:`H(M_1)`, it's very simple to compute
-:math:`H(M_1 \| M_2)`, without actually knowing the value of
-:math:`M_1`. Since you know :math:`H(M_1)`, you know the state of the
-hash function after it's hashed :math:`M_1`. You can use that to
-reconstruct the hash function, and ask it to hash more bytes. Setting
-the hash function's internal state to a known state you got from
-somewhere else (such as :math:`H(M_1)`) is called *fixation*.
-
-For most real-world hash functions, it's a little bit more complicated
-than that. They commonly have a padding step that an attacker needs to
-recreate. MD5 and SHA-1 have the same padding step. It's fairly simple,
-so we'll go through it:
-
-#. Add a 1 bit to the message.
-#. Add zero bits until the length is :math:`448 \pmod {512}`.
-#. Take the total length of the message, before padding, and add it as a
-   64-bit integer.
-
-For the attacker to be able to compute :math:`H(M_1 \| M_2)` given
-:math:`H(M_1)`, the attacker needs to fake that padding, as well. The
-attacker will actually compute :math:`H(M_1 \| G \| M_2)`, where
-:math:`G` is the *glue padding*, called that way because it *glues* the
-two messages together. The hard part is knowing the length of the
-message :math:`M_1`.
-
-In many systems, the attacker can actually make fairly educated guesses
-about the length of :math:`M_1`, though. As an example, consider the
-common (broken) example of a secret-prefix authentication code. People
-send messages :math:`M_i`, authenticated using
-:math:`A_i = H(S \| M_i)`, where :math:`S` is a shared secret. We'll see
-(and break) this MAC algorithm in a future section.
-
-It's very easy for the recipient to compute the same function, and
-verify the code is correct. Any change to the message :math:`M_i` will
-change the value of :math:`A_i` drastically, thanks to the avalanche
-effect. Unfortunately, it's quite easy for attackers to forge messages.
-Since the MAC is usually sent together with the original message, the
-attacker knows the length of the original message. Then, the attacker
-only has to guess at the length of the secret, which is often fixed as
-part of the protocol, and, even if it isn't, the attacker will probably
-get in a hundred tries or less. Contrast this with guessing the secret
-itself, which is impossible for any reasonably chosen secret.
-
-There are secure authentication codes that can be designed using
-cryptographic hash functions: this one just isn't it. We'll see better
-ones in a later chapter.
-
-Some hash functions, particularly newer ones such as SHA-3 competition
-finalists, do not exhibit this property. The digest is computed from the
-internal state, instead of using the internal state directly.
-
-This makes the SHA-3-era hash functions not only a bit more fool-proof,
-but also enables them to produce simpler schemes for message
-authentication. (We'll elaborate on those in a later chapter.) While
-length extension attacks only affected systems where cryptographic hash
-functions were being abused in the first place, there's something to be
-said for preventing them anyway. People will end up making mistakes, we
-might as well mitigate where we can.
-
-TODO: say why this prevents meet in the middle attacks?
-
-Hash trees
-~~~~~~~~~~
-
-Hash trees are trees [#]_ where each node is identified by a hash
-value, consisting of its contents and the hash value of its ancestor.
-The root node, not having an ancestor, simply hashes its own contents.
+哈希树是树 [#]_，其中每个节点由哈希值标识，由它的内容和其祖先的哈
+希值组成。根节点没有祖先，简单地哈希其自己的内容。
 
 .. [#]
-   Directed graphs, where each node except the root has exactly one
-   ancestor.
+   有向图，其中除根之外的每个节点恰好有一个祖先。
 
-This definition is very wide: practical hash trees are often more
-restricted. They might be binary trees [#]_, or perhaps only leaf nodes
-carry data of their own, and parent nodes only carry derivative data.
-Particularly these restricted kinds are often called Merkle trees.
+这个定义非常广泛：实际的哈希树通常更受限制。它们可能是二叉树 [#]_，
+或者也许只有叶节点携带自己的数据，父节点只携带派生数据。特别是这
+些受限制的类型通常称为 Merkle 树。
 
 .. [#]
-   Each non-leaf node has no more than two children
+   每个非叶节点不超过两个子节点
 
-Systems like these or their variants are used by many systems,
-particularly distributed systems. Examples include distributed version
-control systems such as Git, digital currencies such as Bitcoin,
-distributed peer-to-peer networks like Bittorrent, and distributed
-databases such as Cassandra.
+像这样的系统或其变体被许多系统使用，特别是分布式系统。示例包括分
+布式版本控制系统如 Git、数字货币如比特币、分布式点对点网络如
+Bittorrent，以及分布式数据库如 Cassandra。
 
-Remaining issues
-~~~~~~~~~~~~~~~~
+剩余问题
+~~~~~~~~
 
-We've already illustrated that hash functions, by themselves, can't
-authenticate messages, because anyone can compute them. Also, we've
-illustrated that hash functions can't be used to secure passwords. We'll
-tackle both of these problems in the following chapters.
+我们已经说明，哈希函数本身不能认证消息，因为任何人都可以计算它们。
+此外，我们已经说明哈希函数不能用于保护密码。我们将在接下来的章节
+中解决这两个问题。
 
-While this chapter has focused heavily on what hash functions *can't*
-do, it can't be stressed enough that they are still incredibly important
-cryptographic primitives. They just happen to be commonly *abused*
-cryptographic primitives.
+虽然本章主要集中在哈希函数*不能*做什么，但必须强调的是它们仍然是
+ incredibly 重要的密码学原语。它们只是碰巧是常见的*滥用*密码学原语。
