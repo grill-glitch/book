@@ -25,12 +25,11 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.rsvgconverter",
-    # "sphinx.ext.imgmath",  # Disabled: use MathJax instead for better Chinese support
     "admonition_templates",
     "subfig",
 ]
 
-# Use MathJax for math rendering (better Chinese support, no image generation needed)
+# Use MathJax for math rendering (HTML only; EPUB will show raw LaTeX)
 mathjax_config = {
     'TeX': {
         'extensions': ['AMSmath.js', 'AMSsymbols.js'],
@@ -55,7 +54,7 @@ bibtex_bibfiles = ["Crypto101.bib"]
 master_doc = "index"
 
 # these can be read inside the .rst, and are also used in the latex preamble + sphinx stuff
-project = "Crypto 101"
+project = "Crypto101 中文版"
 copyright = "2020, Laurens Van Houtven (lvh)"
 author = "lvh"
 
@@ -77,7 +76,6 @@ release = run_command("git", "describe", "--always")
 locale_dirs = ["locale/"]
 gettext_compact = False
 
-
 pygments_style = "sphinx"
 
 # whether to show .. todo:: 's into the built document
@@ -88,7 +86,7 @@ html_theme = "alabaster"
 html_theme_options = {
     "show_relbars": True,
     "fixed_sidebar": True,
-    "github_user": "crypto101",
+    "github_user": "grill-glitch",
     "github_repo": "book",
     "github_button": True,
     "github_type": "star",
@@ -96,9 +94,9 @@ html_theme_options = {
 
 html_show_sourcelink = False
 html_static_path = ["_static"]
-htmlhelp_basename = "crypto101"
+htmlhelp_basename = "crypto101-zh_CN"
 
-epub_basename = "crypto101"
+epub_basename = "crypto101-zh_CN"
 epub_css_files = ["epub_style.css"]
 
 def read_latex_source(name: str) -> str:
@@ -110,13 +108,12 @@ def read_latex_source(name: str) -> str:
 def read_latex_template(name: str) -> str:
     return Template(read_latex_source(name)).substitute(globals())
 
-
-# inline math is rendered as svg, and needs a preamble to render properly
+# inline math is rendered in PDF via LaTeX, needs preamble
 imgmath_latex_preamble = read_latex_source("imgmath")
 imgmath_image_format = "svg"
 imgmath_font_size = 16
 imgmath_latex = "xelatex"
-imgmath_latex_args = ['-no-pdf']  # Required for xelatex to produce DVI instead of PDF
+imgmath_latex_args = ['-no-pdf']
 
 # whether to show the page number after references
 latex_show_pagerefs = True
@@ -125,22 +122,15 @@ latex_engine = "xelatex"
 # what documents to build
 latex_documents = [
     (
-        # master document
         master_doc,
-        # target file name
         "crypto101.tex",
-        # title
         project,
-        # author
         author,
-        # document class
         "memoir",
     )
 ]
 
-# top level titles are parts
 latex_toplevel_sectioning = "part"
-
 latex_docclass = {"manual": "memoir"}
 latex_elements = {
     "printindex": "",
@@ -150,13 +140,9 @@ latex_elements = {
     "extraclassoptions": "table,dvipsnames,oneside,openany",
     "sphinxsetup": ",".join(
         (
-            # titles should be black
             "TitleColor={rgb}{0.0,0.0,0.0}",
-            # external links color
             "OuterLinkColor={rgb}{0.929,0.094,0.588}",
-            # attention admonitions are used by the advanced warnings
             "attentionBgColor={rgb}{0.694,0.753,0.835}",
-            # set the title font family to bold
             "HeaderFamily={\\bfseries}",
         )
     ),
