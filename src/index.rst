@@ -1,4 +1,4 @@
-Crypto101
+Crypto 101 中文版
 =========
 
 .. toctree::

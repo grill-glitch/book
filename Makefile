@@ -4,16 +4,16 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-SPHINXPROJ    = crypto101
+SPHINXPROJ    = Crypto101 中文版
 SOURCEDIR     = src
-DEFAULT_BUILDDIR = _build_en
+DEFAULT_BUILDDIR = _build_zh_CN
 BUILDDIR      ?= $(DEFAULT_BUILDDIR)
 
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-book: html latexpdf epub
+book: html latexpdf
 
 .PHONY: help book Makefile
 

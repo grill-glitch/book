@@ -1,46 +1,59 @@
-======================
- Crypto 101: the book
+ Crypto 101: 中文翻译版
 ======================
 
-.. image:: https://github.com/crypto101/book/actions/workflows/ci.yml/badge.svg?branch=master
-   :target: https://github.com/crypto101/book/actions/workflows/ci.yml?branch=master
+.. image:: https://github.com/grill-glitch/book/actions/workflows/ci.yml/badge.svg?branch=zh_CN-translation
+   :target: https://github.com/grill-glitch/book/actions/workflows/ci.yml?branch=zh_CN-translation
 
-This is the source repository for `Crypto 101`_, the introductory book
-about cryptography by lvh_.
+这是 `Crypto 101`_ 的中文翻译版本。Crypto 101 是由 lvh_ 编写的密码学入门教材。
 
 .. _`Crypto 101`: https://www.crypto101.io/
 .. _lvh: https://twitter.com/lvh
 
-License
-=======
+原始英文版本: https://github.com/crypto101/book
 
-See the `LICENSE <LICENSE>`_ file.
+许可证
+======
 
-Translations
-============
+详见 `LICENSE <LICENSE>`_ 文件。
 
-For now, crypto101 is only available in english, but `you can help translate it
-into your own language <https://github.com/crypto101/book/issues/372>`_.
+翻译状态
+=========
 
-Building
-========
+本项目目前已完成中文翻译，涵盖以下内容：
 
-Run ``make book`` in the root directory of the repository to convert the
-source files into rendered versions of all supported formats.
+- 全书主体章节已翻译（部分章节仍有 TODO 标记，待补充）
+- 支持格式：HTML（网站）、PDF（打印阅读）
+- EPUB 格式因公式渲染问题暂不支持
 
-Dependencies
-------------
+构建
+====
 
-Due to the high number of dependencies, using docker is highly recommended:
+在仓库根目录运行 ``make book`` 可将源文件转换为所有支持的格式。
+
+依赖
+----
+
+由于依赖较多，强烈建议使用 Docker：
 
 .. code-block:: sh
 
    docker build -t crypto101 docker/
-   docker run --rm -it -v "$(realpath .)":/repo -u "$(id -u)" crypto101 ./make-lang YOUR_LANGUAGE_CODE html latexpdf epub
+   docker run --rm -it -v "$(realpath .)":/repo -u "$(id -u)" crypto101 ./make-lang zh_CN html latexpdf
 
-``YOUR_LANGUAGE_CODE`` must a valid `sphinx language code
-<https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-language>`_,
-like ``en``, ``fr``, ``ko`` or ``zh_CN``.
+语言代码必须是有效的 `Sphinx 语言代码
+<https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-language>`_，
+例如 ``en``、``fr``、``ko`` 或 ``zh_CN``。
 
-You can find the install procedure for the dependencies for `ubuntu <docker/Dockerfile.ubuntu>`_ and `fedora <docker/Dockerfile.fedora>`_ in
-their dedicated dockerfiles.
+您可以在各自的 Dockerfile 中查找 `ubuntu <docker/Dockerfile.ubuntu>`_ 和
+`fedora <docker/Dockerfile.fedora>`_ 的依赖安装说明。
+
+中文版发布
+==========
+
+- GitHub Release: https://github.com/grill-glitch/book/releases/tag/zh_CN-20260321-v4
+- 在线浏览: https://crypto.notarobot.ggff.net
+
+贡献
+====
+
+欢迎提交 Issue 和 Pull Request 帮助改进翻译或修复问题。
