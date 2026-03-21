@@ -1,252 +1,182 @@
-SSL and TLS
+SSL 和 TLS
 -----------
 
 .. _description-9:
 
-Description
-~~~~~~~~~~~
+描述
+~~~~
 
-SSL, short for Secure Socket Layer, is a cryptographic protocol
-originally introduced by Netscape Communications [#]_ for securing
-traffic on the Web. The standard is now superseded by TLS (Transport
-Layer Security), a standard publicized in RFCs by the IETF. The term SSL
-is still commonly used, even when the speaker actually means a TLS
-connection. From now on, this book will only use the term TLS, unless we
-really mean the old SSL standard.
+SSL（Secure Socket Layer，安全套接层）是 Netscape Communications
+[#]_ 最初为保护 Web 流量而引入的加密协议。该标准现已被 IETF 在 RFC
+中推广的 TLS（Transport Layer Security，传输层安全）所取代。即使说话
+者实际指的是 TLS 连接，"SSL" 这个术语仍然被普遍使用。从现在起，本
+书将只使用 TLS 这个术语，除非我们真的指的是旧的 SSL 标准。
 
 .. [#]
-   For those too young to remember, Netscape is a company that used to
-   make browsers.
+   对于那些太年轻不记得的人，Netscape 是一家曾经制作浏览器的公司。
 
-Its first and foremost goal is to transport bytes securely, over the
-Internet or any other insecure medium. :cite:`tls12` It's a
-hybrid cryptosystem: it uses both symmetric and asymmetric algorithms in
-unison. For example, asymmetric algorithms such as signature algorithms
-can be used to authenticate peers, while public key encryption
-algorithms or Diffie-Hellman exchanges can be used to negotiate shared
-secrets and authenticate certificates. On the symmetric side,
-:term:`stream cipher`\s (both native ones and block ciphers in a :term:`mode of operation`) are
-used to encrypt the actual data being transmitted, and MAC algorithms
-are used to authenticate that data.
+它的首要目标是在互联网或任何其他不安全介质上安全地传输字节。\ :cite:`tls12`\ 
+它是一个混合密码系统：它同时使用对称和非对称算法。例如，可以使用签名算
+法等非对称算法来认证对等方，而可以使用公钥加密算法或 Diffie-Hellman
+交换来协商共享密钥和认证证书。在对称方面，:term:`流密码`（包括原生
+流密码以及分组密码在 :term:`密码模式` 下的使用）用于加密实际传输的数
+据，而 MAC 算法用于认证这些数据。
 
-TLS is the world's most common cryptosystem, and hence probably also the
-most studied. Over the years, many flaws have been discovered in SSL and
-TLS, despite many of the world's top cryptographers contributing to and
-examining the standard [#]_. As far as we know, the current versions of
-TLS are secure, or at least can be configured to be secure.
+TLS 是世界上最常见的密码系统，因此可能也是被研究最多的。多年来，SSL
+和 TLS 中发现了许多漏洞，尽管世界上许多顶尖密码学家都为该标准做出了贡
+献并对其进行了审查 [#]_。据我们所知，当前版本的 TLS 是安全的，或者至
+少可以配置为安全的。
 
 .. [#]
-   In case I haven't driven this point home yet: it only goes to show
-   that designing cryptosystems is hard, and you probably shouldn't do
-   it yourself.
+   如果我还没有把这个观点讲清楚：这只能说明设计密码系统是困难的，
+   你可能真的不应该自己设计。
 
-Handshakes
+握手
+~~~~
+
+TODO: 解释现代 TLS 握手
+
+降级攻击
+^^^^^^^^
+
+SSL 2.0 犯了不认证握手的错误。这使得发动降级攻击变得容易。降级攻
+击是一种中间人攻击，攻击者修改协商使用哪种密码套件的握手消息。这
+样，他可以强制客户端使用不安全的分组密码建立连接，例如。
+
+由于当时的加密出口限制，许多密码只有 40 位或 56 位。即使攻击者无
+法破解客户端和服务器都支持的最佳加密，他们也可能破解最弱的加密，
+这对降级攻击成功来说已经足够了。
+
+这是明确禁止新 TLS 实现支持 SSL v2.0 的 RFC :cite:`turner:prohibitssl20` 的众多原因之一。
+
+证书机构
+~~~~~~~~
+
+TLS 证书可用于认证对等方，但我们如何认证证书本身呢？我的银行完全可
+能有一个声称是那个特定银行的证书，但我怎么知道它真的是我的银行，
+而不仅仅是某个假装成我银行的人？我为什么要信任这个特定的证书？当
+我们讨论这些算法时，我们已经看到，任何人都可以生成任意多的密钥对。
+没有人能阻止有人生成一对假装成你银行的密钥。
+
+当有人真的试图使用证书来冒充银行时，真正的浏览器不会相信它们。它
+们会通知用户该证书不受信任。它们使用证书机构的 TLS 标准信任模型来
+实现这一点。TLS 客户端附带一份受信任的证书机构列表，通常随操作系
+统或浏览器一起提供。这些是特殊的、受信任的证书，由其所有者精心保
+护。
+
+作为服务，这些所有者会使用其证书机构签署其他证书。其想法是，除非
+你能证明你确实是 Facebook 或银行或其他人，否则证书机构不会为 Face-
+book 或银行签署证书。
+
+当 TLS 客户端连接到服务器时，该服务器提供证书链。通常，它们自己的
+证书由中间 CA 证书签署，该证书由另一个证书签署，依此类推，直到一
+个由受信任的根证书机构签署的证书。由于客户端已经有了那个根证书的
+副本，它们可以从根证书开始验证签名链。
+
+你的伪造证书没有通向受信任根证书的链，因此浏览器会拒绝它。
+
+TODO: 解释为什么这是一场彻头彻尾的骗局
+
+自签名证书
 ~~~~~~~~~~
 
-TODO: explain a modern TLS handshake
+客户端证书
+~~~~~~~~~~
 
-Downgrade attacks
-^^^^^^^^^^^^^^^^^
+在 TLS 中，证书通常只用于标识服务器。这满足了一个典型用例：用户
+希望与其银行和电子邮件提供商安全通信，证书认证了他们正在通信的服
+务。该服务通常使用密码认证用户，偶尔使用双因素认证。
 
-SSL 2.0 made the mistake of not authenticating handshakes. This made it
-easy to mount downgrade attacks. A downgrade attack is a
-man-in-the-middle attack where an attacker modifies the handshake
-messages that negotiate which ciphersuite is being used. That way, he
-can force the clients to set up the connection using an insecure block
-cipher, for example.
+在我们迄今为止看到的公钥方案中，所有对等方通常都拥有一个或多个自
+己的密钥对。用户拥有自己的证书没有什么问题，并且可以使用它们来向
+服务器认证。TLS 规范明确支持客户端证书。此功能很少使用，尽管它明
+显具有非常有趣的安全优势。
 
-Due to cryptographic export restrictions at the time, many ciphers were
-only 40 or 56 bit. Even if the attacker couldn't break the best
-encryption both client and server supported, he could probably break the
-weakest, which is all that is necessary for a downgrade attack to
-succeed.
+这背后的主要原因可能根植于糟糕的用户体验。没有依赖客户端证书的系
+统对非技术人员来说易于使用。由于这样的系统很少，即使懂技术的人也
+不知道它们，这意味着不会创建新系统。
 
-This is one of the many reasons that there is an explicit
-RFC :cite:`turner:prohibitssl20` prohibiting new TLS
-implementations from having SSL v2.0 support.
+当你控制线路的两端并希望安全认证 TLS 连接中的两个对等方时，客户端
+证书是一个很好的解决方案。通过创建你自己的证书机构，你甚至可以签
+署这些客户端证书来认证它们。
 
-Certificate authorities
-~~~~~~~~~~~~~~~~~~~~~~~
+完美前向保密
+~~~~~~~~~~~~
 
-TLS certificates can be used to authenticate peers, but how do we
-authenticate the certificate? My bank may very well have a certificate
-claiming to be that particular bank, but how do I know it's actually my
-bank, and not just someone pretending to be my bank? Why should I trust
-this particular certificate? As we've seen when we discussed these
-algorithms, anyone can generate as many key pairs as they'd like.
-There's nothing stopping someone from generating a key pair pretending
-to be your bank.
+历史上，最常见的前主密钥协商方式是客户端选择一个随机数并用其加密，
+通常使用 RSA。这有几个优点。例如，这意味着服务器可以少一些熵需
+求：由于随机位由客户端交给服务器，服务器不需要产生任何加密随机
+位。它还使握手稍微快一些，因为不需要来回通信来协商共享密钥。
 
-When someone actually tries to use a certificate to impersonate a bank,
-real browsers don't believe them. They notify the user that the
-certificate is untrusted. They do this using the standard TLS trust
-model of certificate authorities. TLS clients come with a list of
-trusted certificate authorities, commonly shipped with your operating
-system or your browser. These are special, trusted certificates, that
-are carefully guarded by their owners.
+然而，它有一个主要缺陷。假设攻击者获得了服务器的私钥。也许他们成
+功分解了 RSA 密钥的模数，或者他们潜入并偷走了它，或者他们使用法
+律手段迫使所有者交出密钥。无论他们如何获取它，获得密钥访问权限都
+允许攻击者解密所有过去的通信。该密钥允许他们解密密文前主密钥，从
+而允许他们派生出所有对称加密密钥，因此可以解密所有内容。
 
-For a fee, these owners will use their certificate authority to sign
-other certificates. The idea is that the certificate authority wouldn't
-sign a certificate for Facebook or a bank or anyone else, unless you
-could prove you're actually them.
-
-When a TLS client connects to a server, that server provides a
-certificate chain. Typically, their own certificate is signed by an
-intermediary CA certificate, which is signed by another, and another,
-and one that is signed by a trusted root certificate authority. Since
-the client already has a copy of that root certificate, they can verify
-the signature chain starting with the root.
-
-Your fake certificate doesn't have a chain leading up to a trusted root
-certificate, so the browser rejects it.
-
-TODO: Explain why this is a total racket
-
-Self-signed certificates
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Client certificates
-~~~~~~~~~~~~~~~~~~~
-
-In TLS, certificates are usually only used to identify the server. This
-satisfies a typical use case: users want to communicate securely with
-their banks and e-mail providers, and the certificate authenticates the
-service they're talking to. The service usually authenticates the user
-using passwords, and, occasionally, two-factor authentication.
-
-In public-key schemes we've seen so far, all peers typically had one or
-more key pairs of their own. There's no reason users can't have their
-own certificates, and use them to authenticate to the server. The TLS
-specification explicitly supports client certificates. This feature is
-only rarely used, even though it clearly has very interesting security
-benefits.
-
-The main reason for that is probably rooted in the poor user experience.
-There are no systems that rely on client certificates that are easy to
-use for non-technical people. Since there are few such systems, even
-tech-savvy people don't know about them, which means new systems aren't
-created.
-
-Client certificates are a great solution for when you control both ends
-of the wire and want to securely authenticate both peers in a TLS
-connection. By producing your own certificate authority, you can even
-sign these client certificates to authenticate them.
-
-Perfect forward secrecy
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Historically, the most common way to agree on the pre-master secret is
-for the client to select a random number and encrypt it, typically using
-RSA. This has a few nice properties. For example, it means the server
-can make do with less entropy: since the random bits are handed to the
-server by the client, the server doesn't need to produce any
-cryptographically random bits. It also makes the handshake slightly
-faster, since there's no need for back-and-forth communication to agree
-on a shared secret.
-
-However, it has one major flaw. Suppose an attacker gets access to the
-server's private key. Perhaps they managed to factor the modulus of the
-RSA key, or perhaps they broke in and stole it, or perhaps they used
-legal force to get the owner to hand over the key. Regardless of how
-they acquired it, getting access to the key allows the attacker to
-decrypt all past communication. The key allows them to decrypt the
-encrypted pre-master secrets, which allows them to derive all of the
-symmetric encryption keys, and therefore decrypt everything.
-
-There are obvious alternatives to this scheme. We've already seen
-Diffie-Hellman key exchange, allowing two peers to agree on secret keys
-over an insecure medium. TLS allows for peers to agree on the pre-master
-secret using a Diffie-Hellman exchange, either based on discrete logs or
-elliptic curves.
-
-Assuming both peers discard the keys after use like they're supposed to,
-getting access to the secret keys wouldn't allow an attacker to decrypt
-previous communication. That property is called *perfect forward
-secrecy*. The term “perfect” is a little contested, but the term
-“forward” means that communications can't be decrypted later if the
-long-term keys (such as the server's private key) fall into the wrong
-hands.
-
-Of course, this is only true if Diffie-Hellman exchanges are secure. If
-an attacker has a significant mathematical and computational advantage
-over everyone else, such as an algorithm for solving the discrete log
-problem more efficiently than thought possible, combined with many data
-centers filled with number-crunching computers, it's possible that
-they'll break the key exchange itself.
+当然，如果 Diffie-Hellman 交换是安全的，那么这只是正确的。如果
+攻击者在数学和计算能力上比其他所有人都有显著优势，例如拥有比预期
+更高效地解决离散对数问题的算法，外加装满大型计算机的数据中心，可
+能他们会破解密钥交换本身。
 
 .. _attacks-1:
 
-Attacks
-~~~~~~~
+攻击
+~~~~
 
-As with most attacks, attacks on TLS can usually be grouped into two
-distinct categories:
+与大多数攻击一样，对 TLS 的攻击通常可以分为两个不同的类别：
 
-#. Attacks on the protocol itself, such as subverting the CA mechanism;
-#. Attacks on a particular implementation or cipher, such as
-   cryptanalytic attacks exploiting weaknesses in RC4, or timing attacks
-   in a particular AES implementation.
+#. 对协议本身的攻击，例如破坏 CA 机制；
+#. 对特定实现或密码的攻击，例如利用 RC4 中的弱点的密码分析攻击，
+   或特定 AES 实现中的定时攻击。
 
-Unfortunately, SSL/TLS has had many successful attacks in both
-categories. This section is particularly about the latter.
+不幸的是，SSL/TLS 在这两个类别中都有许多成功的攻击。本节特别关注
+后者。
 
-CRIME and BREACH
-^^^^^^^^^^^^^^^^
+CRIME 和 BREACH
+^^^^^^^^^^^^^^^
 
-CRIME [#CRIME]_ is an attack by the authors of BEAST. It's an innovative
-side channel attack that relies on TLS compression leaking information
-about secrets in the plaintext. In a related attack called BREACH [#BREACH]_,
-the attackers accomplish the same effect using HTTP compression. That
-was predicted by the authors of the original paper, but the BREACH
-authors were the first to demonstrate it as a practical attack. The
-BREACH attack was more practically applicable, though: HTTP compression
-is significantly more common than TLS compression.
+CRIME [#CRIME]_ 是 BEAST 作者的一种攻击。它是一种创新的侧信道攻
+击，依赖于 TLS 压缩泄露有关明文中秘密的信息。在一种称为 BREACH
+[#BREACH]_ 的相关攻击中，攻击者使用 HTTP 压缩达到相同的效果。这
+被原始论文的作者所预测，但 BREACH 作者是第一个将其演示为实际攻
+击的人。BREACH 攻击更具实际适用性：HTTP 压缩比 TLS 压缩普遍得多。
 
 .. [#CRIME]
-   Compression Ratio Info-leak Made Easy
+   压缩率信息泄露简化版
 
 .. [#BREACH]
-   Browser Reconnaissance and Exfiltration via Adaptive Compression of
-   Hypertext
+   通过自适应压缩超文本进行浏览器侦察和数据外泄
 
-Both of these rely on encryption of a compressed plaintext, and their
-mechanisms are virtually identical: only the specific details related to
-HTTP compression or TLS compression are relevant. The largest difference
-is that with TLS compression, the entire stream can be attacked; with
-HTTP compression, only the body is compressed, so HTTP headers are safe.
-Since the attacks are otherwise extremely similar, we'll just talk about
-how the attack works in the abstract, by explaining how attackers can
-learn information about the plaintext if it is compressed before
-encryption.
+这两者都依赖于压缩明文后的加密，它们的机制几乎相同：只有与 HTTP
+压缩或 TLS 压缩相关的具体细节是相关的。最大区别在于，使用 TLS
+压缩时，可以攻击整个流；使用 HTTP 压缩时，只有主体被压缩，因此
+HTTP 头部是安全的。由于攻击在其他方面极其相似，我们将抽象地讨论
+攻击如何工作，解释如果压缩在加密之前进行，攻击者如何能从明文中学
+习信息。
 
-The most common algorithm used to compress both HTTP and
-TLS :cite:`rfc3749:tlscompression` is called DEFLATE. The
-exact mechanics of DEFLATE aren't too important, but the important
-feature is that byte sequences that occur more than once can be
-efficiently stored. When a byte sequence recurs [#]_, instead of
-recording the same sequence, a reference is provided to the previous
-sequence: instead of repeating the sequence, it says “go back and look
-at the thing I wrote N bytes ago”.
+用于压缩 HTTP 和 TLS :cite:`rfc3749:tlscompression` 的最常见算
+法称为 DEFLATE。DEFLATE 的确切机制并不太重要，但重要特性是出现多
+次的字节序列可以被高效存储。当字节序列重复出现 [#]_ 时，不记录相
+同的序列，而是提供对先前序列的引用：它说的是"回去看我 N 字节前写
+的东西"而不是重复该序列。
 
 .. [#]
-   Within limits; specifically within a sliding window, usually 32kB
-   big. Otherwise, the pointers would grow bigger than the sequences
-   they're meant to compress.
+   有特定限制；具体来说在滑动窗口内，通常 32kB 大小。否则，指
+   针会比它们要压缩的序列更大。
 
-Suppose an attacker can control the plaintext. For example, the attacker
-injects an invisible iframe [#iframe]_ or some JavaScript code that fires off
-many requests. The attacker needs some way to inject their guess of the
-secret so that their guess occurs in the plaintext, such as the query
-parameters [#query-params]_. Usually, they can prefix their guess with something
-known. Suppose they're trying to intercept an authentication token being
-supplied in the body of the web page:
+假设攻击者可以控制明文。例如，攻击者注入一个不可见的 iframe
+[#iframe]_ 或一些在多个请求中触发的 JavaScript 代码。攻击者需要某
+种方式将其秘密猜测注入到明文，使其猜测出现在明文中，例如查询参数
+[#query-params]_。通常，他们可以在猜测前加上已知的前缀。假设他们正试
+图拦截正在网页正文中提供的认证令牌：
 
 .. [#iframe]
-   An iframe is a web page embedded within a page.
+   内嵌在页面中的网页框架。
 
 .. [#query-params]
-   The key-value pairs in a URL after the question mark, e.g. the
-   ``x=1&y=2`` in ``http://example.test/path?x=1&y=2``.
+   URL 中问号之后的键值对，例如
+   ``x=1&y=2`` 在 ``http://example.test/path?x=1&y=2`` 中。
 
 .. code:: html
 
@@ -254,170 +184,129 @@ supplied in the body of the web page:
           name="csrf-token"
           value="TOKEN_VALUE_HERE">
 
-… they can prefix the guess with the known part of that. In this case,
-it's a :term:`CSRF` token; a random token selected by the server and given to
-the client. This token is intended to prevent malicious third party
-websites from using the ambient authority present in the browser (such
-as session cookies) to make authenticated requests. Without a CSRF
-token, a third party website might just make a request to the vulnerable
-website; the web browser will provide the stored cookie, and the
-vulnerable website will mistake that for an authenticated request.
+…他们可以以该前缀开头加上他们的猜测。在这种情况下，它是一个
+:term:`CSRF` 令牌；服务器选择的随机令牌并提交给客户端。此令牌旨
+在防止恶意第三方网站利用浏览器中存在的权限（如会话 cookie）进行
+经过身份验证的请求。如果没有 CSRF 令牌，第三方网站可能只是向易受
+攻击的网站发出请求；Web 浏览器将提供存储的 cookie，易受攻击的网
+站会将其误认为经过身份验证的请求。
 
-The attacker makes guesses at the value of the token, starting with the
-first byte, and moving on one byte at a time. [#]_ When they guess a
-byte correctly, the ciphertext will be just a little shorter: the
-compression algorithm will notice that it's seen this pattern before,
-and be able to compress the plaintext before encrypting. The plaintext,
-and hence the compressed ciphertext, will therefore be smaller. They can
-do this directly when the connection is using a :term:`stream cipher` or a
-similar construction such as :term:`CTR mode`, since they produce ciphertexts
-that are exactly as long as the plaintexts. If the connection is using a
-block-oriented mode such as :term:`CBC mode`, the difference might get lost in
-the block padding. The attacker can solve that by simply controlling the
-prefix so that the difference in ciphertext size will be an entire
-block.
+攻击者从第一个字节开始猜测令牌值，然后一次移动一个字节 [#]_。当
+他们正确猜测一个字节时，密文会稍微短一点：压缩算法会注意到它之前
+见过这种模式，并且能够在加密之前压缩明文。因此，明文和压缩后的密
+文会变小。当连接使用 :term:`流密码` 或类似构造（如 :term:`CTR 模
+式`）时，他们可以直接执行此操作，因为它们产生的密文字节长度与明
+文字节长度相同。如果连接使用面向分组的模式（如 :term:`CBC 模式`），
+差异可能会在分组填充中丢失。攻击者可以通过简单地控制前缀来解决这
+个问题，使得密文大小的差异会是一个完整的分组。
 
 .. [#]
-   They may be able to move more quickly than just one byte at a time,
-   but this is the simplest way to reason about.
+   他们可能能够比一次一个字节移动得更快，但这是最简单的推理方
+   式。
 
-Once they've guessed one byte correctly, they can move on to the next
-byte, until they recover the entire token.
+一旦他们正确猜到一个字节，他们就可以继续下一个字节，直到恢复整个
+令牌。
 
-This attack is particularly interesting for a number of reasons. Not
-only is it a completely new *class* of attack, widely applicable to many
-cryptosystems, but compressing the plaintext prior to encryption was
-actively recommended by existing cryptographic literature. It doesn't
-require any particularly advanced tools: you only need to convince the
-user to make requests to a vulnerable website, and you only need to be
-able to measure the size of the responses. It's also extremely
-effective: the researchers that published BREACH report being able to
-extract secrets, such as :term:`CSRF` tokens, within one minute.
+这种攻击有几个原因特别有趣。它不仅是一种全新的攻击*类别*，广泛
+适用于许多密码系统，而且在加密明文之前进行压缩是被现有的密码学文
+献积极推荐的。它不需要任何特别高级的工具：你只需要说服用户向易受
+攻击的网站发出请求，并且你只需要能够测量响应的大小。它也非常有
+效：发表 BREACH 的研究人员报告能够在不到一分钟内提取秘密，如
+:term:`CSRF` 令牌。
 
-In order to defend against CRIME, disable TLS compression. This is
-generally done in most systems by default. In order to defend against
-BREACH, there are a number of possible options:
+为了防御 CRIME，请禁用 TLS 压缩。这通常在许多系统中默认完成。为
+了防御 BREACH，有几种可能的选项：
 
--  Don't allow the user to inject arbitrary data into the request.
--  Don't put secrets in the response bodies.
--  Regenerate secrets such as CSRF tokens liberally, for example, each
-   request.
+- 不允许用户将任意数据注入请求。
+- 不要在响应正文中放置秘密。
+- 频繁重新生成 CSRF 等秘密，例如每次请求。
 
-It's a bad idea to simply unconditionally turn off HTTP compression.
-While it does successfully stop the attack, HTTP compression is a
-critical tool for making the Web faster.
+无条件关闭 HTTP 压缩是个坏主意。虽然它确实成功阻止了攻击，但 HTTP
+压缩是使 Web 更快的关键工具。
 
-Web apps that consist of a static front-end (say, using HTML5, JS, CSS)
-and that only operate using an API, say, JSON over REST, are
-particularly easy to immunize against this attack. Just disable
-compression on the channel that actually contains secrets. It makes
-things slower, of course, but at least the majority of data can still be
-served over a CDN.
+由静态前端（例如，使用 HTML5、JS、CSS）组成且仅使用 API（例如，
+JSON over REST）进行操作的 Web 应用程序特别容易免疫于此攻击。只
+要在实际包含秘密的通道上禁用压缩。当然，这会使事情变慢，但至少有
+大部分数据仍然可以通过 CDN 提供服务。
 
 HSTS
 ~~~~
 
-HSTS is a way for web servers to communicate that what they're saying
-should only ever be transferred over a secure transport. In practice,
-the only secure transport that is ever used for HTTP is TLS.
+HSTS（HTTP Strict Transport Security）是 Web 服务器通知其内容应该
+只通过安全传输传递的一种方式。实际上，用于 HTTP 的唯一安全传输是
+TLS。
 
-Using HSTS is quite simple; the web server just adds an extra
-``Strict-Transport-Security`` header to the response. The header value
-contains a maximum age (``max-age``), which determines how long into the
-future the browser can trust that this website will be HSTS-enabled.
-This is typically a large value, such as a year. Browsers successfully
-remembering that a particular host is HSTS-enabled is very important to
-the effectiveness of the scheme, as we'll see in a bit. Optionally, the
-HSTS header can include the ``includeSubDomains`` directive, which
-details the scope of the HSTS policy. :cite:`hsts`
+使用 HSTS 非常简单；Web 服务器只需向响应添加一个额外的
+``Strict-Transport-Security`` 头部。该头部值包含一个最大年龄
+（``max-age``），用于确定浏览器可以信任该网站启用 HSTS 的时间长度。
+这通常是一个大值，例如一年。浏览器成功记住特定主机启用了 HSTS 对
+该方案的有效性非常重要，正如我们稍后将看到的。可选地，HSTS 头部
+可以包含 ``includeSubDomains`` 指令，详细说明 HSTS 策略的范围。\ :cite:`hsts`
 
-There are several things that a conforming web browser will do when
-communicating with an HSTS-enabled website:
+当符合标准的 Web 浏览器与启用 HSTS 的网站通信时，它会做几件事：
 
--  Whenever there is any attempt to make any connection to this website,
-   it will always be done over HTTPS. The browser does this completely
-   by itself, *before* making the request to the website.
--  If there is an issue setting up a TLS connection, the website will
-   not be accessible, instead of simply displaying a warning.
+- 每当尝试与此网站建立任何连接时，都将通过 HTTPS 完成。浏览器完
+  全自主地执行此操作，*在向网站发出请求之前*。
+- 如果设置 TLS 连接时出现问题，网站将无法访问，而不是仅仅显示警
+  告。
 
-Essentially, HSTS is a way for websites to communicate that they only
-support secure transports. This helps protect the users against all
-sorts of attacks including both passive eavesdroppers (that were hoping
-to see some credentials accidentally sent in plaintext), and active
-man-in-the-middle attacks such as SSL stripping.
+本质上，HSTS 是网站传达它们仅支持安全传输的一种方式。这有助于保
+护用户免受各种攻击，包括被动的窃听者（希望看到一些凭据意外以明文
+发送）和活动的中间人攻击（如 SSL 剥离）。
 
-HSTS also defends against mistakes on the part of the web server. For
-example, a web server might accidentally pull in some executable code,
-such as some JavaScript, over an insecure connection. An active attacker
-that can intercept and modify that JavaScript would then have complete
-control over the (supposedly secure) web site.
+HSTS 还可以防御 Web 服务器方面的错误。例如，Web 服务器可能意外地
+通过不安全连接引入一些可执行代码，例如 JavaScript。能够拦截和修
+改该 JavaScript 的活动攻击者随后将对（应该是安全的）网站拥有完全
+的控制权。
 
-As with many TLS improvements, HSTS is not a panacea: it is just one
-tool in a very big toolbox of stuff that we have to try and make TLS
-more secure. HSTS only helps to ensure that TLS is actually used; it
-does absolutely nothing to prevent attacks against TLS itself.
+与许多 TLS 改进一样，HSTS 不是万灵药：它只是我们尝试使 TLS 更安
+全的庞大工具箱中的一种工具。HSTS 仅有助于确保实际使用 TLS；它对
+防止针对 TLS 本身的攻击绝对无能为力。
 
-HSTS can suffer from a chicken-or-egg problem. If a browser has never
-visited a particular HSTS-enabled website before, it's possible that the
-browser doesn't know that the website is HSTS-enabled yet. Therefore,
-the browser may still attempt a regular HTTP connection, vulnerable to
-an SSL stripping attack. Some browsers have attempted to mitigate this
-issue by having browsers come pre-loaded with a list of HSTS websites.
+HSTS 可能面临先有鸡还是先有蛋的问题。如果浏览器之前从未访问过某
+个启用 HSTS 的网站，那么浏览器可能还不知道该网站启用了 HSTS。因
+此，浏览器可能仍会尝试常规 HTTP 连接，容易受到 SSL 剥离攻击。一
+些浏览器试图通过让浏览器预装 HSTS 网站列表来缓解此问题。
 
-Certificate pinning
-~~~~~~~~~~~~~~~~~~~
+证书固定
+~~~~~~~~
 
-Certificate pinning is an idea that's very similar to HSTS, taken a
-little further: instead of just remembering that a particular server
-promises to support HTTPS, we'll remember information about their
-certificates (in practice, we'll remember a hash of the public key).
-When we connect to a server that we have some stored information about,
-we'll verify their certificates, making it much harder for an impostor
-to pretend to be the website we're connecting to using a different
-certificate.
+证书固定是一个非常类似于 HSTS 的想法，但更进了一步：我们不只记住
+特定服务器承诺支持 HTTPS，而是会记住有关其证书的信息（实际上，我
+们会记住公钥的哈希值）。当我们连接到我们有存储信息的服务器时，我
+们将验证它们的证书，这使得伪装成我们正在连接的使用不同证书的网
+站的冒名顶替者更难得逞。
 
-Browsers originally implemented certificate pinning by coming shipped
-with a list of certificates from large, high-profile websites. For
-example, Google included whitelisted certificates for all of their
-services in their Chrome browser.
+浏览器最初通过预装大型高端网站的证书列表来实现证书固定。例如，
+Google 在其 Chrome 浏览器中为其所有服务包含了白名单证书。
 
-Secure configurations
-~~~~~~~~~~~~~~~~~~~~~
+安全配置
+~~~~~~~~
 
-In this section, we are only talking about configuration options such as
-which ciphers to use, TLS/SSL versions, etc. We're specifically *not*
-talking about TLS configurations in the sense of trust models, key
-management, etc.
+在本节中，我们只讨论配置选项，例如使用哪些密码、TLS/SSL 版本等。
+我们特别*不是*在 TLS 配置的意义上讨论信任模型、密钥管理等。
 
-There are several issues with configuring TLS securely:
+安全配置 TLS 有几个问题：
 
-#. Often, the defaults are unsafe, and people are unaware that they
-   should be changed.
-#. The things that constitute a secure TLS configuration can change
-   rapidly, because cryptanalysis and practical attacks are continuously
-   improving.
-#. Old clients that still need to be supported sometimes mean that you
-   have to hang on to broken configuration options.
+#. 通常，默认设置是不安全的，人们不知道它们应该被更改。
+#. 构成安全 TLS 配置的因素可能迅速变化，因为密码分析和实际攻击
+   在持续改进。
+#. 仍然需要支持的旧客户端有时意味着你必须保留损坏的配置选项。
 
-A practical example of some of these points coming together is the BEAST
-attack. That attack exploited weaknesses in CBC ciphersuites in TLSv1.0,
-which were parts of the default ciphersuite specifications everywhere.
-Many people recommended defending against it by switching to RC4. RC4
-was already considered cryptographically weak, later cryptanalysis
-showed that RC4 was even more broken than previously suspected. The
-attack had been known for years before being practically exploited; it
-was already fixed in TLSv1.1 in 2006, years before the BEAST paper being
-published. However, TLSv1.1 had not seen wide adoption.
+这些要点交汇的一个实际例子是 BEAST 攻击。该攻击利用了 TLSv1.0
+中 CBC 密码套件中的弱点，这些弱点无处不在。许多人建议通过切换到
+RC4 来防御它。RC4 在当时已经被认为在密码学上是弱的，后来的密码
+分析表明 RC4 比之前怀疑的更破碎。该攻击在被实际利用之前已被知晓
+多年；早在 2006 年的 TLSv1.1 中就已经修复了，远在 BEAST 论文发
+表之前。然而，TLSv1.1 没有被广泛采用。
 
-Good advice necessarily changes over time, and it's impossible to do so
-in a persistent medium such as a book. Instead, you should look at
-continuously updated third party sources such as `Qualys SSL Labs
-<https://www.ssllabs.com/>`_. They provide tests for both SSL clients
-and servers, and extensive advice on how to improve configurations.
+好的建议必然随时间变化，而在持久媒介（如书籍）中不可能做到这一
+点。相反，你应该查看持续更新的第三方来源，如 `Qualys SSL Labs
+<https://www.ssllabs.com/>`_。他们提供针对 SSL 客户端和服务器的
+测试，以及关于如何改进配置的广泛建议。
 
-That said, there are certainly some general things we want from a TLS
-configuration.
+也就是说，我们肯定对 TLS 配置有一些一般的期望。
 
-TODO: say stuff we generally want from TLS configurations
+TODO: 说说我们对 TLS 配置的一般期望
 
 TODO: http://tools.ietf.org/html/draft-agl-tls-chacha20poly1305-01

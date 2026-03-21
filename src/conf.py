@@ -51,6 +51,9 @@ project = "Crypto 101"
 copyright = "2020, Laurens Van Houtven (lvh)"
 author = "lvh"
 
+# 中文语言支持
+language = "zh_CN"
+
 # these can be accessed as |version| and |release| inside the .rst source
 import subprocess
 
@@ -149,6 +152,7 @@ latex_elements = {
     ),
     "fontpkg": r"""
 \usepackage{fontspec}
+\usepackage{ctex}
 \defaultfontfeatures{Ligatures=TeX}
 \setmainfont{Source Serif Pro}
 \setmonofont[Scale=MatchLowercase]{Source Code Pro}
