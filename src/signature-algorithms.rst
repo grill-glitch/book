@@ -1,33 +1,26 @@
-Signature algorithms
---------------------
+签名算法
+--------
 
 .. _description-7:
 
-Description
-~~~~~~~~~~~
+描述
+~~~~
 
-A signature algorithm is the public-key equivalent of a message
-authentication code. It consists of three parts:
+签名算法是消息认证码的公钥等价物。它由三部分组成：
 
-#. a key generation algorithm, which can be shared with other
-   :term:`public-key algorithm`\s
-#. a signature generation algorithm
-#. a signature verification algorithm
+#. 密钥生成算法，可以与其他 :term:`public-key algorithm`\s 共享
+#. 签名生成算法
+#. 签名验证算法
 
-Signature algorithms can be built using encryption algorithms. Using the
-private key, we produce a value based on the message, usually using a
-cryptographic hash function. Anyone can then use the public key to
-retrieve that value, compute what the value should be from the message,
-and compare the two to verify. The obvious difference between this and
-:term:`public-key encryption` is that in signing, the private key is used to
-produce the message (in this case the signature) and the public key is
-used to interpret it, which is the opposite of how encryption and
-decryption work.
+签名算法可以使用加密算法来构建。使用私钥，我们基于消息产生一个值，
+通常使用密码学哈希函数。然后任何人都可以使用公钥检索该值，从消息
+计算该值应该是什么，并比较两者来验证。这与 :term:`public-key encryption`
+的明显区别在于，在签名中，私钥用于产生消息（在这种情况下是签名），
+而公钥用于解释它，这与加密和解密的工作方式相反。
 
-The above explanation glosses over many important details. We'll discuss
-real schemes in more detail below.
+上面的解释掩盖了许多重要的细节。我们将在下面更详细地讨论实际方案。
 
-RSA-based signatures
+基于 RSA 的签名
 ~~~~~~~~~~~~~~~~~~~~
 
 PKCS#1 v1.5
@@ -43,56 +36,47 @@ TODO (see #49)
 DSA
 ~~~
 
-The Digital Signature Algorithm (DSA) is a US Federal Government
-standard for digital signatures. It was first proposed by the National
-Institute of Standards and Technology (NIST) in 1991, to be used in the
-Digital Signature Standard (DSS). The algorithm is attributed to David
-W. Kravitz, a former technical advisor at the NSA.
+数字签名算法（DSA）是美国联邦政府的数字签名标准。它于 1991 年由
+国家标准与技术研究所（NIST）首次提出，用于数字签名标准（DSS）。
+该算法归功于 David W. Kravitz，NSA 的前技术顾问。
 
-DSA key generation happens in two steps. The first step is a choice of
-parameters, which can be shared between users. The second step is the
-generation of public and private keys for a single user.
+DSA 密钥生成分两步进行。第一步是选择参数，可以在用户之间共享。
+第二步是为单个用户生成公钥和私钥。
 
-Parameter generation
+参数生成
 ^^^^^^^^^^^^^^^^^^^^
 
-We start by picking an approved cryptographic hash function :math:`H`.
-We also pick a key length :math:`L` and a prime length :math:`N`. While
-the original DSS specified that :math:`L` be between 512 and 1024, NIST
-now recommends a length of 3072 for keys with a security lifetime beyond
-2030. As :math:`L` increases, so should :math:`N`.
+我们首先选择一个批准的密码学哈希函数 :math:`H`。我们还选择一个密钥
+长度 :math:`L` 和一个素数长度 :math:`N`。虽然原始的 DSS 指定 :math:`L`
+在 512 到 1024 之间，NIST 现在建议对于安全性超过 2030 年的密钥使用
+3072 的长度。随着 :math:`L` 增加，:math:`N` 也应该增加。
 
-Next we choose a prime :math:`q` of length :math:`N` bits; :math:`N`
-must be less than or equal to the length of the hash output. We also
-pick an *L*-bit prime :math:`p` such that :math:`p-1` is a multiple of
-:math:`q`.
+接下来我们选择一个长度为 :math:`N` 位的素数 :math:`q`；:math:`N`
+必须小于或等于哈希输出的长度。我们还选择一个 *L* 位素数 :math:`p`，
+使得 :math:`p-1` 是 :math:`q` 的倍数。
 
-The last part is the most confusing. We have to find a number :math:`g`
-whose :ref:`multiplicative order <multiplicative-order>`
-:math:`\pmod{p}` is :math:`q`. The easy way to do this is to set
-:math:`g \equiv 2^{(p-1)/q} \pmod{p}`. We can try another number greater
-than 2, and less than :math:`p-1`, if :math:`g` comes out to equal 1.
+最后一部分是最令人困惑的。我们必须找到一个数字 :math:`g`，其
+:ref:`乘法阶 <multiplicative-order>` :math:`\pmod{p}` 是 :math:`q`。
+做到这一点的简单方法是设置 :math:`g \equiv 2^{(p-1)/q} \pmod{p}`。
+如果 :math:`g` 等于 1，我们可以尝试另一个大于 2 且小于 :math:`p-1` 的数字。
 
-Once we have parameters :math:`(p, q, g)`, they can be shared between
-users.
+一旦我们有了参数 :math:`(p, q, g)`，它们可以在用户之间共享。
 
-Key generation
+密钥生成
 ^^^^^^^^^^^^^^
 
-Armed with parameters, it's time to compute public and private keys for
-an individual user. First, select a random :math:`x` with
-:math:`0 < x < q`. Next, calculate :math:`y` where
-:math:`y \equiv g^x \pmod{p}`. This delivers a public key
-:math:`(p, q, g, y)`, and private key :math:`x`.
+有了参数，现在是计算单个用户的公钥和私钥的时候了。首先，选择一个
+随机 :math:`x` 满足 :math:`0 < x < q`。接下来，计算 :math:`y` 其中
+:math:`y \equiv g^x \pmod{p}`。这交付一个公钥 :math:`(p, q, g, y)`，
+和私钥 :math:`x`。
 
-Signing a message
-^^^^^^^^^^^^^^^^^
+签名消息
+^^^^^^^^^^^^^^^^
 
-In order to sign a message, the signer picks a random :math:`k` between
-0 and :math:`q`. Picking that :math:`k` turns out to be a fairly
-sensitive and involved process; but we'll go into more detail on that
-later. With :math:`k` chosen, they then compute the two parts of the
-signature :math:`r, s` of the message :math:`m`:
+为了签名消息，签名者选择一个随机 :math:`k` 在 0 和 :math:`q` 之间。
+选择那个 :math:`k` 结果是一个相当敏感和涉及的过程；但我们稍后会
+更多细节。选择 :math:`k` 后，他们然后计算消息 :math:`m` 的签名的两部分
+:math:`r, s`：
 
 .. math::
 
@@ -102,17 +86,15 @@ signature :math:`r, s` of the message :math:`m`:
 
    s \equiv k^{-1} (H(m) + xr) \pmod q
 
-If either of these happen to be 0 (a rare event, with 1 in :math:`q`
-odds, and :math:`q` being a pretty large number), pick a different
-:math:`k`.
+如果这些结果恰好是 0（一个罕见事件，概率为 1/:math:`q`，而 :math:`q`
+是一个相当大的数字），选择不同的 :math:`k`。
 
 TODO: 谈谈 k\ :sup:`-1`，模逆元（见 #52）
 
-Verifying a signature
+验证签名
 ^^^^^^^^^^^^^^^^^^^^^
 
-Verifying the signature is a lot more complex. Given the message
-:math:`m` and signature :math:`(r, s)`:
+验证签名要复杂得多。给定消息 :math:`m` 和签名 :math:`(r, s)`：
 
 .. math::
 
@@ -130,50 +112,39 @@ Verifying the signature is a lot more complex. Given the message
 
    v \equiv (g^{u_1}y^{u_2} \pmod p) \pmod q
 
-If the signature is valid that final result :math:`v` will be equal to
-:math:`r`, the second part of the signature.
+如果签名有效，最终结果 :math:`v` 将等于 :math:`r`，签名的第二部分。
 
-The trouble with :math:`k`
+:math:`k` 的麻烦
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While there is nothing wrong with DSA done right, it's very easy to get
-it wrong. Furthermore, DSA is quite sensitive: even a small
-implementation mistake results in a broken scheme.
+虽然正确完成的 DSA 没有任何问题，但很容易出错。此外，DSA 非常敏感：
+即使是一个小的实现错误也会导致方案被破坏。
 
-In particular, the choice of the signature parameter :math:`k` is
-critical. The requirements for this number are among the strictest of
-all random numbers in cryptographic algorithms. For example, many
-algorithms require a :term:`nonce`. A :term:`nonce` just has to be unique: you can use
-it once, and then you can never use it again. It doesn't have to be
-secret. It doesn't even have to be unpredictable. A :term:`nonce` can be
-implemented by a simple counter, or a monotonic clock. Many other
-algorithms, such as :term:`CBC mode`, use an initialization vector. It doesn't
-have to be unique: it only has to be unpredictable. It also doesn't have
-to be secret: initialization vectors are typically tacked on to the
-ciphertext. DSA's requirements for the :math:`k` value are a combination
-of all of these:
+特别是，签名参数 :math:`k` 的选择是关键的。对于这个数字的要求是所有
+密码算法中随机数最严格的要求之一。例如，许多算法需要一个 :term:`nonce`。
+一个 :term:`nonce` 只需要是唯一的：你可以使用它一次，然后你永远不能
+再次使用它。它不需要是秘密的。它甚至不需要是不可预测的。一个 :term:`nonce`
+可以通过简单的计数器或单调时钟实现。许多其他算法，例如用于 :term:`CBC mode`，
+使用一个初始化向量。它不需要是唯一的：它只需要是不可预测的。它也不需要
+是秘密：初始化向量通常附加在密文上。DSA 对 :math:`k` 值的要求是所有这些
+的组合：
 
--  It has to be unique.
--  It has to be unpredictable.
--  It has to be secret.
+- 它必须是唯一的。
+- 它必须是不可预测的。
+- 它必须是秘密的。
 
-Mess up any of these properties, and an attacker can probably
-retrieve your secret key, even with a modest amount of signatures. For
-example, an attacker can recover the secret key knowing only a few bits
-of :math:`k`, plus a large amount of valid signatures.
+这些属性中任何一个出错，攻击者可能就能检索你的私钥，即使只有少量签名。
+例如，攻击者可以只使用 :math:`k` 的几位加上大量有效签名就恢复私钥。
 :cite:`nguyen:dsa`
 
-It turns out that many implementations of DSA don't even get the
-uniqueness part right, happily reusing :math:`k` values. That allows a
-direct recovery of the secret key using basic arithmetic. Since this
-attack is much simpler to understand, very commonly applicable, and
-equally devastating, we'll discuss it in detail.
+结果许多 DSA 实现甚至没有正确得到唯一边，愉快地重复使用 :math:`k` 值。
+这允许使用基本算术直接恢复私钥。由于这个攻击更容易理解，非常普遍适用，
+并且同样具有破坏性，我们将详细讨论它。
 
-Suppose that an attacker sees multiple signatures :math:`(r_i, s_i)`,
-for different messages :math:`m_i`, all with the same :math:`k`. The
-attacker picks any two signatures :math:`(r_1, s_1)` and
-:math:`(r_2, s_2)` of messages :math:`m_1` and :math:`m_2` respectively.
-Writing down the equations for :math:`s_1` and :math:`s_2`:
+假设攻击者看到多个签名 :math:`(r_i, s_i)`，对于不同消息 :math:`m_i`，
+都使用相同的 :math:`k`。攻击者选择任意两个签名 :math:`(r_1, s_1)`
+和 :math:`(r_2, s_2)` 分别对应消息 :math:`m_1` 和 :math:`m_2`。
+写下 :math:`s_1` 和 :math:`s_2` 的方程：
 
 .. math::
 
@@ -183,19 +154,18 @@ Writing down the equations for :math:`s_1` and :math:`s_2`:
 
    s_2 \equiv k^{-1} (H(m_2) + xr_2) \pmod q
 
-The attacker can simplify this further: :math:`r_1` and :math:`r_2` must
-be equal, following the definition:
+攻击者可以进一步简化这个：根据定义，:math:`r_1` 和 :math:`r_2` 必须
+相等：
 
 .. math::
 
    r_i \equiv g^k \pmod q
 
-Since the signer is reusing :math:`k`, and the value of :math:`r` only
-depends on :math:`k`, all :math:`r_i` will be equal. Since the signer is
-using the same key, :math:`x` is equal in the two equations as well.
+由于签名者重复使用 :math:`k`，并且 :math:`r` 的值只依赖于 :math:`k`，
+所有 :math:`r_i` 将相等。由于签名者使用相同的密钥，:math:`x` 在两个
+方程中也相等。
 
-Subtract the two :math:`s_i` equations from each other, followed by some
-other arithmetic manipulations:
+从彼此中减去两个 :math:`s_i` 方程，然后进行一些其他算术操作：
 
 .. math::
 
@@ -206,29 +176,26 @@ other arithmetic manipulations:
    & \equiv & k^{-1} (H(m_1) - H(m_2)) \pmod q
    \end{aligned}
 
-This gives us the simple, direct solution for :math:`k`:
+这给我们提供了 :math:`k` 的简单直接解：
 
 .. math::
 
    k \equiv \left(H(m_1) - H(m_2)\right) \left(s_1 - s_2\right)^{-1} \pmod q
 
-The hash values :math:`H(m_1)` and :math:`H(m_2)` are easy to compute.
-They're not secret: the messages being signed are public. The two values
-:math:`s_1` and :math:`s_2` are part of the signatures the attacker saw.
-So, the attacker can compute :math:`k`. That doesn't give him the
-private key :math:`x` yet, though, or the ability to forge signatures.
+哈希值 :math:`H(m_1)` 和 :math:`H(m_2)` 很容易计算。它们不是秘密：
+被签名的消息是公开的。两个值 :math:`s_1` 和 :math:`s_2` 是攻击者
+从签名中看到的。所以，攻击者可以计算 :math:`k`。那还没有给他私钥
+:math:`x` 或伪造签名能力。
 
-Let's write the equation for :math:`s` down again, but this time
-thinking of :math:`k` as something we know, and :math:`x` as the
-variable we're trying to solve for:
+让我们再次写下 :math:`s` 的方程，但这次认为 :math:`k` 是我们知道的，
+而 :math:`x` 是我们试图求解的变量：
 
 .. math::
 
    s \equiv k^{-1} (H(m) + xr) \pmod q
 
-All :math:`(r, s)` that are valid signatures satisfy this equation, so
-we can just take any signature we saw. Solve for :math:`x` with some
-algebra:
+所有满足这个方程的有效签名 :math:`(r, s)`，所以我们只需取我们看到的
+任何签名。用一些代数解出 :math:`x`：
 
 .. math::
 
@@ -242,28 +209,21 @@ algebra:
 
    r^{-1}(sk - H(m)) \equiv x \pmod q
 
-Again, :math:`H(m)` is public, plus the attacker needed it to compute
-:math:`k`, anyway. They've already computed :math:`k`, and :math:`s` is
-plucked straight from the signature. That just leaves us with
-:math:`r^{-1} \pmod q` (read as: "the modular inverse of :math:`r`
-modulo :math:`q`"), but that can be computed efficiently as well. (For
-more information, see the appendix on modular arithmetic; keep in mind
-that :math:`q` is prime, so the modular inverse can be computed
-directly.) That means that the attacker, once they've discovered the
-:math:`k` of any signature, can recover the private key directly.
+再次，:math:`H(m)` 是公开的，加上攻击者需要它来计算 :math:`k`  anyway。
+他们已经计算了 :math:`k`，并且 :math:`s` 直接从签名中选取。那只剩我们
+:math:`r^{-1} \pmod q`（读作："模 :math:`q` 下的 :math:`r` 的模逆元"），
+但那也可以高效计算。（更多信息，参见模算术附录；记住 :math:`q` 是素数，
+所以模逆可以直接计算。）这意味着攻击者一旦发现任何签名的 :math:`k`，
+就可以直接恢复私钥。
 
-So far, we've assumed that the broken signer would always use the same
-:math:`k`. To make matters worse, a signer only has to re-use :math:`k`
-*once* in any two signatures that the attacker can see for the attack to
-work. As we've seen, if :math:`k` is repeated, the :math:`r_i` values
-repeat as well. Since :math:`r_i` is a part of the signature, it's very
-easy to see when the signer has made this mistake. So, even if reusing
-:math:`k` is something the signer only does rarely (because their random
-number generator is broken, for example), doing it once is enough for
-the attacker to break the DSA scheme.
+到目前，我们假设破裂的签名者会总是使用相同的 :math:`k`。更糟糕的是，
+签名者只需要*一次*重复使用 :math:`k` 在攻击者能看到的任意两个签名中
+攻击就能工作。正如我们所见，如果 :math:`k` 被重复，:math:`r_i` 值
+也会重复。由于 :math:`r_i` 是签名的一部分，当签名者犯了这个错误时
+非常容易看到。所以，即使重复使用 :math:`k` 是签名者因为例如其随机
+数Generator损坏而很少做的事情，做一次就足够攻击者破坏 DSA 方案。
 
-In short, reusing the :math:`k` parameter of a DSA signing operation
-means an attacker recovers the private key.
+简而言之，重复 DSA 签名操作的 :math:`k` 参数意味着攻击者恢复私钥。
 
 TODO: Debian
 http://rdist.root.org/2009/05/17/the-debian-pgp-disaster-that-almost-was/
@@ -273,27 +233,21 @@ ECDSA
 
 TODO: explain (see #53)
 
-As with regular DSA, the choice of :math:`k` is extremely critical.
-There are attacks that manage to recover the signing key using a few
-thousand signatures when only a few bits of the :term:`nonce` leak.
+与常规 DSA 一样，:math:`k` 的选择极其关键。存在仅用几千个签名就能
+恢复签名密钥的攻击，当只有 :term:`nonce` 的几位泄露时。
 :cite:`demulder:ecdsa`
 
-Repudiable authenticators
-~~~~~~~~~~~~~~~~~~~~~~~~~
+否认性认证器
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Signatures like the ones we described above provide a property called
-*non-repudiation*. In short, it means that you can't later deny being
-the sender of the signed message. Anyone can verify that the signature
-was made using your private key, something only you could do.
+我们上面描述的签名提供了称为*不可否认性*的属性。简而言之，它意味着
+你不能后来否认你是已签名消息的发送者。任何人都可以验证签名是用你的
+私钥制作的，只有你能做的事情。
 
-That may not always be a useful feature; it may be more prudent to have
-a scheme where only the intended recipient can verify the signature. An
-obvious way to design such a scheme would be to make sure that the
-recipient (or, in fact, anyone else) could have computed an identical
-value.
+那可能并不总是一个有用的特性；可能更谨慎有一个方案，其中只有预期
+接收者可以验证签名。设计这样的方案的明显方法是确保接收者（或，事实上，
+任何其他人）可以计算相同的值。
 
-Such messages can be repudiated; such a scheme is often called "deniable
-authentication". While it authenticates the sender to the intended
-recipient, the sender can later deny (to third parties) having sent the
-message. Equivalently, the recipient can't convince anyone else that the
-sender sent that particular message.
+这样的消息可以被否认；这样的方案通常被称为"可否认认证"。虽然它向
+预期接收者认证发送者，发送者后来可以向第三方否认发送了该消息。
+等价地，接收者不能说服其他人发送者发送了那条特定消息。
