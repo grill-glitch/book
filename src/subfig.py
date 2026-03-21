@@ -218,7 +218,16 @@ class FigmatrixDirective(Directive):
                     caption_nodes.extend(child.children)
                     node.remove(child)
 
-            caption_rawsource = "".join(e.rawsource for e in caption_nodes)
+            # Safely extract caption text for both old and new docutils versions
+            caption_parts = []
+            for e in caption_nodes:
+                if hasattr(e, 'rawsource'):
+                    caption_parts.append(e.rawsource)
+                elif isinstance(e, nodes.Text):
+                    caption_parts.append(e.astext())
+                else:
+                    caption_parts.append(e.astext())
+            caption_rawsource = "".join(caption_parts)
             caption = nodes.caption(caption_rawsource, "", *caption_nodes)
             # finding the source file / line is required for i18n
             caption.source, caption.line = self.state_machine.get_source_and_line(self.lineno)
