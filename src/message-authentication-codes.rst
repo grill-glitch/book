@@ -1,252 +1,195 @@
-Message authentication codes
-----------------------------
+消息认证码
+----------
 
 .. _description-6:
 
-Description
-~~~~~~~~~~~
+描述
+~~~~
 
-A MAC is a small bit of information that can be used to check the
-authenticity and integrity of a message. These codes are often
-called “tags”. A MAC algorithm takes a message of arbitrary length and a
-secret key of fixed length, and produces the tag. The MAC algorithm also
-comes with a verification algorithm that takes a message, the key and a
-tag, and tells you if the tag was valid or not. (It is not always
-sufficient to just recompute a tag and check if they are the same; many
-secure MAC algorithms are randomized, and will produce different tags
-every time you apply them.)
+MAC 是可用于检查消息真实性和完整性的一小段信息。这些代码通常称为
+"标签"。MAC 算法接受任意长度的消息和固定长度的秘密密钥，并产生标签。
+MAC 算法还带有验证算法，它接受消息、密钥和标签，并告诉您标签是否
+有效。（仅重新计算标签并检查它们是否相同并不总是足够的；许多安全的
+MAC 算法是随机化的，每次应用它们都会产生不同的标签。）
 
-Note that we say “message” here instead of “plaintext” or “ciphertext”.
-This ambiguity is intentional. In this book we're mostly interested in
-MACs as a way to achieve authenticated encryption, so the message will
-always be a ciphertext. That said, there's nothing wrong with a MAC
-being applied to a plaintext message. In fact, we will be seeing
-examples of secure authenticated encryption schemes that explicitly
-allow for authenticated (but not encrypted) information to be sent along
-with the authenticated ciphertext.
+注意，我们在"消息"而不是"明文"或"密文"的地方说。这种歧义是故意的。
+在这本书中，我们主要对作为实现认证加密方式的 MAC 感兴趣，所以消息
+将始终是密文。也就是说，将 MAC 应用于明文消息没有任何问题。实际上，
+我们将看到明确允许认证但不加密信息与认证密文一起发送的安全认证
+加密方案的示例。
 
-Often, when you just want to talk about the authenticity and integrity
-of a particular message, it may be more practical to use a *signature
-algorithm*, which we'll talk about in a later chapter. For now, all you
-need to know is that the term “signature” is normally reserved for
-asymmetric algorithms, whereas this chapter deals with symmetric
-algorithms.
+通常，当您只想谈论特定消息的真实性和完整性时，使用*签名算法*可能
+更实用，我们将在后面的章节中讨论。现在，您只需要知道术语"签名"
+通常保留给非对称算法，而本章处理对称算法。
 
-Secure MACs
-^^^^^^^^^^^
+安全 MAC
+^^^^^^^^
 
-We haven't quite defined yet exactly which properties we want from a
-secure MAC.
+我们还没有完全定义我们到底需要安全 MAC 的哪些属性。
 
-We will be defending against an active attacker. The attacker will be
-performing a *chosen message attack*. That means that an attacker will
-ask us the tag for any number of messages :math:`m_i`, and we'll answer
-truthfully with the appropriate tag :math:`t_i`.
+我们将防御主动攻击者。攻击者将执行*选择消息攻击*。这意味着攻击者
+将为我们询问任何数量消息 :math:`m_i` 的标签，我们将用适当的标签
+:math:`t_i` 如实回答。
 
-An attacker will then attempt to produce an *existential forgery*, a
-fancy way of saying that they will produce some new valid combination of
-:math:`(m, t)`. The obvious target for the attacker is the ability to
-produce valid tags :math:`t^{\prime}` for new messages
-:math:`m^{\prime}` of their choosing. We will also consider the MAC
-insecure if an attacker can compute a new, different valid tag
-:math:`t^{\prime}` for a message :math:`m_i` that we previously gave
-them a valid tag for.
+然后攻击者将尝试产生*存在性伪造*，一种花哨的说法，即他们会产生某
+些新的有效组合 :math:`(m, t)`。攻击者的明显目标是能够为他们选择的
+新消息 :math:`m^{\prime}` 产生有效标签 :math:`t^{\prime}`。如果
+攻击者能够为我们之前给其有效标签的消息 :math:`m_i` 计算新的、不同
+的有效标签 :math:`t^{\prime}`，我们也会认为 MAC 不安全。
 
-Why does a MAC take a secret key?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If you've had to deal with verifying the integrity of a message before,
-you may have used checksums (like CRC32 or Adler32) or even
-cryptographic hashes (like the SHA family) in order to compute a
-checksum for the message (depending on the algorithm and who you're
-talking to, they may have called it “hash” or “digest”, too).
-
-Let's say that you're distributing a software package. You have some
-tarballs with source code in them, and maybe some binary packages for
-popular operating systems. Then you put some (cryptographically secure!)
-hashes right next to them, so that anyone who downloads them can verify
-the hashes and be confident that they downloaded what they think they
-downloaded.
-
-Of course, this scheme is actually totally broken. Computing those
-hashes is something everyone can do. You're even relying on that fact
-for your user to be able to verify their download. That also means that
-an attacker that modified any of the downloads can just compute the hash
-again for the modified download and save that value. A user downloading
-the modified file will compute its hash and compare it against the
-modified hash, and conclude that the download worked. The scheme
-provided no help whatsoever against an attacker modifying the download,
-either as stored, or in transit.
-
-In order to do this securely, you would either apply a signature
-algorithm to the binaries directly, or by signing the digests, as long
-as the hash function used to produce the digest is secure against
-second-preimage attacks. The important difference is that producing a
-signature (using either a pre-shared key with your users, or,
-preferably, a public-key signature algorithm) is *not* something that an
-attacker can do. Only someone who has the secret keys can do that.
-
-Combining MAC and message
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-As we've mentioned before, unauthenticated encryption is bad. That's why
-we introduced MACs. Of course, for a MAC to be useful, it has to make it
-to the recipient. Since we're explicitly talking about authenticating
-encryption, now, we'll stop using the word “message” and instead use the
-less ambiguous “plaintext” and “ciphertext”.
-
-There are three common ways to combine a ciphertext with a MAC.
-
-#. Authenticate and encrypt. You authenticate and encrypt the plaintext
-   separately. This is how SSH does it. In symbols: :math:`C = E(K_C, P)`,
-   :math:`t = MAC(K_M, P)`, and you send both ciphertext :math:`C` and tag
-   :math:`t`.
-#. Authenticate, then encrypt. You authenticate the plaintext and then
-   encrypt the combination of the plaintext and the authentication tag.
-   This is how TLS usually does it. In symbols: :math:`t = MAC(K_M, P)`,
-   :math:`C = E(K_C, P \| t)`, and you only send :math:`C`. (You don't need to
-   send :math:`t`, because it's already an encrypted part of :math:`C`.)
-#. Encrypt, then authenticate. You encrypt the plaintext, compute the
-   MAC of that ciphertext. This is how IPSec does it. In symbols:
-   :math:`C = E(K_C, P)`, :math:`t = MAC(K_M, C)`, and you send both :math:`C`
-   and :math:`t`.
-
-All of these options were studied and compared extensively.
-:cite:`krawczyk:order`
-:cite:`bellare:maccomposition` We now know that out of all
-of these, encrypt-then-authenticate is unequivocally the best option.
-It's so emphatically the best option that Moxie Marlinspike, a
-well-respected information security researcher, has a principle called
-“The Cryptographic Doom Principle” for any system that does *not* follow
-this pattern :cite:`moxie:doom`. Moxie claims that any
-system that does anything before checking the MAC is doomed. Both
-authenticate-and-encrypt and authenticate-then-encrypt require you to
-decrypt something before you can verify the authentication.
-
-Authenticate-then-encrypt
+为什么 MAC 需要秘密密钥？
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Authenticate-then-encrypt is a poor choice, but it's a subtle poor
-choice. It can still be provably secure, but only under certain
-conditions. :cite:`krawczyk:order`
+如果您以前不得不处理验证消息的完整性，您可能已使用校验和（如 CRC32
+或 Adler32）甚至密码学哈希（如 SHA 系列）来计算消息的校验和（取决于
+算法和您与之交谈的人，他们也可能称之为"哈希"或"摘要"）。
 
-At first sight, this scheme appears to work. Sure, you have to decrypt
-before you can do anything, but to many cryptographers, including the
-designers of TLS, this did not appear to pose a problem.
+假设您正在分发软件包。您有一些包含源代码的 tar 文件，可能还有流行
+操作系统的一些二进制包。然后您将一些（密码学安全的！）哈希放在它们
+旁边，以便任何下载它们的人都可以验证哈希并确信他们下载了他们认为
+下载的内容。
 
-In fact, prior to rigorous comparative study of different composition
-mechanisms, many preferred this setup. In a critique of IPSec, Schneier
-and Ferguson, two veteran cryptographers, considered IPSec's use of
-encrypt-then-authenticate a flaw, preferring TLS's
-authenticate-then-encrypt. :cite:`schneier:ipsec` While they
-may have had a plausible (albeit mostly heuristic) argument for the
-time, this criticism is completely superseded by the *provable* security
-of encrypt-then-authenticate schemes. :cite:`krawczyk:order`
+当然，这个方案实际上是完全破碎的。计算这些哈希是每个人都可以做的。
+您甚至依赖这一事实让用户能够验证他们的下载。这也意味着修改任何下载
+的攻击者可以重新计算修改后下载的哈希并保存该值。下载修改文件的用户
+将计算其哈希并与修改的哈希进行比较，并得出结论下载成功。该方案对
+攻击者修改下载（无论是在存储中还是在传输中）完全没有帮助。
+
+为了安全地做到这一点，您需要对二进制文件本身应用签名算法，或者通
+过签名摘要（只要用于产生摘要的哈希函数对第二预像攻击是安全的）。
+重要的区别是产生签名（使用与用户的预共享密钥，或者，更好的做法是
+使用公钥签名算法）*不是*攻击者可以做的事情。只有拥有秘密密钥的人
+才能这样做。
+
+组合 MAC 和消息
+~~~~~~~~~~~~~~~~
+
+如前所述，未经验证的加密是不好的。这就是我们引入 MAC 的原因。
+当然，为了使 MAC 有用，它必须到达接收器。由于我们明确讨论认证加密，
+现在我们将停止使用"消息"这个词，而使用不太模糊的"明文"和"密文"。
+
+有三种常见方式组合密文和 MAC。
+
+#. 认证后加密。您分别认证和加密明文。SSH 就是这样做的。用符号表示：
+   :math:`C = E(K_C, P)`，:math:`t = MAC(K_M, P)`，您同时发送密文
+   :math:`C` 和标签 :math:`t`。
+#. 认证，然后加密。您认证明文，然后加密明文和认证标签的组合。这
+   是 TLS 通常的做法。用符号表示：:math:`t = MAC(K_M, P)`，
+   :math:`C = E(K_C, P \| t)`，您只发送 :math:`C`。（您不需要发送
+   :math:`t`，因为它已经是 :math:`C` 的加密部分。）
+#. 加密，然后认证。您加密明文，计算该密文的 MAC。这是 IPSec 的做法。
+   用符号表示：:math:`C = E(K_C, P)`，:math:`t = MAC(K_M, C)`，您
+   同时发送 :math:`C` 和 :math:`t`。
+
+所有这些选项都经过广泛研究和比较。
+:cite:`krawczyk:order`
+:cite:`bellare:maccomposition` 我们现在知道，在所有选项中，
+加密后认证 unequivocally 是最佳选择。它如此强调是最佳选择，以至于
+Moxie Marlinspike，一位备受尊敬的信息安全研究员，对于任何*不*遵循
+此模式的系统都有一个称为"密码学厄运原则"的原则
+:cite:`moxie:doom`。Moxie 声称任何在检查 MAC 之前做任何事情
+的系统都是注定要失败的。认证然后加密和加密然后认证都需要您在验证
+认证之前解密某些内容。
+
+认证然后加密
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+认证然后加密是一个糟糕的选择，但这是一个微妙的糟糕选择。它仍然可以
+被证明是安全的，但仅在特定条件下。
+:cite:`krawczyk:order`
+
+乍一看，这个方案似乎可行。当然，您必须先解密才能做任何事情，但
+对于许多密码学家（包括 TLS 的设计师）来说，这似乎不构成问题。
+
+实际上，在对不同组合机制进行严格比较研究之前，许多人更喜欢这种
+设置。在对 IPSec 的批评中，Schneier 和 Ferguson，两位资深密码学家，
+认为 IPSec 使用加密然后认证是一个缺陷，更喜欢 TLS 的认证然后加密。
+:cite:`schneier:ipsec` 虽然他们可能在当时有一个合理的（尽管
+大多数是启发式的）论点，但这个批评完全被加密然后认证方案的*可证明*
+安全性所取代。:cite:`krawczyk:order`
 :cite:`bellare:maccomposition`
 
-TODO: Explain Vaudenay CBC attack
+TODO: 解释 Vaudenay CBC 攻击
 :cite:`vaudenay:cbcpadding`
 
-Authenticate-and-encrypt
+认证然后加密
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Authenticate-and-encrypt has some serious problems. Since the tag
-authenticates the plaintext and that tag is part of the transmitted
-message, an attacker will be able to recognize two plaintext messages
-are the same because their tags will also be the same. This essentially
-leads to the same problem we saw with ECB mode, where an attacker can
-identify identical blocks. That's a serious problem, even if they can't
-decrypt those blocks.
+认证然后加密有一些严重问题。由于标签认证明文并且该标签是传输消息的
+一部分，攻击者将能够识别两个明文消息是相同的，因为它们的标签也将
+相同。这本质上导致了我们使用 ECB 模式时看到的相同问题，攻击者可以
+识别相同的块。这是一个严重的问题，即使他们无法解密这些块。
 
-TODO: Explain how this works in SSH (see Moxie's Doom article)
+TODO: 解释这在 SSH 中如何工作（参见 Moxie 的 Doom 文章）
 
-A naive attempt with hash functions
+使用哈希函数的朴素尝试
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Many ways of constructing MACs involve hash functions. Perhaps one of
-the simplest ways you could imagine doing that is to just prefix the
-message with the secret key and hash the whole thing:
+构造 MAC 的许多方式涉及哈希函数。也许您可以想象的最简单方法之一
+只是在消息前面加上秘密密钥并对整个内容进行哈希：
 
 .. math::
 
    t = H(k \| m)
 
-This scheme is most commonly called “Prefix-MAC”, because it is a MAC
-algorithm that works by using the secret key as a prefix.
+这种方案通常称为"前缀-MAC"，因为它是通过使用秘密密钥作为前缀工作的
+MAC 算法。
 
-The cryptographically secure hash function :math:`H` guarantees a few
-things that are important to us here:
+密码学安全哈希函数 :math:`H` 保证了一些对我们来说重要的东西：
 
--  The tag :math:`t` will be easy to compute; the hash function
-   :math:`H` itself is typically very fast. In many cases we can compute
-   the common key part ahead of time, so we only have to hash the
-   message itself.
--  Given any number of tags, there is no way for an attacker to “invert”
-   the hash function to recover :math:`k`, which would allow them to
-   forge arbitrary messages.
--  Given any number of tags, there is no way for an attacker to “rewind”
-   the hash function to recover :math:`H(k)`, which may allow them to
-   forge *almost* arbitrary messages.
+- 标签 :math:`t` 将易于计算；哈希函数 :math:`H` 本身通常非常快。
+  在许多情况下，我们可以预先计算公共密钥部分，所以我们只需要哈希
+  消息本身。
+- 给定任何数量的标签，攻击者无法"反转"哈希函数以恢复 :math:`k`，
+  这将允许他们伪造任意消息。
+- 给定任何数量的标签，攻击者无法"倒带"哈希函数以恢复 :math:`H(k)`，
+  这可能允许他们伪造*几乎*任意消息。
 
-One small caveat: we're assuming that the secret key :math:`k` has
-enough entropy. Otherwise, we have the same issue that we had for
-password storage using hash functions: an attacker could just try every
-single :math:`k` until one of them matches. Once they've done that,
-they've almost certainly found the correct :math:`k`. That's not really
-a failure of the MAC though: if your secret key contains so little
-entropy that it's feasible for an attacker to try all of them, you've
-already lost, no matter which MAC algorithm you pick.
+一个小警告：我们假设秘密密钥 :math:`k` 有足够的熵。否则，我们有
+使用哈希函数进行密码存储时遇到的相同问题：攻击者可以简单地尝试每
+一个 :math:`k`，直到其中一个匹配。一旦他们这样做了，他们几乎肯定
+找到了正确的 :math:`k`。这不是 MAC 真正的失败：如果您的秘密密钥
+包含的熵如此之少，以至于攻击者可以尝试所有密钥，那么无论您选择哪
+个 MAC 算法，您都已经输了。
 
-Breaking prefix-MAC
+破解前缀-MAC
 ^^^^^^^^^^^^^^^^^^^
 
-Despite being quite common, this MAC is actually completely insecure for
-most (cryptographically secure!) hash functions :math:`H`, including
-SHA-2.
+尽管这种 MAC 相当常见，但对于大多数（密码学安全的！）哈希函数
+:math:`H`（包括 SHA-2）来说，它实际上完全是不安全的。
 
-As we saw in the chapter on hash functions, many hash functions, such as
-MD5, SHA-0, SHA-1 and SHA-2, pad the message with a predictable padding
-before producing the output digest. The output digest is the same thing
-as the internal state of the hash function. That's a problem: the
-attacker can use those properties to forge messages.
+正如我们在哈希函数一章中看到的，许多哈希函数，如 MD5、SHA-0、SHA-1
+和 SHA-2，在产生输出摘要之前用可预测的填充填充消息。输出摘要是哈
+希函数内部状态的相同东西。那是一个问题：攻击者可以利用这些属性
+伪造消息。
 
-First, they use the digest as the internal state of the hash function.
-That state matches the state you get when you hash :math:`k \| m \| p`,
-where :math:`k` is the secret key, :math:`m` is the message, and
-:math:`p` is that predictable padding. Now, the attacker gets the hash
-function to consume some new bytes: the attacker's chosen message
-:math:`m^{\prime}`. The internal state of the hash function is now what
-you get when you feed it :math:`k \| m \| p \| m^{\prime}`. Then, the
-attacker tells the hash function to produce a digest. Again, the hash
-function appends a padding, so we're now at
-:math:`k \| m \| p \| m^{\prime} \| p^{\prime}`. The attacker outputs
-that digest as the tag. That is *exactly* the same thing as what happens
-when you try to compute the tag for the message
-:math:`m \| p \| m^{\prime}` under the secret key :math:`k`. So, the
-attacker has successfully forged a tag for a new message, and, by our
-definition, the MAC is insecure.
+首先，他们使用摘作为哈希函数的内部状态。该状态与您对
+:math:`k \| m \| p` 进行哈希时获得的状态相匹配，其中 :math:`k` 是
+秘密密钥，:math:`m` 是消息，:math:`p` 是那个可预测的填充。现在，
+攻击者让哈希函数消耗一些新字节：攻击者选择的消息 :math:`m^{\prime}`。
+哈希函数的内部状态现在是您给它喂食
+:math:`k \| m \| p \| m^{\prime}` 时得到的状态。然后，攻击者告诉
+哈希函数产生摘要。同样，哈希函数附加一个填充，所以我们现在在
+:math:`k \| m \| p \| m^{\prime} \| p^{\prime}`。攻击者输出该摘要
+作为标签。这*完全*与您尝试在秘密密钥 :math:`k` 下计算消息
+:math:`m \| p \| m^{\prime}` 的标签时发生的事情相同。所以，攻击者已
+成功伪造了新消息的标签，根据我们的定义，MAC 是不安全的。
 
-This attack is called a length extension attack, because you are
-extending a valid message. The padding in the middle :math:`p`, which
-started out as the padding for the original message but has become just
-some data in the middle, is called *glue padding*, because it glues the
-original message :math:`m` and the attacker's message :math:`m^{\prime}`
-together.
+这种攻击称为长度扩展攻击，因为您正在扩展有效消息。中间的填充
+:math:`p`，最初是原始消息的填充但已成为中间的一些数据，称为*粘合
+填充*，因为它粘合了原始消息 :math:`m` 和攻击者的消息
+:math:`m^{\prime}`。
 
-This attack might sound a little academic, and far from a practical
-problem. We may have proven that the MAC is insecure by our definition,
-but the only tags the attacker can successfully forge are for very
-limited modifications of real messages. Specifically, the attacker can
-only forge tags for a message that consists of a message we sent,
-followed by some binary junk, followed by something the attacker
-chooses. However, it turns out that for many systems, this is plenty to
-result in real breaks. Consider the following Python code that parses a
-sequence of key-value pairs that look like ``k1=v1&k2=v2&...``: [#]_
+这种攻击可能听起来有点学术，远离实际问题。我们可能已经证明根据
+我们的定义 MAC 是不安全的，但攻击者能够成功伪造的唯一标签是针对
+真实消息的非常有限的修改。具体来说，攻击者只能为我们发送的消息后
+面跟着一些二进制垃圾然后攻击者选择的东西伪造标签。然而，事实证明，
+对于许多系统，这足以导致真正的破坏。考虑以下解析类似
+``k1=v1&k2=v2&...`` 的键值对序列的 Python 代码： [#]_
 
 .. [#]
-   I realize there are briefer ways to write that function. I am trying
-   to make it comprehensible to most programmers; not pleasing to
-   advanced Pythonistas.
+   我知道有更简短的方法来写那个函数。我试图让大多数程序员都能
+   理解；不是为了取悦高级 Pythonistas。
 
 .. code:: python
 
@@ -258,153 +201,121 @@ sequence of key-value pairs that look like ``k1=v1&k2=v2&...``: [#]_
            parsed[key] = value
        return parsed
 
-The parsing function only remembers the last value for a given key:
-previous values in the dictionary are overwritten. As a result, an
-attacker mounting a length extension attack can effectively control the
-parsed dictionary entirely.
+解析函数只记住给定键的最后一个值：字典中的先前值被覆盖。结果，执
+行长度扩展攻击的攻击者可以有效地完全控制解析的字典。
 
-If you're thinking that this code has many issues; sure, it does. For
-example, it doesn't handle escaping correctly. But even if it did, that
-wouldn't really fix the length extension attack problem. Most parsing
-functions will perfectly happily live with that binary junk in the
-middle. Hopefully it convinces you that there is in fact a pretty good
-chance that an attacker can produce messages with valid tags that say
-something entirely different from what you intended.
+如果您认为这段代码有很多问题；当然，它确实有。例如，它没有正确处理
+转义。但即使它有，那也不会真正修复长度扩展攻击问题。大多数解析函
+数会很乐意接受中间的二进制垃圾。希望它让您相信攻击者实际上有很大
+的机会产生带有有效标签的消息，这些消息说的内容与您想要的完全不同。
 
-The prefix-MAC construction is actually secure with many current
-(SHA-3-era) hash functions, such as Keccak and BLAKE(2). The
-specifications for these hash functions even recommend it as a secure
-and fast MAC. They use various techniques to foil length extension
-attacks: for example, BLAKE keeps track of the number of bits that have
-been hashed so far, while BLAKE2 has a finalization flag that marks a
-specific block as the last.
+前缀-MAC 构造实际上对许多当前（SHA-3 时代）哈希函数是安全的，例
+如 Keccak 和 BLAKE(2)。这些哈希函数的规范甚至推荐它作为安全快速
+的 MAC。它们使用各种技术来防止长度扩展攻击：例如，BLAKE 跟踪到目前
+为止已经哈希的位数，而 BLAKE2 有将特定块标记为最后的终止标志。
 
-Variants
-^^^^^^^^
+变体
+^^^^^^^
 
-Issues with prefix-MAC has tempted people to come up with all sorts of
-clever variations. For example, why not add the key to the end instead
-of the beginning (:math:`t = H(m \| k)`, or “suffix-MAC”, if you will)?
-Or maybe we should append the key to both ends for good measure
-(:math:`t = H(k \| m \| k)`, “sandwich-MAC” perhaps?)?
+前缀-MAC 的问题诱使人们想出各种聪明的变体。例如，为什么不将密钥
+附加在末尾而不是开头（:math:`t = H(m \| k)`，或"后缀-MAC"）？或者
+我们可能应该为了保险起见将密钥附加在两端
+（:math:`t = H(k \| m \| k)`，也许是"三明治-MAC"）？
 
-For what it's worth, both of these are at least better than prefix-MAC,
-but both of these have serious issues. For example, a suffix-MAC system
-is more vulnerable to weaknesses in the underlying hash function; a
-successful collision attack breaks the MAC. Sandwich-MAC has other, more
-complex issues.
+无论如何，这两个至少比前缀-MAC 好，但这两个都有严重问题。例如，
+后缀-MAC 系统更容易受到底层哈希函数弱点的影响；成功的碰撞攻击会
+破坏 MAC。三明治-MAC 有其他更复杂的问题。
 
-Cryptography has produced much stronger MACs, which we'll see in the
-next few sections. There are no good reasons not to use them.
+密码学已经产生了强得多的 MAC，我们将在接下来的章节中看到这些。
+没有任何理由不使用它们。
 
 HMAC
 ~~~~
 
-HMAC is a standard to produce a MAC with a cryptographic hash function
-as a parameter. It was introduced in 1996 in a paper by Bellare, Canetti
-and Krawczyk. Many protocols at the time implemented their own attempt
-at message authentication using hash functions. Most of these attempts
-failed. The goal of that paper specifically was to produce a provably
-secure MAC that didn't require anything beyond a secret key and a hash
-function.
+HMAC 是使用密码学哈希函数作为参数产生 MAC 的标准。它于 1996 年在
+Bellare、Canetti 和 Krawczyk 的一篇论文中引入。当时许多协议实现了
+他们自己使用哈希函数进行消息认证的尝试。这些尝试中的大多数都失败
+了。那篇论文的目标是产生一个可证明安全的 MAC，不需要除秘密密钥和
+哈希函数之外的任何东西。
 
-One of the nice features of HMAC is that it has a fairly strong security
-proof. As long as the underlying hash function is a pseudorandom
-function, HMAC itself is also a pseudorandom function. The underlying
-hash function doesn't even have to be collision resistant for HMAC to be
-a secure MAC. :cite:`hmac:proof2` This proof was introduced
-after HMAC itself, and matched real-world observations: even though MD5
-and to a lesser extent SHA-0 had serious collision attacks, HMAC
-constructions built from those hash functions still appeared to be
-entirely secure.
+HMAC 的一个很好的特性是它有相当强的安全性证明。只要底层哈希函数
+是伪随机函数，HMAC 本身也是伪随机函数。底层哈希函数甚至不需要对
+碰撞有抵抗力，HMAC 就是安全的 MAC。
+:cite:`hmac:proof2` 这个证明是在 HMAC 本身之后引入的，与真实世界
+的观察一致：即使 MD5 和程度较轻的 SHA-0 有严重的碰撞攻击，从这些
+哈希函数构建的 HMAC 构造仍然看起来是完全安全的。
 
-The biggest difference between HMAC and prefix-MAC or its variants is
-that the message passes through a hash function twice, and is combined
-with the key before each pass. Visually, HMAC looks like this:
+HMAC 与前缀-MAC 或其变体之间的最大区别在于消息两次通过哈希函数，
+并且在每次传递前与密钥组合。从视觉上看，HMAC 看起来像这样：
 
 .. figure:: ./Illustrations/HMAC/HMAC.svg
    :align: center
 
-The only surprising thing here perhaps are the two constants
-:math:`p_{inner}` (the inner padding, one hash function's block length
-worth of ``0x36`` bytes) and :math:`p_{outer}` (the outer padding, one
-block length worth of ``0x5c`` bytes). These are necessary for the
-security proof of HMAC to work; their particular values aren't very
-important, as long as the two constants are different.
+这里唯一令人惊讶的也许两个常量 :math:`p_{inner}`（内填充，一个哈
+希函数块长度那么多的 ``0x36`` 字节）和 :math:`p_{outer}`（外填充，
+一个块长度那么多的 ``0x5c`` 字节）。这些对于 HMAC 的安全性证明是
+必要的；它们的特定值不那么重要，只要两个常量不同。
 
-The two pads are XORed with the key before use. The result is either
-prepended to the original message (for the inner padding
-:math:`p_{inner}`) or to the intermediate hash output (for the outer
-padding :math:`p_{outer}`). Because they're prepended, the internal
-state of the hash function after processing the prefixes can be computed
-ahead of time, shaving a few cycles off the MAC computation time.
+这两个填充在使用前与密钥进行 XOR。结果要么被附加到原始消息前面
+（对于内填充 :math:`p_{inner}`），要么附加到中间哈希输出前面（对
+于外填充 :math:`p_{outer}`）。由于它们是前缀添加的，哈希函数在处
+理前缀后的内部状态可以预先计算，为 MAC 计算时间节省几个周期。
 
-One-time MACs
-~~~~~~~~~~~~~
+一次性 MAC
+~~~~~~~~~~
 
-So far, we've always assumed that MAC functions can be used with a
-single key to produce secure MACs for a very large number of messages.
-By contrast, :term:`one-time MAC`\s are MAC functions that can only securely be
-used once with a single key. That might sound like a silly idea, since
-we've already talked about regular secure MACs. An algorithm that only
-works once just seems objectively worse. However, they have several big
-advantages:
+到目前为止，我们一直假设 MAC 函数可以与单个密钥一起用于为大量消息
+产生安全 MAC。相比之下，:term:`一次性 MAC`\s 是只能用单个密钥安全使用
+一次的 MAC 函数。那听起来可能是个愚蠢的想法，因为我们已经在讨论
+常规安全 MAC。仅工作一次的算法客观上看起来更糟糕。然而，它们有几
+个优点：
 
--  They can be incredibly fast to evaluate, even for very large
-   messages.
--  They have a compelling security proof based on the information
-   content of the tag.
--  A construction exists to turn a :term:`one-time MAC` into a secure
-   multiple-use MAC, removing the principal problem.
+- 评估它们可以 incredibly 快，即使对于非常大的消息。
+- 它们有基于标签信息内容的引人注目的安全性证明。
+- 存在一个构造可以将 :term:`一次性 MAC` 转换为安全的多次使用 MAC，
+  消除主要问题。
 
-A typical simple example of such :term:`one-time MAC`\s consists of a simple
-multiplication and addition modulo some large prime :math:`p`. In this
-case, the secret key consists of two truly random numbers :math:`a` and
-:math:`b`, both between 1 and :math:`p`.
+这种 :term:`一次性 MAC` 的典型简单例子由简单的乘法和加法模某个大素数
+:math:`p` 组成。在这种情况下，秘密密钥由两个真正随机的数字 :math:`a`
+和 :math:`b` 组成，都在 1 和 :math:`p` 之间。
 
 .. math::
 
    t \equiv m \cdot a + b \pmod p
 
-This simple example only works for one-block messages :math:`m`, and
-some prime :math:`p` slightly bigger than the biggest :math:`m`. It can
-be extended to support bigger messages :math:`M` consisting of blocks
-:math:`m_i` by using a message-specific polynomial :math:`P`:
+这个简单例子仅适用于单块消息 :math:`m`，以及一些比最大 :math:`m`
+稍大的素数 :math:`p`。它可以通过使用消息特定多项式 :math:`P` 扩
+展以支持由块 :math:`m_i` 组成的更大的消息 :math:`M`：
 
 .. math::
 
    t \equiv \underbrace{(m_n \cdot a^n + \cdots + m_1 \cdot a)}_{P(M, a)} + b \pmod p
 
-This might look like a lot of computation, but this polynomial can be
-efficiently evaluated by iteratively factoring out the common factor
-:math:`a` (also known as Horner's rule):
+这看起来像很多计算，但这个多项式可以通过迭代提取公因子 :math:`a`
+（也称为 Horner 法则）高效计算：
 
 .. math::
 
    P(M, a) \equiv a \cdot (a \cdot (a \cdot (\cdots) + m_2) + m_1) + b \pmod p
 
-By computing each multiplication modulo :math:`p`, the numbers will
-remain conveniently small.
+通过模 :math:`p` 计算每次乘法，数字将保持方便的小。
 
-In many ways, a :term:`one-time MAC` is to authentication what a one-time pad is
-to encryption. The security argument is similar: as long as the key is
-only used once, an attacker learns no information about the key or the
-message, because they are being irreversibly mixed. This demonstrates
-that the MAC is secure against attackers trying to produce existential
-forgeries, even when that attacker has infinite computational power.
+在许多方面，:term:`一次性 MAC` 对于认证就像一次性密码本对于加密。
+安全性论证是相似的：只要密钥只使用一次，攻击者就不会学到关于密钥
+或消息的任何信息，因为它们被不可逆地混合。这表明 MAC 对试图产生存
+在性伪造的攻击者是安全的，即使该攻击者有无限的计算能力。
 
-Also like a one-time pad, the security argument relies on two very
-important properties about the keys :math:`a, b`:
+也像一次性密码本，安全性论证依赖于关于密钥 :math:`a, b` 的两个非
+常重要的属性：
 
--  They have to be truly random.
--  They have to be used at most once.
+- 它们必须是真正随机的。
+- 它们必须最多使用一次。
 
-Re-using :math:`a` and :math:`b`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+重复使用 :math:`a` 和 :math:`b`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We'll illustrate that our example MAC is insecure if it is used to
-authenticate two messages :math:`m_1, m_2` with the same key
-:math:`(a, b)`:
+我们将说明如果我们的示例 MAC 用于使用相同密钥 :math:`(a, b)` 认证
+两个消息 :math:`m_1, m_2`，它是不安全的：
 
 .. math::
 
@@ -413,222 +324,183 @@ authenticate two messages :math:`m_1, m_2` with the same key
    t_2 &\equiv m_2 \cdot a + b \pmod p
    \end{aligned}
 
-An attacker can reconstruct :math:`a, b` with some simple modular
-arithmetic:  [#]_
+攻击者可以使用一些简单的模算术重建 :math:`a, b`： [#]_
 
 .. [#]
-   For a refresher on modular arithmetic, including an explanation of
-   the modular inverse, please refer to :ref:`the appendix <modular-arithmetic>`.
+   有关模算术的复习，包括模逆的解释，请参考 :ref:`附录 <modular-arithmetic>`。
 
 .. math::
 
    \begin{aligned}
      t_1 - t_2 &\equiv (m_1 \cdot a + b) - (m_2 \cdot a + b) \pmod p \\
-     &\Downarrow \text{(remove parentheses)} \\
+     &\Downarrow \text{(移除括号)} \\
      t_1 - t_2 &\equiv m_1 \cdot a + b - m_2 \cdot a - b \pmod p \\
-     &\Downarrow \text{($b$ and $-b$ cancel out)} \\
+     &\Downarrow \text{($b$ 和 $-b$ 抵消)} \\
      t_1 - t_2 &\equiv m_1 \cdot a - m_2 \cdot a \pmod p \\
-     &\Downarrow \text{(factor out $a$)} \\
+     &\Downarrow \text{(提取因子 $a$)} \\
      t_1 - t_2 &\equiv a \cdot (m_1 - m_2) \pmod p \\
-     &\Downarrow \text{(flip sides, multiply by inverse of $(m_1 - m_2)$)} \\
+     &\Downarrow \text{(翻转两边，乘以 $(m_1 - m_2)$ 的逆)} \\
      a &\equiv (t_1 - t_2)(m_1 - m_2)^{-1} \pmod p
    \end{aligned}
 
-Plugging :math:`a` into either the equation for :math:`t_1` or
-:math:`t_2` gets :math:`b`:
+将 :math:`a` 代入 :math:`t_1` 或 :math:`t_2` 的方程中得到 :math:`b`：
 
 .. math::
 
    \begin{aligned}
    t_1 &\equiv m_1 \cdot a + b \pmod p \\
-   &\Downarrow \text{(reorder terms)}\\
-   b &\equiv t_1 - m_1 \cdot a \pmod p
+     &\Downarrow \text{(重排项)} \\
+     b &\equiv t_1 - m_1 \cdot a \pmod p
    \end{aligned}
 
-As you can see, as with one-time pads, re-using the key even once leads
-to a complete failure of the cryptosystem to preserve privacy or
-integrity, as the case may be. As a result, :term:`one-time MAC`\s are a bit
-dangerous to use directly. Fortunately, this weakness can be solved with
-a construction called a :term:`Carter-Wegman MAC`, which we'll see in the next
-section.
+如您所见，与一次性密码本一样，即使只使用一次密钥也会导致密码系统
+完全失败，无法保护隐私或完整性（视情况而定）。结果，直接使用
+:term:`一次性 MAC`\s 有点危险。幸运的是，这种弱点可以使用称为
+:term:`Carter-Wegman MAC` 的构造解决，我们将在下一节看到。
 
 Carter-Wegman MAC
 ~~~~~~~~~~~~~~~~~
 
-As we've already stated, the obvious problem with :term:`one-time MAC`\s is their
-limited practicality. Fortunately, it turns out that there is a
-construction, called a :term:`Carter-Wegman MAC`, that turns any secure one-time
-MAC into a secure many-time MAC while preserving most of the performance
-benefit.
+正如我们已经陈述的，:term:`一次性 MAC`\s 的明显问题是它们有限的实用
+性。幸运的是，事实证明存在一种称为 :term:`Carter-Wegman MAC` 的构造，
+它可以将任何安全的一次性 MAC 转换为安全的多次使用 MAC，同时保留
+大部分性能优势。
 
-The idea behind a :term:`Carter-Wegman MAC` is that you can use a :term:`one-time MAC`
-:math:`O` to produce a tag for the bulk of the data, and then encrypt a
-:term:`nonce` :math:`n` with a pseudorandom function :math:`F`, such as a block
-cipher, to protect that one-time tag:
+:term:`Carter-Wegman MAC` 背后的思想是您可以使用 :term:`一次性 MAC`
+:math:`O` 为数据主体产生标签，然后用伪随机函数 :math:`F`（如分组
+密码）加密 :term:`一次性 MAC` 标签以保护那个一次性标签：
 
 .. math::
 
    CW((k_1, k_2), n, M) = F(k_1, n) \xor O(k_2, M)
 
-As long as :math:`F` is a secure pseudorandom function, the :term:`nonce`'s
-encryption is totally unpredictable. In the eyes of an attacker, that
-means the XOR operation will randomly flip the bits of the :term:`one-time MAC`
-tag :math:`O(k_2, M)`. Because this masks the real value of the :term:`one-time MAC`
-tag, the attacker can not perform the algebraic tricks we saw for
-:term:`one-time MAC`\s recovering the key when it is used more than once.
+只要 :math:`F` 是安全的伪随机函数，:term:`nonce` 的加密就完全不可预测。
+在攻击者看来，这意味着 XOR 操作将随机翻转 :term:`一次性 MAC` 标签
+:math:`O(k_2, M)` 的位。因为这个掩藏了 :term:`一次性 MAC` 标签的真实
+值，攻击者无法执行我们在:ref:`一次性 MAC`\s 中看到的代数技巧，当
+它使用超过一次时恢复密钥。
 
-Keep in mind that while :term:`Carter-Wegman MAC`\s take two distinct keys
-:math:`k_1` and :math:`k_2`, and that :term:`Carter-Wegman MAC`\s are related to
-:term:`one-time MAC`\s, some of which also take two distinct keys :math:`a` and
-:math:`b`, they are not the same two keys. The Carter-Wegman MAC's
-:math:`k_2` is the only key passed to the fast :term:`one-time MAC` :math:`O`.
-If that fast :term:`one-time MAC` is our earlier example that takes two keys
-:math:`a` and :math:`b`, that :math:`k_2` would have to get split up
-into those two keys. The :term:`Carter-Wegman MAC` key would then be
-:math:`(k_1, k_2) = (k_1, (a, b))`.
+请记住，虽然 :term:`Carter-Wegman MAC`\s 需要两个不同的密钥
+:math:`k_1` 和 :math:`k_2`，并且 :term:`Carter-Wegman MAC`\s 与
+:term:`一次性 MAC`\s 相关，其中一些也需要两个不同的密钥 :math:`a`
+和 :math:`b`，它们不是相同的两个密钥。Carter-Wegman MAC 的
+:math:`k_2` 是传递给快速 :term:`一次性 MAC` :math:`O` 的唯一密钥。
+如果那个快速 :term:`一次性 MAC` 是我们之前需要两个密钥 :math:`a`
+和 :math:`b` 的例子，那个 :math:`k_2` 将不得不被分成那些两个密钥。
+然后 :term:`Carter-Wegman MAC` 密钥将是 :math:`(k_1, k_2) = (k_1, (a, b))`。
 
-You can tell how a :term:`Carter-Wegman MAC` exploits the benefits of both kinds
-of MACs by considering the two terms of the equation separately. In
-:math:`F(k_1, n)`, :math:`F` is just a regular pseudorandom function,
-such as a block cipher. It is quite slow by comparison to the one-time
-MAC. However, its input, the :term:`nonce`, is very small. The unpredictable
-output of the block cipher masks the output of the :term:`one-time MAC`. In the
-second term, :math:`O(k_2, M)`, the large input message :math:`M` is
-only handled by the very fast :term:`one-time MAC` :math:`O`.
+通过分别考虑方程的两个项，您可以告诉 :term:`Carter-Wegman MAC` 如何
+利用两种 MAC 的好处。在 :math:`F(k_1, n)` 中，:math:`F` 只是常规
+伪随机函数，如分组密码。它比较慢相比一次性 MAC。然而，它的输入，
+:term:`nonce`，非常小。分组密码的不可预测输出掩藏了 :term:`一次性 MAC`
+的输出。在第二项中，:math:`O(k_2, M)`，大的输入消息 :math:`M` 仅
+由非常快的 :term:`一次性 MAC` :math:`O` 处理。
 
-These constructions, in particular Poly1305-AES, currently represent
-some of the state of the art in MAC functions. The paper
-(:cite:`umac`) and RFC (:cite:`rfc4418`) for an
-older, related MAC function called UMAC may also be good sources of
-extra background information, since they go into extensive details of
-the hows and whys of a practical :term:`Carter-Wegman MAC`.
+这些构造，特别是 Poly1305-AES，目前代表 MAC 函数的一些最先进技术。
+关于较老、相关的 MAC 函数 UMAC 的论文（:cite:`umac`）和 RFC
+（:cite:`rfc4418`）也可能是额外背景信息的好来源，因为它们详细
+说明了实用 :term:`Carter-Wegman MAC` 的如何和为何。
 
-Authenticated encryption modes
+认证加密模式
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-So far, we've always clearly distinguished encryption from
-authentication, and explained the need for both. The majority of secure
-connections that are set up every day have that distinction as well:
-they treat encryption and authentication as fundamentally different
-steps.
+到目前为止，我们一直清楚地区分加密和认证，并解释了两者的需求。
+每天建立的大多数安全连接也有这种区分：它们将加密和认证视为根本
+不同的步骤。
 
-Alternatively, we could make authentication a fundamental part of the
-:term:`mode of operation`. After all, we've already seen that unauthenticated
-encryption is virtually never what you want; it is, at best, something
-you occasionally have to live with. It makes sense to use constructions
-that not only guarantee the privacy of an arbitrary stream, but also its
-integrity.
+或者，我们可以使认证成为 :term:`模式操作` 的基本部分。毕竟，我们已
+经知道未经验证的加密几乎从来都不是您想要的；它充其量只是您偶尔
+不得不接受的东西。使用不仅保证任意流隐私而且保证其完整性的构造
+是有意义的。
 
-As we've already seen, many of the methods of composing authentication
-and encryption are inherently insecure. By doing that in a fixed, secure
-way such as a properly designed authenticated encryption mode, an
-application developer no longer has to make that choice, which means
-they also can't inadvertently make the *wrong* choice.
+正如我们已经看到的，组合认证和加密的许多方法本质上是不安全的。通
+过以固定的安全方式这样做，例如正确设计的认证加密模式，应用程序开
+发人员不再必须做那个选择，这意味着他们也不会无意中做出*错误*的
+选择。
 
 AEAD
 ^^^^
 
-AEAD is a feature of certain modes of authenticated encryption. Such
-modes of operation are called :term:`AEAD mode`\s. It starts with the premise
-that many messages actually consist of two parts:
+AEAD 是某些认证加密模式的功能。这样的模式操作称为 :term:`AEAD mode`\s。
+它以许多消息实际上由两部分组成的前提开始：
 
--  The actual content itself
--  Metadata: data *about* the content
+- 实际内容本身
+- 元数据：关于内容的数据
 
-In many cases the metadata should be plaintext, but the content itself
-should be encrypted. The entire message should be authenticated: it
-should not be possible for an attacker to mess with the metadata and
-have the resulting message still be considered valid.
+在许多情况下，元数据应该是明文，但内容本身应该是加密的。整个消息
+应该被认证：它不应该可能让攻击者篡改元数据并使结果消息仍然被认
+为有效。
 
-Consider an e-mail alternative as an example cryptosystem. The metadata
-about the content might contain the intended recipient. We definitely
-want to encrypt and authenticate the content itself, so that only the
-recipient can read it. The metadata, however, has to be in plaintext:
-the e-mail servers performing the message delivery have to know which
-recipient to send the message to.
+考虑电子邮件替代方案作为示例密码系统。关于内容的元数据可能包含预
+期收件人。我们肯定想要加密和认证内容本身，以便只有收件人可以阅读
+它。然而，元数据必须是明文：执行消息传递的电子邮件服务器必须知道
+将消息发送给哪个收件人。
 
-Many systems would leave this metadata unauthenticated, allowing
-attackers to modify it. In our case, that looks like it may just lead to
-messages being delivered to the wrong inbox. That also means that an
-attacker can force e-mail to be delivered to the wrong person, or not
-delivered at all.
+许多系统会留下这个元数据未认证，允许攻击者修改它。在我们的情况中，
+那看起来可能只是导致消息被传递到错误的收件箱。这也意味着攻击者可
+以强制电子邮件传递给错误的人，或者根本不传递。
 
-:term:`AEAD mode`\s address this issue by providing a specified way to add
-metadata to encrypted content, so that the whole of the encrypted
-content and the metadata is authenticated, and not the two pieces
-separately:
+:term:`AEAD mode`\s 通过提供指定方式将元数据添加到加密内容来解决这
+个问题，使得加密内容和元数据的整体被认证，而不是两个部分单独认证：
 
 .. figure:: Illustrations/AEAD/AEAD.svg
    :align: center
 
-OCB mode
+OCB 模式
 ~~~~~~~~
 
 .. canned_admonition::
    :from_template: advanced
 
-Usually, you will want to use a much more high level cryptosystem, such as OpenPGP, NaCl or TLS.
+通常，您将想要使用更高级的密码系统，如 OpenPGP、NaCl 或 TLS。
 
-:term:`OCB mode` is an :term:`AEAD mode` of operation. It is one of the earliest
-developed :term:`AEAD mode`\s.
+:term:`OCB mode` 是认证加密模式操作的一种。它是最早开发的 :term:`AEAD mode`\s 之一。
 
 .. figure:: Illustrations/OCB/Encryption.svg
    :align: center
 
-As you can see, most of this scheme looks quite similar to
-:term:`ECB mode`. The name OCB is quite similar to electronic codebook,
-as well. OCB does not share the security issues ECB mode has, however,
-as there are several important differences, such as the offsets
-:math:`\Delta_i` introduced in each individual block encryption.
+如您所见，这个方案看起来 quite 类似于 :term:`ECB mode`。OCB 的名称
+与电子密码本也非常相似。然而，OCB 不具有 ECB 模式的安全问题，因为
+有几个重要的区别，例如在每个单独块加密中引入的偏移 :math:`\Delta_i`。
 
-Being an :term:`AEAD mode`, :term:`OCB mode` provides a cryptographically secure
-authentication tag :math:`t`, which is built from :math:`X`, a very
-simple (not cryptographically secure by itself) checksum of the
-plaintext. There is also another, separate tag :math:`t_a`, which
-authenticates the AEAD associated data. That associated data tag
-:math:`t_a` is computed as follows:
+作为 :term:`AEAD mode`，:term:`OCB mode` 提供密码学安全的认证标签
+:math:`t`，它由 :math:`X` 构建，这是一个非常简单（本身不是密码学
+安全的）明文的校验和。还有另一个单独的标签 :math:`t_a`，它认证
+AEAD 关联数据。该关联数据标签 :math:`t_a` 计算如下：
 
 .. figure:: Illustrations/OCB/Auth.svg
    :align: center
 
-This design has a number of interesting properties. For example, it is
-very fast: only requiring roughly one block cipher operation per
-encrypted or associated data block, as well as one additional block
-cipher operation for the final tag. The offsets (:math:`\Delta_i`) are
-also extremely easy to compute. The checksum block :math:`X` is just all
-of the plaintext blocks :math:`P_i` XORed together. Finally, :term:`OCB mode` is
-easy to compute in parallel; only the final authentication tag is
-dependent on all the preceding information.
+这种设计有几个有趣的属性。例如，它非常快：仅需要大约每个加密或关
+联数据块的一个分组密码操作，以及最终标签的一个额外块密码操作。偏
+移（:math:`\Delta_i`）也非常容易计算。校验和块 :math:`X` 只是所有
+明文块 :math:`P_i` 的 XOR。最后，:term:`OCB mode` 易于并行计算；
+只有最终认证标签依赖于所有前面的信息。
 
-:term:`OCB mode` also comes with a built-in padding scheme: it behaves slightly
-differently when the plaintexts or authentication text is not exactly a
-multiple of the block size. This means that, unlike with PKCS#5/PKCS#7
-padding, there isn't an entire block of “wasted” padding if the
-plaintext happens to be a multiple of the block size.
+:term:`OCB mode` 还带有内置填充方案：当明文或认证文本不是块大小的精
+确倍数时，它的行为略有不同。这意味着，与 PKCS#5/PKCS#7 填充不同，
+如果明文恰好是块大小的倍数，则没有"浪费"填充块。
 
-Despite having several interesting properties going for it, :term:`OCB mode` has
-not received as much attention as some of the alternatives; one of the
-main reasons being that it is patent encumbered. Even though a number of
-patent licenses are available, including a free-of-charge one for open
-source software, this does not appear to have significantly impacted how
-much :term:`OCB mode` is used in the field. :cite:`ocb:license`
+尽管有几个有趣的属性，:term:`OCB mode` 并没有像其他一些替代方案那样
+受到很多关注；主要原因之一是它有专利负担。尽管有许多专利许可证可
+用，包括开源软件的免费许可证，这似乎没有显著影响 :term:`OCB mode` 在
+领域中的使用量。:cite:`ocb:license`
 
-GCM mode
+GCM 模式
 ~~~~~~~~
 
 .. canned_admonition::
    :from_template: advanced
 
-Usually, you will want to use a much more high level cryptosystem, such as OpenPGP, NaCl or TLS.
+通常，您将想要使用更高级的密码系统，如 OpenPGP、NaCl 或 TLS。
 
-:term:`GCM mode` is an :term:`AEAD mode` with an unfortunate case of RAS (redundant
-acronym syndrome) syndrome: GCM itself stands for “Galois Counter Mode”.
-It is formalized in a NIST Special Publication :cite:`gcm`
-and roughly boils down to a combination of classical CTR mode with a
-:term:`Carter-Wegman MAC`. That MAC can be used by itself as well, which is
-called :term:`GMAC`.
+:term:`GCM mode` 是带有不幸的 RAS（冗余首字母缩写综合征）综合征的
+:term:`AEAD mode`：GCM 本身代表"Galois 计数器模式"。
+它在 NIST 特别出版物 :cite:`gcm` 中正式化，大致归结为经典 CTR
+模式与 :term:`Carter-Wegman MAC` 的组合。该 MAC 也可以单独使用，称为
+:term:`GMAC`。
 
-Authentication
+认证
 ^^^^^^^^^^^^^^
 
-:term:`GCM mode` (and by extension :term:`GMAC`)
+:term:`GCM mode`（以及通过扩展 :term:`GMAC`）
