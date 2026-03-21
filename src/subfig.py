@@ -72,12 +72,24 @@ def depart_subfigure_tex(self, node):
     figoutput = figoutput.lstrip("\n")
 
     # if the node isn't the first, pad
-    if node["subfig_i"] != 0:
+    subfig_i = node.get("subfig_i", 0)
+    if subfig_i != 0:
         figoutput = r"\hspace{\fill}" + figoutput
 
     # replace the start tag
     base_output = r"\\begin{figure}\[[a-z]*\]"
-    replacement = r"\\begin{subfigure}[t]{%s\\linewidth}" % node["width"]
+    width = node.get("width")
+    if width is None:
+        # Try to get width from parent figmatrix
+        parent = node.parent
+        while parent is not None:
+            if isinstance(parent, figmatrix):
+                width = parent.get("width", 0.5)
+                break
+            parent = parent.parent
+        if width is None:
+            width = 0.5  # default fallback
+    replacement = r"\\begin{subfigure}[t]{%s\\linewidth}" % width
     figoutput = re.sub(base_output, replacement, figoutput)
     # replace the end tag
     figoutput = figoutput.replace(r"\end{figure}", r"\end{subfigure}")
@@ -123,9 +135,21 @@ def depart_subfigure_html(self, node):
     self.add_fignumber = self.__saved_add_fignumber
 
     figoutput = "".join(self.body)
+    # Get width from node with fallback to figmatrix parent's width or default 0.5
+    width = node.get("width")
+    if width is None:
+        # Try to get width from parent figmatrix
+        parent = node.parent
+        while parent is not None:
+            if isinstance(parent, figmatrix):
+                width = parent.get("width", 0.5)
+                break
+            parent = parent.parent
+        if width is None:
+            width = 0.5  # default fallback
     figoutput = figoutput.replace(
         'class="figure',
-        'style="width: %g%%" class="subfigure' % (float(node["width"]) * 100),
+        'style="width: %g%%" class="subfigure' % (float(width) * 100),
     )
     self.body = self.__body
     self.body.append(figoutput)
@@ -237,7 +261,9 @@ def doctree_read(app, doctree):
                         figure_node.insert(0, prevnode)
                         removed_nodes += 1
 
-                figure_node["width"] = figmatrix_node["width"]
+                # Ensure width is set on subfigure
+                if "width" not in figure_node:
+                    figure_node["width"] = figmatrix_node.get("width", 0.5)
                 figure_node["subfig_i"] = subfig_i
                 doc_subfigures[node_id(figure_node)] = (figmatrix_id, subfig_i)
                 subfig_i += 1

@@ -1,5 +1,5 @@
-Appendices
-==========
+附录
+====
 
 .. raw:: latex
 
@@ -7,63 +7,55 @@ Appendices
 
 .. _modular-arithmetic:
 
-Modular arithmetic
-------------------
+模算术
+------
 
-Modular arithmetic is used for many public key cryptosystems, including
-:term:`public-key encryption` algorithms like RSA and key exchange protocols
-like Diffie-Hellman.
+模算术用于许多公钥密码系统，包括像 RSA 这样的 :term:`public-key encryption`
+算法和像 Diffie-Hellman 这样的密钥交换协议。
 
-Modular arithmetic is something most people actually already understand,
-they just don't know it's called that. We can illustrate the principles
-of modular arithmetic using a clock.
+模算术是大多数人实际上已经理解的东西，他们只是不知道它叫这个名字。
+我们可以使用时钟来说明模算术的原理。
 
 .. figure:: ./Illustrations/ModularArithmetic/Clock2.svg
    :align: center
 
-   A clock, pointing to 2.
+   一个时钟，指向 2。
 
-For simplicity's sake, our demonstration 12-hour clock only shows hours,
-not minutes or seconds. Also unlike real clocks, the hour hand is never
-halfway in between two hours: it always shows an exact hour, such as 2
-or 9.
+为了简单起见，我们演示的 12 小时时钟只显示小时，不显示分钟或秒。
+与实际时钟不同的是，时针永远不会在两个小时之间：它总是显示整点，
+如 2 或 9。
 
 .. _Modular subtraction:
 .. _Modular addition:
 
-Addition and subtraction
-~~~~~~~~~~~~~~~~~~~~~~~~
+加法和减法
+~~~~~~~~~~
 
-It obviously makes sense to add hours on our clock: if it's 2 o'clock
-now, and you'd like to know what time it is five hours from now, you can
-add 5, and end up with 7, as you can see in :numref:`fig-Clock2Plus5`.
+在我们的时钟上加法显然是有意义的：如果现在是 2 点，你想知道 5 小时后
+是什么时间，你可以加 5，结果是 7，正如你在 :numref:`fig-Clock2Plus5` 中看到的。
 
 .. _fig-Clock2Plus5:
 
 .. figure:: ./Illustrations/ModularArithmetic/Clock2Plus5.svg
    :align: center
 
-   :math:`2 + 5 = 7`, on the clock.
+   :math:`2 + 5 = 7`，在时钟上。
 
-Similarly, we can subtract times. If it's 10 o'clock now, and you'd like
-to know what time it was two hours ago, you subtract 2 and end up with
-8.
-
+类似地，我们可以做减法。如果现在是 10 点，你想知道 2 小时前是什么时间，
+你减去 2，结果是 8。
 
 .. _fig-ClockMinus:
 
 .. figure:: ./Illustrations/ModularArithmetic/Clock10Minus2.svg
    :align: center
 
-   :math:`10 - 2 = 8`, on the clock.
+   :math:`10 - 2 = 8`，在时钟上。
 
-The “weird” part is when you cross the boundary at 12. As far as the
-clock is concerned, there's no real difference between 12 and 0. If it's
-10 o'clock now, it'll be 2 o'clock in four hours. If it's 2 o'clock now,
-it was 9 o'clock five hours ago.
+"奇怪"的部分是当你跨越 12 的边界时。就时钟而言，12 和 0 没有真正的区别。
+如果现在是 10 点，4 小时后将是 2 点。如果现在是 2 点，5 小时前是 9 点。
 
-This is an example of what's called “modular arithmetic”. The modulus,
-in this case, is 12. We can write the above equations as:
+这是所谓的"模算术"的例子。在这种情况下，模数是 12。我们可以将上述
+等式写为：
 
 .. math::
 
@@ -73,12 +65,10 @@ in this case, is 12. We can write the above equations as:
 
    (2 - 5) \bmod{12} = 9
 
-In these equations, the :math:`\bmod` is an operator, giving the
-remainder after division. When we are dealing with modular arithmetic,
-where all operations are affected by the modulus instead of a simple
-single operation, we'll instead write :math:`\negthickspace\pmod{12}` at
-the end of the equation and use an :math:`\equiv` sign instead of an
-equals sign (:math:`=`):
+在这些等式中，:math:`\bmod` 是一个运算符，给出除法后的余数。当我们处理
+模算术时，其中所有操作都受模数影响而不是简单的一次性操作，我们改为
+在等式末尾写 :math:`\negthickspace\pmod{12}` 并使用 :math:`\equiv` 号
+而不是等号 (:math:`=`)：
 
 .. math::
 
@@ -88,136 +78,110 @@ equals sign (:math:`=`):
 
    2 - 5 \equiv 9 \pmod{12}
 
-This is read as “ten plus four is equivalent to two, modulo twelve” and
-“two minus five is equivalent to nine, modulo twelve”. That might seem
-like a trivial notational hack now, but the difference will become
-apparent once we start applying tricks for doing more complex modular
-computations, like multiplication and exponentiation.
+这读作"十加四等价于二，模十二"和"二减五等价于九，模十二"。现在这可能
+看起来像是微不足道的符号技巧，但一旦我们开始应用技巧进行更复杂的模运算，
+如乘法和幂运算，区别将会显现出来。
 
-In general, we call two numbers *equivalent modulo some modulus* if
-dividing them by the modulus leaves the same remainder. We can
-illustrate this with our previous examples: :math:`10 + 4 = 14` leaves a
-remainder of 2 when divided by 12, so it is equivalent to 2 modulo 12.
-For negative numbers, we'll always use positive remainders. For example,
-:math:`2 - 5 \equiv 9 \pmod{12}`. This is exactly the way a clock works
-as well: if it's 2 o'clock now, then five hours ago was “nine o'clock”,
-not “minus three o'clock”.
+通常，如果两个数除以模数后余数相同，我们称它们*在模数下等价*。
+我们可以用前面的例子来说明这一点：:math:`10 + 4 = 14` 除以 12 余 2，
+所以它等价于 2 模 12。
 
-Prime numbers
-~~~~~~~~~~~~~
+对于负数，我们总是使用正余数。例如，:math:`2 - 5 \equiv 9 \pmod{12}`。
+这正是时钟的工作方式：如果现在是 2 点，那么 5 小时前是"九点"，而不是
+"负三点"。
 
-Prime numbers are wonderful kinds of numbers that come back in many
-branches of mathematics. Anything I say about them probably won't do
-them justice; but we're in a practical book about applied cryptography,
-so we'll only see a few properties.
+素数
+~~~~
 
-A prime number is a number that is divisible only by two numbers: 1 and
-itself. For example, 3 is a prime number, but 4 is not, because it can
-be divided by 2.
+素数是一种在数学许多分支中回归的美妙数字。我对素数说的任何话可能都
+无法公正对待它们；但这是一本关于应用密码学的实用书籍，所以我们只
+看到一些属性。
 
-Any number can be written as a product of prime factors: a bunch of
-prime numbers multiplied together. That product is called a prime
-factorization. For example, 30 can be factorized into 2, 3 and 5:
+素数是一个只能被两个数整除的数字：1 和它本身。例如，3 是素数，但
+4 不是，因为它可以被 2 整除。
+
+任何数字都可以写成素因子的乘积：一堆素数相乘。这个乘积称为素因子分解。
+例如，30 可以分解为 2、3 和 5：
 
 .. math::
 
    30 = 2 \cdot 3 \cdot 5
 
-Sometimes, a prime number will occur more than once in a factorization.
-For example, the factorization of 360 has 2 in it three times, and three
-in it twice:
+有时，一个素数会在分解中出现多次。例如，360 的分解包含 2 三次，3 两次：
 
 .. math::
 
    360 = 2^3 \cdot 3^2 \cdot 5
 
-The factorization of any prime number is just that prime number itself.
+任何素数的分解就是该素数本身。
 
-Modern mathematics no longer considers 1 to be a prime number, even
-though it is only divisible by 1 and itself (1 again). Under this
-convention, every number not only *has* a factorization, but that
-factorization is *unique*. Otherwise, 4 could be factored not only as
-:math:`2 \cdot 2`, but also as :math:`2 \cdot 2 \cdot 1`,
-:math:`2 \cdot 2 \cdot 1 \cdot 1`, and so on. The uniqueness of factorization helps in some important
-proofs in number theory.
+现代数学不再认为 1 是素数，尽管它只能被 1 和自身（又是 1）整除。
+根据这一惯例，每个数字不仅*有*一个分解，而且该分解是*唯一的*。
+否则，4 不仅可以分解为 :math:`2 \cdot 2`，还可以是
+:math:`2 \cdot 2 \cdot 1`、:math:`2 \cdot 2 \cdot 1 \cdot 1` 等等。
+分解的唯一性有助于数论中一些重要证明。
 
-Also, 0 is *not* a prime number, as it is divisible by many numbers: all
-numbers except 0 itself.
+另外，0 *不*是素数，因为它可以被许多数字整除：除了 0 本身的所有数字。
 
-Two numbers are called coprime when their greatest common divisor is 1,
-or, to put it in another way, they don't share any prime factors. Since
-the only prime factor a prime has is itself, that means that all prime
-numbers are also coprime. More generally, a prime is coprime to any
-number that isn't a multiple of that prime.
+当两个数的最大公约数是 1 时，它们称为互质，换句话说，它们不共享任何
+素因子。由于素数唯一的素因子是它自己，这意味着所有素数也是互质的。
+更一般地，素数与任何不是该素数倍数的数字互质。
 
-Multiplication
-~~~~~~~~~~~~~~
+乘法
+~~~~
 
-You might remember you were first taught multiplication as repeated
-addition:
+你可能记得你第一次学乘法时是作为重复加法：
 
 .. math::
 
    n \cdot x = \underbrace{x + x + \ldots + x}_{n \text{ times}}
 
-Modular multiplication is no different. You can compute modular
-multiplication by adding the numbers together, and taking the modulus
-whenever the sum gets larger than the modulus. You can also just do
-regular multiplication, and then take the modulus at the end.
+模乘法没有不同。您可以通过将数字相加并在和大于模数时取模来计算模乘法。
+您也可以只做普通乘法，然后在最后取模。
 
-Division and modular inverses
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+除法和模逆
+~~~~~~~~~~
 
-Division is defined as the inverse of multiplication. So,
-:math:`a \cdot b \equiv c \pmod m`, then
-:math:`\frac{c}{b} \equiv a \pmod m`.
+除法定义为乘法的逆运算。所以，
+如果 :math:`a \cdot b \equiv c \pmod m`，那么
+:math:`\frac{c}{b} \equiv a \pmod m`。
 
-For example, :math:`5 \cdot 6 \equiv 2 \pmod 7`; so:
-:math:`\frac{2}{6} \equiv 5 \pmod 7`. This is because
-:math:`5 \cdot 6 = 30`, which leaves a remainder of 2 when divided by 7.
+例如，:math:`5 \cdot 6 \equiv 2 \pmod 7`；所以：
+:math:`\frac{2}{6} \equiv 5 \pmod 7`。这是因为
+:math:`5 \cdot 6 = 30`，除以 7 余 2。
 
-Usually, instead of using division directly, we'll multiply using
-something called a modular inverse. The modular inverse of :math:`a` is
-a number, that when you multiply it with :math:`a`, you get 1. This is
-just like the inverse of a number in regular arithmetic:
-:math:`x \cdot \frac{1}{x} = 1`.
+通常，我们会使用称为模逆的乘法而不是直接使用除法。:math:`a` 的模逆
+是一个数字，当您将其与 :math:`a` 相乘时得到 1。这就像普通算术中
+数字的逆：:math:`x \cdot \frac{1}{x} = 1`。
 
-Like in regular arithmetic, not all numbers have modular inverses. This
-is the equivalent of dividing by zero in regular arithmetic.
+像普通算术一样，不是所有数字都有模逆。这相当于普通算术中除以零。
 
-There are two algorithms that are used to compute modular inverses: the
-extended Euclidean algorithm, and with the help of Euler's theorem.
+有两种算法用于计算模逆：扩展欧几里得算法和欧拉定理。
 
-The extended Euclidean algorithm
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+扩展欧几里得算法
+^^^^^^^^^^^^^^^^
 
-The extended Euclidean algorithm is an extension to the Euclidean 
-algorithm (which gives us an efficient method for computing the greatest 
-common divisor of two integers). The extended algorithm additionally helps us 
-express this GCD of two integers as a linear combination of the two original 
-numbers:
+扩展欧几里得算法是欧几里得算法的扩展（它为我们提供了一种计算两个
+整数最大公约数的有效方法）。扩展算法还帮助我们表达这两个整数的 GCD
+为两个原始数的线性组合：
 
 .. math::
 
    GCD(x, y) = Px + Qy
 
-Given the numbers :math:`x` and :math:`y`, the extended Euclidean algorithm
-gives us a way to efficiently calculate the value of coefficients :math:`P` 
-and :math:`Q`.
+给定数字 :math:`x` 和 :math:`y`，扩展欧几里得算法为我们提供了一种
+有效计算系数 :math:`P` 和 :math:`Q` 值的方法。
 
-This algorithm can be further used to calculate multiplicative inverses 
-because of the known property that the inverse of number :math:`a \pmod n` 
-can only exist if gcd\ :math:`(a, n) = 1`. Therefore we can substitute 
-:math:`x` & :math:`y` with :math:`a` & :math:`n` respectively in the 
-extended Euclidean algorithm equation:
+由于已知属性：:math:`a \pmod n` 的逆元仅当 gcd\ :math:`(a, n) = 1` 才
+能存在，因此该算法可进一步用于计算乘法逆。因此，我们可以在扩展欧几里得
+算法方程中分别将 :math:`x` 和 :math:`y` 替换为 :math:`a` 和 :math:`n`：
 
 .. math::
 
    1 = Pa + Qn
 
-Writing this equation in :math:`\pmod n` will lead to elimination of 
-the :math:`Qn` factor because any multiple of :math:`n` is congruent to
-:math:`0 \pmod n`.
+将此方程写为 :math:`\pmod n` 将导致消除 :math:`Qn` 因子，因为 :math:`n` 的任何倍数都同余于
+:math:`0 \pmod n`。
 
 .. math::
 
@@ -227,85 +191,68 @@ the :math:`Qn` factor because any multiple of :math:`n` is congruent to
 
    a^{-1} \equiv P \pmod n
 
-This proves that the coeffiecient :math:`P \pmod n` is the multiplicative 
-inverse of :math:`a`, and we can use the extended Euclidean algorithm 
-to calculate the value of coefficient :math:`P`.
+这证明了系数 :math:`P \pmod n` 是 :math:`a` 的乘法逆，我们可以使用
+扩展欧几里得算法计算系数 :math:`P` 的值。
 
+使用欧拉定理
+^^^^^^^^^^^^
 
-Using Euler's theorem
-^^^^^^^^^^^^^^^^^^^^^
-
-Euler's theorem states that if two numbers :math:`a` and :math:`n` are
-coprime, then:
+欧拉定理指出，如果两个数字 :math:`a` 和 :math:`n` 互质，则：
 
 .. math::
 
    a^{\phi(n)} \equiv 1 \pmod n
 
-In that equation, :math:`\phi` is Euler's totient function, which counts
-the amount of numbers that are coprime to (and less than or equal to)
-its argument. As an example, the totient of 10 is 4, as 1, 3, 7, and 9
-do not have common prime factors with 10.
+在这个等式中，:math:`\phi` 是欧拉 totient 函数，它计算与其参数
+互质（且小于或等于）的数字数量。例如，10 的 totient 是 4，因为 1、3、7、9
+与 10 没有共同的素因子。
 
-We can use Euler's theorem to find the multiplicative inverse of
-:math:`a`. If we just multiply both sides of the equation by
-:math:`a^{-1}`, we get:
+我们可以使用欧拉定理来找到 :math:`a` 的乘法逆。如果我们只是将等式
+两边乘以 :math:`a^{-1}`，我们得到：
 
 .. math::
 
    a^{\phi(n) - 1} \equiv a^{-1} \pmod n
 
-That gives us a direct formula for computing :math:`a^{-1}`.
-Unfortunately, this is still generally less interesting than using the
-extended Euclidean algorithm, for two reasons:
+这给了我们一个计算 :math:`a^{-1}` 的直接公式。不幸的是，这通常仍然不如
+使用扩展欧几里得算法有趣，原因有两个：
 
-#. It requires computing the totient function, which is harder than
-   running the extended Euclidean algorithm in the first place, unless
-   you happen to know the prime factors of :math:`n`.
-#. Modular exponentiation is computationally expensive.
+#. 它需要计算 totient 函数，这比运行扩展欧几里得算法更困难，除非你碰巧知道 :math:`n` 的素因子。
+#. 模幂运算计算成本高昂。
 
-One exception to that rule is for prime moduli. Since a prime is coprime
-to every other number, and since there are :math:`p - 1` numbers smaller
-than :math:`p`, :math:`\phi(p) = p - 1`. So, for a prime modulus, the
-modular inverse of :math:`a` is simply:
+该规则的一个例外是对于素模数。由于素数与每个其他数字互质，并且由于
+有 :math:`p - 1` 个小于 :math:`p` 的数字，:math:`\phi(p) = p - 1`。
+所以，对于素模数，:math:`a` 的模逆就是：
 
 .. math::
 
    a^{-1} \equiv a^{\phi(p) - 1} \equiv a^{p - 2} \pmod p
 
-This still requires us to be able to efficiently raise :math:`a` to a
-power using modular arithmetic. We'll discuss how you can do that
-efficiently in the next section.
+这仍然要求我们能够使用模算术有效地将 :math:`a` 提升到幂。我们将在下
+一节讨论如何高效地做到这一点。
 
-Exponentiation
-~~~~~~~~~~~~~~
+幂运算
+~~~~~~
 
-Like multiplication is taught as repeated addition, exponentiation can
-be thought of as repeated multiplication:
+就像乘法被教导为重复加法一样，幂运算可以被认为是重复乘法：
 
 .. math::
 
    a^n = \underbrace{a \cdot a \cdot \ldots \cdot a}_{n \text{ times}}
 
-As with multiplication, it's possible to compute modular exponentiation
-by performing regular exponentiation, and then taking the modulus at the
-end. However, this is very inefficient, particularly for large
-:math:`n`: the product quickly becomes far too large.
+与乘法一样，可以通过执行常规幂运算然后在最后取模来计算模幂运算。
+然而，这是非常低效的，特别是对于大的 :math:`n`：乘积会迅速变得太大。
 
-Fortunately, it is possible to compute modular exponentiation much more
-efficiently. This is done by splitting the problem up into smaller
-sub-problems. For example, instead of computing :math:`2^{20}` directly
-you could split it up:
+幸运的是，可以更高效地计算模幂运算。这是通过将问题分解成更小的子问题
+来实现的。例如，不是直接计算 :math:`2^{20}`，你可以把它分开：
 
 .. math::
 
    2^{20} = (2^{10})^2
 
-:math:`2^{10}` is something you can compute on your hands: start at 2,
-which is :math:`2^1`, and then keep multiplying by two. Every time you
-multiply by two, the exponent goes up by 1, so by the time you've
-counted all your fingers (assuming you have ten of them), you're done.
-The result is 1024. So:
+:math:`2^{10}` 是你可以用手算出来的：从 2 开始，即 :math:`2^1`，然后
+继续乘以 2。每次乘以 2，指数增加 1，所以当你数完所有手指（假设你有
+十个）时，你就完成了。结果是 1024。所以：
 
 .. math::
 
@@ -317,17 +264,14 @@ The result is 1024. So:
           &\equiv 1                     \pmod {15}
    \end{aligned}
 
-Exponentiation by squaring
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+平方求幂法
+~~~~~~~~~~
 
-A particularly efficient way to do it on computers is splitting the
-exponent up into a sum of powers of two. This is called exponentiation
-by squaring, or sometimes also binary exponentiation. Suppose we want to
-compute :math:`3^{209} \pmod {19}`. First, we split up 209 into a sum of
-powers of two. This process is essentially just writing 209 down in
-binary: ``0b11010001``. That's very practical if the computation is
-being performed by a computer, because that's typically how the computer
-had the number stored in the first place.
+在计算机上特别有效的方法是将指数拆分成 2 的幂的和。这称为平方求幂法，
+有时也称为二进制求幂法。假设我们想计算 :math:`3^{209} \pmod {19}`。
+首先，我们将 209 拆分成 2 的幂的和。这个过程本质上只是将 209 写成二进制：
+``0b11010001``。如果计算是由计算机执行的，这非常实用，因为计算机通常
+就是这样存储数字的。
 
 .. math::
 
@@ -338,8 +282,7 @@ had the number stored in the first place.
        &= 128           &+ 64            &                &+ 16            &                &                &                &+ 1
    \end{array}
 
-We use that expansion into a sum of powers of two to rewrite the
-equation:
+我们利用这个展开成 2 的幂的和来重写方程：
 
 .. math::
 
@@ -348,20 +291,18 @@ equation:
            &= 3^{128} \cdot 3^{64} \cdot 3^{16} \cdot 3^1
    \end{aligned}
 
-Now, we need to compute those individual powers of 3: 1, 16, 64 and 128.
-A nice property of this algorithm is that we don't actually have to
-compute the big powers separately from scratch. We can use previously
-computed smaller powers to compute the larger ones. For example, we need
-both :math:`3^{128} \pmod {19}` and :math:`3^{64} \pmod {19}`, but you
-can write the former in terms of the latter:
+现在，我们需要计算 3 的这些个别幂：1、16、64 和 128。
+这个算法的一个很好的特性是我们实际上不必单独从头计算大幂。
+我们可以使用先前计算的较小幂来计算较大的幂。例如，我们需要
+:math:`3^{128} \pmod {19}` 和 :math:`3^{64} \pmod {19}`，但你可以
+用后者表示前者：
 
 .. math::
 
    3^{128} \bmod {19} = (3^{64} \bmod {19})^2 \pmod {19}
 
-Let's compute all the powers of 3 we need. For sake of brevity, we won't
-write these out entirely, but remember that all tricks we've already
-seen to compute these still apply:
+让我们计算所有需要的 3 的幂。为简洁起见，我们不会完全写出它们，
+但请记住我们已经看到的所有计算这些的技巧仍然适用：
 
 .. math::
 
@@ -371,7 +312,7 @@ seen to compute these still apply:
    3^{128} &\equiv (3^{64})^2 \equiv 16^2 \equiv 9  \pmod {19}
    \end{aligned}
 
-Filling these back in to our old equation:
+将这些代回到我们的旧方程：
 
 .. math::
 
@@ -380,64 +321,48 @@ Filling these back in to our old equation:
            &\equiv 9       \cdot 16     \cdot 17     \cdot 3   \pmod {19}
    \end{aligned}
 
-This trick is particularly interesting when the exponent is a very large
-number. That is the case in many cryptographic applications. For
-example, in RSA decryption, the exponent is the private key :math:`d`,
-which is usually more than a thousand bits long. Keep in mind that this
-method will still leak timing information, so it's only suitable for
-offline computation. Modular exponentiation can also be computed using a
-technique called a Montgomery ladder, which we'll see in the next
-section.
+当指数非常大时，这个技巧特别有趣。这在许多加密应用中是如此。例如，
+在 RSA 解密中，指数是私钥 :math:`d`，通常超过一千位长。请记住，
+这种方法仍然会泄露时序信息，所以它只适用于离线计算。模幂运算也可以
+使用称为 Montgomery ladder 的技术来计算，我们将在下一节看到。
 
-Many programming languages provide access to specific modular
-exponentiation functions. For example, in Python, ``pow(e, x, m)``
-performs efficient modular exponentiation. However, the expression
-``(e ** x) % m`` will still use the inefficient method.
+许多编程语言提供对特定模幂函数的访问。例如，在 Python 中，
+``pow(e, x, m)`` 执行有效的模幂运算。然而，表达式 ``(e ** x) % m``
+仍将使用低效的方法。
 
-Montgomery ladder exponentiation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Montgomery ladder 求幂
+~~~~~~~~~~~~~~~~~~~~~~
 
-As we mentioned before, the exponentiation by squaring algorithm is
-simple and fast, but the time it takes to complete depends on the value
-of the exponent. That's bad, because the exponent is usually a secret
-value, such as a Diffie-Hellman secret or the private exponent :math:`d`
-in RSA.
+如前所述，平方求幂算法简单快速，但完成所需时间取决于指数的值。
+这很糟糕，因为指数通常是秘密值，如 Diffie-Hellman 秘密或 RSA 中的
+私钥指数 :math:`d`。
 
-The Montgomery ladder is an algorithm that resolves this by guaranteeing
-the same number of operations irrespective of the particular value of
-the exponent. It was originally applied for efficient scalar
-multiplications over elliptic curves, but the mathematics works for many
-other systems: specifically, for any abelian group.
-:cite:`montgomerypowerladder`
+Montgomery ladder 是一种通过保证恒定的操作数量（无论指数的特定值如何）
+来解决此问题的算法。它最初应用于椭圆曲线上的高效标量乘法，但数学
+适用于许多其他系统：具体来说，适用于任何阿贝尔群。
 
-Deriving the ladder
-^^^^^^^^^^^^^^^^^^^
+推导 ladder
+^^^^^^^^^^^^
 
 .. canned_admonition::
    :from_template: advanced
 
-   This section involves a good deal of arithmetic tricks. You might want to get
-   out some paper and pencil to follow along.
+   本节涉及大量算术技巧。您可能想拿出纸和笔跟着做。
 
-
-Like with exponentiation by squaring, we start by looking at the binary
-expansion of the exponent :math:`k`. Generally, any :math:`k` can be
-written as a sum (:math:`\sum`) of some powers of two (:math:`2^i`). If
-:math:`2^j` appears in the binary expansion, we'll say that
-:math:`k_j = 1`; if it doesn't, we'll say that :math:`k_j = 0`. That
-gives us:
+与平方求幂法一样，我们首先查看指数 :math:`k` 的二进制展开。
+通常，任何 :math:`k` 都可以写成一些 2 的幂（:math:`2^i`）的和。
+如果二进制展开中包含 :math:`2^j`，我们会说 :math:`k_j = 1；如果
+不包含，我们会说 :math:`k_j = 0`。这给了我们：
 
 .. math::
 
    k = \sum_{i=0}^{t-1} 2^i k_i
 
-That definition might look scary, but all you're really doing here is
-defining :math:`k_i` as bit of :math:`k` at position :math:`i`. The sum
-goes over all the bits: if :math:`k` is :math:`t` bits long, and we
-start indexing at 0, the index of the highest bit is :math:`t - 1`, and
-the index of the lowest bit is 0. For example, the binary expansion of
-the number 6 is ``0b110``. That number is three bits long, so
-:math:`t = 3`. So:
+这个定义可能看起来很吓人，但您在这里真正做的只是将 :math:`k_i` 定义为
+:math:`k` 在位置 :math:`i` 的位。和遍​​历所有位：如果 :math:`k` 是
+:math:`t` 位长，我们从 0 开始索引，最高位的索引是 :math:`t - 1`，
+最低位的索引是 0。例如，数字 6 的二进制展开是 ``0b110``。那个数字
+是 3 位长，所以 :math:`t = 3`。所以：
 
 .. math::
 
@@ -448,17 +373,16 @@ the number 6 is ``0b110``. That number is three bits long, so
      &= 1 \cdot 2^2 + 1 \cdot 2^1 + 0 \cdot 2^0
    \end{aligned}
 
-So, :math:`(k_2, k_1, k_0) = (1, 1, 0)`.
+所以，:math:`(k_2, k_1, k_0) = (1, 1, 0)`。
 
-The next few steps don't make a lot of sense until you see them come
-together at the end, so bear with me and check that the math works out.
-We'll define a related sum, :math:`L_j`:
+接下来的几个步骤在最后看到它们组合在一起之前没有多大意义，请耐心
+并检查数学是否成立。我们将定义一个相关的和，:math:`L_j`：
 
 .. math::
 
    L_j = \sum_{i = j}^{t - 1} 2^{i - j} k_i
 
-For example, :math:`L_1` (still with :math:`k = 6`) becomes:
+例如，:math:`L_1`（仍然是 :math:`k = 6`）变成：
 
 .. math::
 
@@ -469,23 +393,20 @@ For example, :math:`L_1` (still with :math:`k = 6`) becomes:
        & = 3
    \end{aligned}
 
-Essentially, :math:`L_j` is just :math:`k` shifted to the right by
-:math:`j` bits. Shifting to the right by one bit is the same thing as
-flooring division by two, just like right-shifting by a decimal digit is
-the same thing as flooring division by 10. For example: 73, shifted one
-decimal digit to the right is 7; 0b101 (5) shifted one binary digit
-(bit) to the right is 0b10 (2). Analogously, shifting left is the
-inverse operation, and is equivalent to *multiplying* by two.
+本质上，:math:`L_j` 只是 :math:`k` 向右移动 :math:`j` 位。向右移动
+一位相当于向下取整除以 2，就像十进制数字向右移动一位相当于向下取整
+除以 10 一样。例如：73，向右移动一位小数是 7；0b101 (5) 向右移动一位
+二进制数字（位）是 0b10 (2)。类似地，向左移动是逆操作，相当于*乘以*
+2。
 
-Next, we'll perform a little arithmetical hocus pocus. First of all:
+接下来，我们将进行一点算术魔法。首先：
 
 .. math::
 
    L_j = 2 \cdot L_{j + 1} + k_j
 
-While you can verify this arithmetically, the easiest way to check this
-is to think of it in terms of right and left shifts. If you shift
-:math:`k` to the right by :math:`j` positions, that
+虽然您可以算术上验证这一点，但检查它的最简单方法是考虑左右移位。
+如果将 :math:`k` 向右移动 :math:`j` 位，那么
 
 .. math::
 
@@ -496,19 +417,17 @@ is to think of it in terms of right and left shifts. If you shift
    2 \cdot L_{j + 1} = 2 \cdot L_3 & = \mathtt{0b1100100}
    \end{aligned}
 
-You can visually verify that :math:`L_2` is indeed :math:`L_3`, shifted
-one to the left (which is the same thing as multiplying by two), plus
-that one bit :math:`k_j` that “fell off” when shifting right.
-:math:`k_j` is the last bit of :math:`L_j`; in this case it happens to
-be 1, but it could equally well have been 0.
+您可以直观地验证 :math:`L_2` 确实是 :math:`L_3`，向左移动一位
+（相当于乘以 2），加上"掉落"的那个位 :math:`k_j`。:math:`k_j` 是
+:math:`L_j` 的最后一位；在这种情况下它恰好是 1，但也同样可能是 0。
 
-We define another very simple function :math:`H_j`:
+我们定义另一个非常简单的函数 :math:`H_j`：
 
 .. math::
 
    H_j = L_j + 1 \iff L_j = H_j - 1
 
-Starting from our previous result:
+从我们前一个结果开始：
 
 .. math::
 
@@ -520,8 +439,7 @@ Starting from our previous result:
    L_j & = 2 \cdot H_{j + 1} + k_j - 2
    \end{aligned}
 
-We can combine these to produce an inductive way to compute :math:`L_j`
-and :math:`H_j`:
+我们可以将这些结合起来产生计算 :math:`L_j` 和 :math:`H_j` 的归纳方法：
 
 .. math::
 
@@ -534,257 +452,78 @@ and :math:`H_j`:
 
    H_j = \begin{cases}
    L_{j + 1} + H_{j + 1} & \mbox{if } k_j = 0, \\
-   2 H_{j + 1} & \mbox{if } k_j = 1.
+   2 H_{j + 1}           & \mbox{if } k_j = 1.
    \end{cases}
 
-Remember that we're doing this to compute :math:`g^k`. Let's write the
-exponentiation out:
+TODO: 将阿贝尔群的东西移到别处，因为它也适用于我们的域
 
-.. math::
+将所有这些东西放在一起形成所谓的阿贝尔群。这是一个听起来可怕的数学
+术语，但几乎每个人都已理解其基础知识。具体来说，如果您知道如何将
+整数（:math:`\ldots -2, -1, 0, 1, 2, \ldots`）相加，那么您已经知道
+了阿贝尔群。阿贝尔群满足五个属性：
 
-   g^{L_j} = \begin{cases}
-   g^{2 L_{j + 1}} = \left(g^{L_{j + 1}}\right)^2 & \mbox{if } k_j = 0, \\
-   g^{L_{j + 1} + H_{j + 1}} = g^{L_{j + 1}} \cdot g^{H_{j+1}} & \mbox{if } k_j = 1.
-   \end{cases}
+#. 如果 :math:`a` 和 :math:`b` 是阿贝尔群的成员，且 :math:`\star` 是
+   运算符，那么 :math:`a \star b` 也是该阿贝尔群的成员。实际上，
+   任何两个整数相加总是得到另一个整数。这个属性称为*封闭性*，或者
+   我们说该群在加法下是*封闭的*（或我们定义的任何操作名）。
+#. 如果 :math:`a`、:math:`b` 和 :math:`c` 是阿贝尔群的成员，则操作
+   顺序无关紧要；换句话说：我们可以移动括号。用方程表示：
+   :math:`(a \star b) \star c = a \star (b \star c)`。确实，您相加
+   整数的顺序无关紧要；它们总是总和相同。这个属性称为*结合性*，该群
+   被称为*结合的*。
+#. 恰好存在一个单位元 :math:`i`，使得
+   :math:`a \star i = i \star a = a`。对于整数加法，那是零：
+   :math:`a + 0 = 0 + a = a` 对所有 a。
+#. 对于每个元素 :math:`a`，恰好存在一个逆元 :math:`b`，使得
+   :math:`a \star b = b \star a = i`，其中 :math:`i` 是单位元。
+   确实，对于整数加法，:math:`a + (-a) = (-a) + a = 0` 对所有 a。
+#. 对于操作结果，元素顺序无关紧要。对于所有元素 :math:`a, b`，
+   :math:`a \star b = b \star a`。这被称为*交换性*，该群被称为
+   *交换的*。
 
-.. math::
+前四个属性称为群属性，使某物成为群；最后一个属性是使群成为阿贝尔群的原因。
 
-   g^{H_j} = \begin{cases}
-   g^{L_{j + 1} + H_{j + 1}} = g^{L_{j + 1}} \cdot g^{H_{j+1}} & \mbox{if } k_j = 0, \\
-   g^{2 H_{j + 1}} = \left(g^{H_{j + 1}}\right)^2 & \mbox{if } k_j = 1.
-   \end{cases}
+我们可以看到我们的椭圆曲线，加上无穷远点和加法运算符，形成了一个
+阿贝尔群：
 
-Remember that :math:`L_j` is :math:`k` right-shifted by :math:`j` bits,
-so :math:`L_0` is :math:`k` shifted right by 0 bits, or just :math:`k`
-itself. That means :math:`g^k`, the number we're trying to compute, is
-the same thing as :math:`g^{L_0}`. By starting at :math:`g^{L_{t - 1}}`
-(:math:`g` raised to the power of the leftmost bit of :math:`k`) and
-iteratively making our way down to :math:`g^{L_0} = g^k`, we have an
-elegant inductive method for computing :math:`g^k` based on two simple
-recursive rules.
+#. 如果 :math:`P` 和 :math:`Q` 是椭圆曲线上的两个点，那么 :math:`P + Q`
+   也总是曲线上的一个点。
+#. 如果 :math:`P`、:math:`Q` 和 :math:`R` 都是曲线上的点，那么
+   :math:`P + (Q + R) = (P + Q) + R`，所以椭圆曲线是结合的。
+#. 存在单位元，我们的无穷远点 :math:`O`。对于曲线上的所有点 :math:`P`，
+   :math:`P + O = O + P = P`。
+#. 每个元素都有一个逆元。这最容易可视化解释 TODO: 可视化解释
+#. 操作数的顺序无关紧要，对于曲线上的所有 :math:`P, Q`，
+   :math:`P + Q = Q + P`。
 
-The important part about this algorithm is the constant number of
-operations. If :math:`k_j = 0`, computing :math:`g^{L_j}` involves one
-squaring and :math:`g^{H_j}` involves one multiplication; if
-:math:`k_j = 1`, it's the other way around. No matter what any of the
-bits of :math:`k` are, you need one squaring operation and one
-multiplication per bit.
+椭圆曲线离散对数问题
+~~~~~~~~~~~~~~~~~~~~~~
 
-Implementing the Montgomery ladder in Python
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TODO: 完全解释
 
-The Python implementation of this algorithm, applied to modular
-exponentiation, is surprisingly terse:
+与常规离散对数问题一样，椭圆曲线离散对数问题实际上没有正式证明该
+操作是"困难"执行的：我们只是知道没有公开可用的算法可以有效地做到
+这一点。然而，有可能（虽然不太可能）某人有神奇的算法使问题变得容易，
+这将完全破坏椭圆曲线密码学。更有可能的是，我们将看到一系列持续的
+改进，加上不断增长的计算能力，最终侵蚀算法的安全性。
 
-.. code:: python
+侧信道攻击
+-----------
 
-   def montgomery(x, exponent, modulus):
-       x1, x2 = x, x ** 2
-       high_bit, *remaining_bits = bits(exponent)
-       for bit in remaining_bits:
-           if bit == 0:
-               x2 = x1 * x2
-               x1 = x1 ** 2
-           else:
-               x1 = x1 * x2
-               x2 = x2 ** 2
-           x1, x2 = x1 % modulus, x2 % modulus
-       return x1
+时序攻击
+~~~~~~~~
 
-This code block doesn't show the definition of ``bits``: it produces the
-binary expansion of its argument. Python doesn't provide that by
-default; ``bin`` is close, but that produces a string: ``bin(100)``
-evaluates to ``0b1100100``. The ``a, *b = bits(...)`` construct assigns
-the first item in ``bits(...)`` to ``a``, and all remaining bits to
-``b``, effectively just skipping the first bit.
-
-The important thing to note here is that no matter what the particular
-value of the exponent is, there is one squaring, one multiplication, and
-one modulo operation per bit. Keep in mind that this doesn't necessarily
-make the entire algorithm take constant time, because the individual
-squaring and multiplication operations are not necessarily constant
-time.
-
-Discrete logarithm
-~~~~~~~~~~~~~~~~~~
-
-Just like subtraction is the inverse of addition, and division is the
-inverse of multiplication, logarithms are the inverse of exponentiation.
-In regular arithmetic, :math:`b^x = y`, if :math:`x = \log_b
-y`. This is pronounced “:math:`b` raised to the power :math:`x` is
-:math:`y`”, and “the logarithm of :math:`y` with respect to :math:`b` is
-:math:`x`”. The equivalent of this in modular arithmetic is called a
-“discrete logarithm”.
-
-As with division, if you start from the definition as the inverse of a
-different operator, it's easy to come up with examples. For example,
-since :math:`3^6 \equiv 9 \pmod {15}`, we can define
-:math:`6 \equiv \log_3 9 \pmod {15}`. Unlike modular inverses, computing
-discrete logarithms is generally hard. There is no formal proof that computing
-discrete logarithms is *intrinsically* complex; we just haven't found any
-efficient algorithms to do it. Because this field has gotten extensive
-research and we still don't have very fast general algorithms, we
-consider it safe to base the security of protocols on the assumption
-that computing discrete logs is hard.
-
-There is one theoretical algorithm for computing discrete logarithms
-efficiently. However, it requires a quantum computer, which is a
-fundamentally different kind of computer from the classical computers we
-use today. While we can build such computers, we can only build very
-small ones. The limited size of our quantum computers strongly limits
-which problems we can solve. So far, they're much more in the realm of
-the kind of arithmetic a child can do in their head, than ousting the
-top of the line classical computers from the performance throne.
-
-The complexity of computing discrete logarithms, together with the
-relative simplicity of computing its inverse, modular exponentiation, is
-the basis for many public key cryptosystems. Common examples include the
-RSA encryption primitive, and the Diffie-Hellman key exchange protocol.
-
-While cryptosystems based on the discrete logarithm problem are
-currently considered secure with appropriate parameter choices, there
-are certainly ways that could change in the future. For example:
-
--  Theoretical breakthroughs in number theory could make discrete
-   logarithms significantly easier to compute than we currently think.
--  Technological breakthroughs in quantum computing could lead to large
-   enough quantum computers.
--  Technological breakthroughs in classical computing as well as the
-   continuous gradual increases in performance and decreases in cost
-   could increase the size of some problems that can be tackled using
-   classical computers.
-
-Discrete logarithm computation is tightly linked to the problem of
-number factorization. They are still areas of active mathematical
-research; the links between the two problems are still not thoroughly
-understood. That said, there are many similarities between the two:
-
--  Both are believed to be hard to compute on classical computers, but
-   neither has a proof of that fact.
--  They can both be efficiently computed on quantum computers using
-   Shor's algorithm.
--  Mathematical advances in one are typically quickly turned into
-   mathematical advances in the other.
-
-.. _multiplicative-order:
-
-Multiplicative order
-~~~~~~~~~~~~~~~~~~~~
-
-Given integer :math:`a` and positive integer :math:`b` with
-gcd\ :math:`(a, b) = 1`, the *multiplicative order* of
-:math:`a \pmod{b}` is the smallest positive integer :math:`k` such that
-:math:`a^k = 1 \pmod{b}`.
-
-.. _elliptic-curves:
-
-Elliptic curves
----------------
-
-Like modular arithmetic, elliptic curve arithmetic is used for many
-public key cryptosystems. Many cryptosystems that traditionally work
-with modular arithmetic, such as Diffie-Hellman and DSA, have an
-elliptic curve counterpart.
-
-Elliptic curves are curves with the following form:
-
-.. math::
-
-   y^2 = x^3 + ax + b
-
-This is called the “short Weierstrass form”, and is the most common form
-when talking about elliptic curves in general. There are several other
-forms which mostly have applications in cryptography, notably the
-Edwards form:
-
-.. math::
-
-   x^2 + y^2 = 1 + dx^2y^2
-
-We can define addition of points on the curve.
-
-TODO: Move the Abelian group thing somewhere else, since it applies to
-our fields thing as well
-
-All of this put together form something called an Abelian group. That's
-a scary-sounding mathematical term that almost everyone already
-understands the basics of. Specifically, if you know how to add integers
-(:math:`\ldots -2, -1, 0, 1, 2, \ldots`) together, you already know an
-Abelian group. An Abelian group satisfies five properties:
-
-#. If :math:`a` and :math:`b` are members of the Abelian group and
-   :math:`\star` is the operator, then :math:`a \star b` is also a
-   member of that Abelian group. Indeed, any two integers added together
-   always get you another integer. This property is called *closure*,
-   or, we say that the group is *closed under addition* (or whatever the
-   name is of the operation we've defined).
-#. If :math:`a`, :math:`b` and :math:`c` are members of the Abelian
-   group, the order of operations doesn't matter; to put it differently:
-   we can move the brackets around. In equation form:
-   :math:`(a \star b) \star c = a \star (b \star c)`. Indeed, the order in which
-   you add integers together doesn't matter; they will always sum up to the same
-   value. This property is called *associativity*, and the group is said to be
-   *associative*.
-#. There's exactly one identity element :math:`i`, for which
-   :math:`a \star i = i \star a = a`. For integer addition, that's zero:
-   :math:`a + 0 = 0 + a = a` for all a.
-#. For each element :math:`a`, there's exactly one inverse element
-   :math:`b`, for which :math:`a \star b = b \star a = i`, where
-   :math:`i` is the identity element. Indeed, for integer addition,
-   :math:`a + (-a) = (-a) + a = 0` for all a.
-#. The order of elements doesn't matter for the result of the operation.
-   For all elements :math:`a, b`, :math:`a \star b = b \star a`. This is
-   known as *commutativity*, and the group is said to be *commutative*.
-
-The first four properties are called group properties and make something
-a group; the last property is what makes a group Abelian.
-
-We can see that our elliptic curve, with the point at infinity and the
-addition operator, forms an Abelian group:
-
-#. If :math:`P` and :math:`Q` are two points on the elliptic curve, then
-   :math:`P + Q` is also always a point on the curve.
-#. If :math:`P`, :math:`Q`, and :math:`R` are all points on the curve,
-   then :math:`P + (Q + R) = (P + Q) + R`, so the elliptic curve is associative.
-#. There's an identity element, our point at infinity :math:`O`. For all
-   points on the curve :math:`P`, :math:`P + O = O + P = P`.
-#. Each element has an inverse element. This is easiest explained
-   visually TODO: Explain visually
-#. The order of operands doesn't matter, :math:`P + Q = Q + P` for all
-   :math:`P, Q` on the curve.
-
-The elliptic curve discrete log problem
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TODO: explain fully
-
-As with the regular discrete log problem, the elliptic curve discrete
-log problem doesn't actually have a formal proof that the operation is
-“hard” to perform: we just know that there is no publicly available
-algorithm to do it efficiently. It's possible, however unlikely, that
-someone has a magical algorithm that makes the problem easy, and that
-would break elliptic curve cryptography completely. It's far more likely
-that we will see a stream of continuous improvements, which coupled with
-increased computing power eventually eat away at the security of the
-algorithm.
-
-Side-channel attacks
---------------------
-
-Timing attacks
-~~~~~~~~~~~~~~
-
-AES cache timing
+AES 缓存时序
 ^^^^^^^^^^^^^^^^
 
 http://tau.ac.il/~tromer/papers/cache.pdf
 
-Elliptic curve timing attacks
+椭圆曲线时序攻击
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-TODO: Explain why the edwards form is great?
+TODO: 解释为什么 Edwards 形式很棒？
 
-Power measurement attacks
-~~~~~~~~~~~~~~~~~~~~~~~~~
+功耗测量攻击
+~~~~~~~~~~~~
 
-TODO: Say something here.
+TODO: 说点什么。

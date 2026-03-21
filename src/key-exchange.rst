@@ -1,23 +1,20 @@
 .. _key-exchange:
 
-Key exchange
-------------
+密钥交换
+--------
 
 .. _description-3:
 
-Description
-~~~~~~~~~~~
+描述
+~~~~
 
-:term:`Key exchange <key exchange>` protocols attempt to solve a problem that, at first glance,
-seems impossible. Alice and Bob, who've never met before, have to agree
-on a secret value. The channel they use to communicate is insecure:
-we're assuming that everything they send across the channel is being
-eavesdropped on.
+:term:`密钥交换` 协议试图解决一个乍看似乎不可能的问题。Alice 和 Bob，
+他们从未见过面，必须就一个秘密值达成一致。他们用来通信的渠道是不安全
+的：我们假设他们通过渠道发送的所有内容都被窃听了。
 
-We'll demonstrate such a protocol here. Alice and Bob will end up having
-a shared secret, only communicating over the insecure channel. Despite
-Eve having literally all of the information Alice and Bob send to each
-other, she can't use any of that information to figure out their shared
+我们在这里将演示这样一个协议。Alice 和 Bob 最终将拥有一个共享秘密，
+仅通过不安全渠道通信。尽管 Eve 拥有 Alice 和 Bob 相互发送的所有信息，
+她也无法使用任何这些信息来找出他们的共享秘密。
 secret.
 
 That protocol is called Diffie-Hellman, named after Whitfield Diffie and
@@ -90,6 +87,10 @@ sees both mixed colors, but she can't figure out what either of Alice
 and Bob's *secret* colors are. Even though she knows the base, she can't
 “un-mix” the colors sent over the network. [#]_
 
+.. [#]
+   虽然使用黑白近似颜色混合看起来很容易，但请记住这只是插图的
+   失败：我们的假设是这是困难的。
+
 .. figure:: ./Illustrations/DiffieHellman/mixed-secret.svg
    :align: center
 
@@ -122,37 +123,29 @@ colors mixed into them. However, that would have the base color in it
 twice, resulting in a different color than the shared secret color that
 Alice and Bob computed, which only has the base color in it once.
 
-Diffie-Hellman with discrete logarithms
+基于离散对数的 Diffie-Hellman
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This section describes a practical implementation of the Diffie-Hellman
-algorithm, based on the discrete logarithm problem. It is intended to
-provide some mathematical background, and requires modular arithmetic to
-understand. If you are unfamiliar with modular arithmetic, you can
-either skip this chapter, or first read the :ref:`mathematical background appendix
-<modular-arithmetic>`.
+本节描述基于离散对数问题的 Diffie-Hellman 算法的实际实现。它旨在
+提供一些数学背景，需要模运算来理解。如果您不熟悉模运算，您可以
+跳过本章，或先阅读 :ref:`数学背景附录<modular-arithmetic>`。
 
-Discrete log Diffie-Hellman is based on the idea that computing
-:math:`y` in the following equation is easy (at least for a computer):
+离散对数 Diffie-Hellman 基于计算以下等式中的 :math:`y` 很容易
+（至少对计算机而言）的想法：
 
 .. math::
 
    y \equiv g^x \pmod{p}
 
-However, computing :math:`x` given :math:`y`, :math:`g` and :math:`p` is
-believed to be very hard. This is called the discrete logarithm problem,
-because a similar operation without the modular arithmetic is called a
-logarithm.
+然而，给定 :math:`y`、:math:`g` 和 :math:`p` 计算 :math:`x` 被认为
+是非常困难的。这称为离散对数问题，因为没有模运算的类似操作称为对数。
 
-This is just a concrete implementation of the abstract Diffie-Hellman
-process we discussed earlier. The common base color is a large prime
-:math:`p` and the base :math:`g`. The “color mixing” operation is the
-equation given above, where :math:`x` is the input value and :math:`y`
-is the resulting mixed value.
+这只是我们前面讨论的抽象 Diffie-Hellman 过程的具体实现。共同基础
+颜色是一个大素数 :math:`p` 和基数 :math:`g`。"颜色混合"操作是上面
+给出的等式，其中 :math:`x` 是输入值，:math:`y` 是结果混合值。
 
-When Alice or Bob select their random numbers :math:`r_A` and
-:math:`r_B`, they mix them with the base to produce the mixed numbers
-:math:`m_A` and :math:`m_B`:
+当 Alice 或 Bob 选择他们的随机数 :math:`r_A` 和 :math:`r_B` 时，
+他们将其与基础颜色混合以产生混合数字 :math:`m_A` 和 :math:`m_B`：
 
 .. math::
 
@@ -162,20 +155,20 @@ When Alice or Bob select their random numbers :math:`r_A` and
 
    m_B \equiv g^{r_B} \pmod{p}
 
-These numbers are sent across the network where Eve can see them. The
-premise of the discrete logarithm problem is that it is okay to do so,
-because figuring out :math:`r` in :math:`m \equiv g^r \pmod{p}` is
-supposedly very hard.
+这些数字通过网络发送，Eve 可以看到它们。离散对数问题的前提是这样
+做是安全的，因为在 :math:`m \equiv g^r \pmod{p}` 中找出 :math:`r`
+据说是非常困难的。
 
-Once Alice and Bob have each other's mixed numbers, they add their own
-secret number to it. For example, Bob would compute:
+一旦 Alice 和 Bob 拥有彼此的混合数字，他们就会添加自己的秘密数字。
+例如，Bob 将计算：
 
 .. math::
 
    s \equiv (g^{r_A})^{r_B} \pmod{p}
 
-While Alice's computation looks different, they get the same result,
-because :math:`(g^{r_A})^{r_B} \equiv (g^{r_B})^{r_A} \pmod{p}`. This is
+虽然 Alice 的计算看起来不同，但他们得到相同的结果，因为
+:math:`(g^{r_A})^{r_B} \equiv (g^{r_B})^{r_A} \pmod{p}`。这是
+共享秘密。
 the shared secret.
 
 Because Eve doesn't have :math:`r_A` or :math:`r_B`, she can not perform
@@ -185,46 +178,39 @@ mixed numbers :math:`m_A \equiv g^{r_A} \pmod{p}` and
 needs either :math:`r_A` or :math:`r_B` (or both) to make the
 computation Alice and Bob do.
 
-TODO: Say something about active MITM attacks where the attacker picks
-smooth values to produce weak secrets?
+TODO: 谈谈主动 MITM 攻击，其中攻击者选择平滑值以产生弱秘密？
 
-Diffie-Hellman with elliptic curves
+椭圆曲线 Diffie-Hellman
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This section describes a practical implementation of the Diffie-Hellman
-algorithm, based on the elliptic curve discrete logarithm problem. It is
-intended to provide some mathematical background, and requires a (very
-basic) understanding of the mathematics behind elliptic curve
-cryptography. If you are unfamiliar with elliptic curves, you can either
-skip this chapter, or first read the :ref:`mathematical background appendix
-<elliptic-curves>`.
+本节描述基于椭圆曲线离散对数问题的 Diffie-Hellman 算法的实际实现。
+它旨在提供一些数学背景，需要（非常基本的）理解椭圆曲线密码学背后的
+数学。如果您不熟悉椭圆曲线，您可以跳过本章，或先阅读:ref:`数学背景
+附录<elliptic-curves>`。
 
-One of the benefits of the elliptic curve Diffie-Hellman variant is that
-the required key size is much, much smaller than the variant based on
-the discrete log problem. This is because the fastest algorithms for
-breaking the elliptic curve discrete log problem have a larger asymptotic
-complexity than the non-elliptic variants. For example, the number field sieve
-for discrete logarithms, a state of the art algorithm for attacking
-discrete logarithm-based Diffie-Hellman, has time complexity:
+椭圆曲线 Diffie-Hellman 变体的好处之一是所需密钥大小比基于离散对数
+问题的变体小得多。这是因为攻击椭圆曲线离散对数问题的最快算法比
+非椭圆变体具有更大的渐近复杂性。例如，用于离散对数的数域筛，
+一种攻击基于离散对数的 Diffie-Hellman 的最先进算法，具有时间复杂度：
 
 .. math::
 
    L\left[1/3,\sqrt[3]{64/9}\right]
 
-Which is more than polynomial (but less than exponential) in the number
-of digits. On the other hand, the fastest algorithms that could be used
-to break the elliptic curve discrete log problem all have complexity:
+这比数字数多于多项式（但少于指数）。另一方面，可用于破解椭圆曲线
+离散对数问题的最快算法都具有复杂性：
 
 .. math::
 
    L\left[1, 1/2\right] = O(\sqrt{n})
 
-Relatively speaking, that means that it's much harder to solve the
-elliptic curve problem than it is to solve the regular discrete log
-problem, using state of the art algorithms for both. The flip side of
-that is that for equivalent security levels, the elliptic curve
-algorithm needs much smaller key
-sizes :cite:`rsa:keysizes` :cite:`nist:keymanagement` [#]_:
+相对而言，这意味着使用两种的最先进算法，解决椭圆曲线问题比解决
+常规离散对数问题困难得多。另一方面是，对于等效的安全级别，椭圆曲线
+算法需要小得多的密钥大小 :
+
+.. [#]
+   这些数字实际上是针对 RSA 问题与等效椭圆曲线问题的，但它们
+   的安全级别足够接近以给您一个概念。
 
 .. [#]
    These figures are actually for the RSA problem versus the equivalent
@@ -243,45 +229,37 @@ Security level in bits Discrete log key bits Elliptic curve key bits
 
 .. _remaining-problems-3:
 
-Remaining problems
-~~~~~~~~~~~~~~~~~~
+剩余问题
+~~~~~~~~
 
-Using Diffie-Hellman, we can agree on shared secrets across an insecure
-Internet, safe from eavesdroppers. However, while an attacker may not be
-able to simply get the secret from eavesdropping, an active attacker can
-still break the system. If such an attacker, usually called Mallory, is
-in between Alice and Bob, she can still perform the Diffie-Hellman
-protocol twice: once with Alice, where Mallory pretends to be Bob, and
-once with Bob, where Mallory pretends to be Alice.
+使用 Diffie-Hellman，我们可以通过不安全的互联网就共享秘密达成一致，
+免受窃听者攻击。然而，虽然攻击者可能无法仅通过窃听获取秘密，但主动
+攻击者仍然可以破坏系统。如果这样的攻击者，通常称为 Mallory，位于
+Alice 和 Bob 之间，她仍然可以执行两次 Diffie-Hellman 协议：一次
+与 Alice，其中 Mallory 假装是 Bob，一次与 Bob，其中 Mallory 假装是
+Alice。
 
 .. figure:: ./Illustrations/DiffieHellman/MITM.svg
    :align: center
 
-There are two shared secrets here: one between Alice and Mallory, and
-one between Mallory and Bob. The attacker (Mallory) can then simply take
-all the messages they get from one person and send them to the other,
-they can look at the plaintext messages, remove messages, and they can
-also modify them in any way they choose.
+这里有两个共享秘密：一个在 Alice 和 Mallory 之间，另一个在 Mallory
+和 Bob 之间。然后攻击者（Mallory）可以简单地把她从一个人那里收到的
+所有消息发给另一个人，她可以查看明文消息，删除消息，也可以以任何她
+选择的方式修改它们。
 
-To make matters worse, even if one of the two participants was somehow
-aware that this was going on, they would have no way to get the other
-party to believe them. After all: Mallory performed the successful
-Diffie-Hellman exchange with the unwitting victim, she has all the
-correct shared secrets. Bob has no shared secrets with Alice, just with
-Mallory; there's no way for him to prove that he's the legitimate
-participant. As far as Alice can tell, Bob just chose a few random
-numbers. There's no way to link any key that Bob has with any key that
-Alice has.
+更糟糕的是，即使两个参与者之一以某种方式意识到正在发生什么，他们也
+没有办法让另一方相信他们。毕竟：Mallory 与无知的受害者执行了成功的
+Diffie-Hellman 交换，她有所有正确的共享秘密。Bob 与 Alice 没有共享
+秘密，只有与 Mallory；他无法证明他是合法参与者。对 Alice 来说，
+Bob 只是选择了一些随机数字。没有任何方法可以将 Bob 持有的任何密钥
+与 Alice 持有的任何密钥联系起来。
 
-Attacks like these are called MITM attacks, because the attacker
-(Mallory) is in between the two peers (Alice and Bob). Given that the
-network infrastructure that we typically use to send messages is run by
-many different operators, this kind of attack scenario is very
-realistic, and a secure cryptosystem will have to address them somehow.
+这样的攻击称为 MITM 攻击，因为攻击者（Mallory）位于两个对等方
+（Alice 和 Bob）之间。鉴于我们通常用于发送消息的网络基础设施由许多
+不同的运营商运行，这种攻击场景非常现实，安全的密码系统必须 somehow
+解决它们。
 
-While the Diffie-Hellman protocol successfully produced a shared secret
-between two peers, there are clearly some pieces of the puzzle still
-missing to build secure cryptosystems. We need tools that help us
-authenticate Alice to Bob and vice versa, and we need tools that help
-guarantee message integrity, allowing the receiver to verify that the
-received messages are in fact the messages the sender intended to send.
+虽然 Diffie-Hellman 协议成功在两个对等方之间产生了共享秘密，但显然
+仍然有一些拼图缺失才能构建安全的密码系统。我们需要工具来帮助我们对
+Bob 验证 Alice 反之亦然，我们需要工具来帮助保证消息完整性，允许
+接收者验证收到的消息实际上是发送者打算发送的消息。

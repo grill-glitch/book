@@ -1,64 +1,47 @@
 .. _key derivation function:
 
-Key derivation functions
-------------------------
+密钥派生函数
+--------------
 
 .. _description-8:
 
-Description
-~~~~~~~~~~~
+描述
+~~~~
 
-A key derivation function is a function that derives one or more secret
-values (the *keys*) from one secret value.
+密钥派生函数是一个从一个秘密值派生一个或多个秘密值（*密钥*）的函数。
 
-Many key derivation functions can also take a (usually optional) :term:`salt`
-parameter. This parameter causes the key derivation function to not
-always return the same output keys for the same input secret. As with
-other cryptosystems, :term:`salt`\s are fundamentally different from the secret
-input: :term:`salt`\s generally do not have to be secret, and can be re-used.
+许多密钥派生函数还可以接受一个（通常可选的）:term:`盐值`参数。该参数
+使密钥派生函数对于相同的输入秘密不总是返回相同的输出密钥。与其他
+密码系统一样，:term:`盐值`从根本上不同于秘密输入：:term:`盐值`通常不必是
+秘密的，可以重复使用。
 
-Key derivation functions can be useful, for example, when a
-cryptographic protocol starts with a single secret value, such as a
-shared password or a secret derived using Diffie-Hellman key exchange,
-but requires multiple secret values to operate, such as encryption and
-MAC keys. Another use case of key derivation functions is in
-cryptographically secure random number generators, which we'll see in
-more detail in a following chapter, where they are used to extract
-randomness with high entropy density from many sources that each have
-low entropy density.
+密钥派生函数可能很有用，例如，当密码协议以一个单一秘密值开始时，
+如共享密码或使用 Diffie-Hellman 密钥交换派生的秘密，但需要多个
+秘密值才能操作，如加密和 MAC 密钥。密钥派生函数的另一个用例是
+在密码学安全的随机数生成器中，我们将在下一章更详细地看到，其中
+它们用于从每个熵密度低的许多源中提取高熵密度的随机性。
 
-There are two main categories of key derivation functions, depending on
-the entropy content of the secret value, which determines how many
-different possible values the secret value can take.
+根据秘密值的熵含量，有两种主要类别的密钥派生函数，这决定了秘密值
+可以取多少不同的可能值。
 
-If the secret value is a user-supplied password, for example, it
-typically contains very little entropy. There are very few values the
-password will take. As we've already established in :ref:`a previous
-section on password storage <password storage>`, that means it is
-necessary that the key derivation function is hard to compute. That
-means it requires a non-trivial amount of computing resources, such as
-CPU cycles or memory. If the key derivation function were easy to
-compute, an attacker could simply enumerate all possible values of the
-shared secret, since there are few possibilities, and then compute the
-key derivation function for all of them. As we've seen in that previous
-section on password storage, this is how most modern attacks on password
-stores work. Using an appropriate key derivation function would prevent
-these attacks. In this chapter, we'll see scrypt, as well as other key
-derivation functions in this category.
+如果秘密值是用户提供的密码，例如，它通常包含非常少的熵。密码可能
+取的值非常少。正如我们在:ref:`关于密码存储的上一节<a previous section on password storage>` 中已经建立的，
+这意味着密钥派生函数必须难以计算。这意味着它需要非平凡数量的计算资源，
+如 CPU 周期或内存。如果密钥派生函数容易计算，攻击者可以简单地枚举
+共享秘密的所有可能值，因为可能性很少，然后为其所有可能值计算密钥
+派生函数。正如我们在关于密码存储的那一节中看到的，这就是大多数
+现代攻击密码存储的方式。使用适当的密钥派生函数将阻止这些攻击。
+在本章中，我们将看到 scrypt 以及此类中的其他密钥派生函数。
 
-On the other hand, the secret value could also have a high entropy
-content. For example, it could be a shared secret derived from a
-Diffie-Hellman :term:`key agreement` protocol, or an API key consisting of
-cryptographically random bytes (we'll discuss cryptographically secure
-random number generation in the next chapter). In that case, it isn't
-necessary to have a key derivation function that's hard to compute: even
-if the key derivation function is trivial to compute, there are too many
-possible values the secret can take, so an attacker would not be able to
-enumerate them all. We'll see the best-of-breed of this kind of key
-derivation function, HKDF, in this chapter.
+另一方面，秘密值也可能具有高熵含量。例如，它可能来自 Diffie-Hellman
+:term:`密钥协商` 协议的共享秘密，或由密码学随机字节组成的 API 密钥
+（我们将在下一章讨论密码学安全的随机数生成）。在这种情况下，
+不需要难以计算的密钥派生函数：即使密钥派生函数计算是琐碎的，秘密
+可以取的可能值也太多了，所以攻击者将无法枚举它们全部。我们将看到
+此类最佳 breed 的密钥派生函数 HKDF。
 
-Password strength
-~~~~~~~~~~~~~~~~~
+密码强度
+~~~~~~~~
 
 TODO: NIST Special Publication 800-63
 
@@ -74,88 +57,65 @@ scrypt
 HKDF
 ~~~~
 
-The HKDF, defined in RFC 5869 :cite:`rfc5869` and explained
-in detail in a related paper :cite:`hkdf`, is a key
-derivation function designed for high entropy inputs, such as shared
-secrets from a Diffie-Hellman key exchange. It is specifically *not*
-designed to be secure for low-entropy inputs such as passwords.
+在 RFC 5869 中定义并在相关论文中详细解释的 HKDF 是专为高熵输入
+设计的密钥派生函数，例如来自 Diffie-Hellman 密钥交换的共享秘密。
+它专门*不*设计用于低熵输入（如密码）。
 
-HKDF exists to give people an appropriate, off-the-shelf key derivation
-function. Previously, key derivation was often something that was done
-ad hoc for a particular standard. Usually these ad hoc solutions did not
-have the extra provisions HKDF does, such as :term:`salt`\s or the optional info
-parameter (which we'll discuss later in this section); and that's only
-in the best case scenario where the KDF wasn't fundamentally broken to
-begin with.
+HKDF 的存在是为了给人们一个适当的、现成的密钥派生函数。以前，密钥
+派生通常是为特定标准临时做的事情。通常这些临时解决方案没有 HKDF
+所做的额外规定，如 :term:`盐值` 或可选 info 参数（我们将在本节后面讨论）；
+而这只是在 KDF 从根本上就不是完全broken的最好的情况。
 
-HKDF is based on HMAC. Like HMAC, it is a generic construction that uses
-hash functions, and can be built using any cryptographically secure hash
-function you want.
+HKDF 基于 HMAC。像 HMAC 一样，它是一个使用哈希函数的通用构造，并且
+可以使用您想要的任何密码学安全哈希函数构建。
 
-A closer look at HKDF
+仔细看看 HKDF
 ^^^^^^^^^^^^^^^^^^^^^
 
 .. canned_admonition::
    :from_template: advanced
 
-HKDF consists of two phases. In the first phase, called the *extraction
-phase*, a fixed-length key is extracted from the input entropy. In the
-second phase, called the *expansion phase*, that key is used to produce
-a number of pseudorandom keys.
+HKDF 由两个阶段组成。在第一阶段（称为*提取阶段*），从输入熵中提取
+固定长度的密钥。在第二阶段（称为*扩展阶段*），该密钥用于产生多个
+伪随机密钥。
 
-The extraction phase
-''''''''''''''''''''
+提取阶段
+''''''''''''
 
-The extraction phase is responsible for extracting a small amount of
-data with a high entropy content from a potentially large amount of data
-with a smaller entropy density.
+提取阶段负责从可能大量但熵密度较小的数据中提取少量高熵含量的数据。
 
-The extraction phase just uses HMAC with a :term:`salt`:
+提取阶段只使用带 :term:`盐值` 的 HMAC：
 
 .. code:: python
 
    def extract(salt, data):
        return hmac(salt, data)
 
-The :term:`salt` value is optional. If the :term:`salt` is not specified, a string of
-zeroes equal to the length of the hash function's output is used. While
-the :term:`salt` is technically optional, the designers stress its importance,
-because it makes the independent uses of the key derivation function
-(for example, in different applications, or with different users)
-produce independent results. Even a fairly low-entropy :term:`salt` can already
-contribute significantly to the security of the key derivation function.
-:cite:`rfc5869` :cite:`hkdf`
+:term:`盐值` 参数是可选的。如果未指定 :term:`盐值`，则使用等于哈希函数输出长度
+的零字符串。虽然 :term:`盐值` 在技术上可选，但设计者强调其重要性，
+因为它使密钥派生函数的独立使用（例如在不同应用程序中或与不同用户一起）
+产生独立的结果。即使相当低熵的 :term:`盐值` 已经可以对密钥派生函数的
+安全性做出显著贡献。
 
-The extraction phase explains why HKDF is not suitable for deriving keys
-from passwords. While the extraction phase is very good at
-*concentrating* entropy, it is not capable of *amplifying* entropy. It
-is designed for compacting a small amount of entropy spread out over a
-large amount of data into the same amount of entropy in a small amount
-of data, but is not designed for creating a set of keys that are
-difficult to compute in the face of a small amount of available entropy.
-There are also no provisions for making this phase computationally
-intensive. :cite:`rfc5869`
+提取阶段解释了为什么 HKDF 不适合从密码派生密钥。虽然提取阶段非常
+擅长*集中*熵，但它不能*放大*熵。它设计用于将分布在大量数据中的少量
+熵压缩成少量数据中的相同熵量，但不设计用于在少量可用熵面前创建
+难以计算的一组密钥。也没有使该阶段计算密集化的规定。
 
-In some cases, it is possible to skip the extraction phase, if the
-shared secret already has all the right properties, for example, if it
-is a pseudorandom string of sufficient length, and with sufficient
-entropy. However, sometimes this should not be done at all, for example
-when dealing with a Diffie-Hellman shared secret. The RFC goes into
-slightly more detail on the topic of whether or not to skip this step;
-but it is generally inadvisable. :cite:`rfc5869`
+在某些情况下，如果共享秘密已经具有所有正确属性，例如如果它是足够
+长度的伪随机字符串，并且具有足够的熵，则可以跳过提取阶段。然而，
+有时根本不应该这样做，例如处理 Diffie-Hellman 共享秘密时。RFC 对
+是否应该跳过此步骤的话题稍微详细了一些；但通常不建议这样做。
 
-The expansion phase
-'''''''''''''''''''
+扩展阶段
+''''''''''''
 
-In the expansion phase, the random data extracted from the inputs in the
-extraction phase is expanded into as much data as is required.
+在扩展阶段，从提取阶段的输入中提取的随机数据扩展成所需数量的数据。
 
-The expansion step is also quite simple: chunks of data are produced
-using HMAC, this time with the extracted secret, not with the public
-:term:`salt`, until enough bytes are produced. The data being HMACed is the
-previous output (starting with an empty string), an “info” parameter (by
-default also the empty string), and a counter byte that counts which
-block is currently being produced.
+扩展步骤也非常简单：使用 HMAC 生成数据块，这次使用提取的秘密，
+而不是公共 :term:`盐值`，直到产生足够的字节。被 HMAC 的数据是前一个输出
+（以空字符串开始）、"info" 参数（默认也是空字符串）和计算当前正在
+生成哪个块的计数器字节。
 
 .. code:: python
 
@@ -185,12 +145,8 @@ block is currently being produced.
 
        return "".join(outputs)[:desired_length]
 
-Like the :term:`salt` in the extraction phase, the “info” parameter is entirely
-optional, but can actually greatly increase the security of the
-application. The “info” parameter is intended to contain some
-application-specific context in which the key derivation function is
-being used. Like the :term:`salt`, it will cause the key derivation function to
-produce different values in different contexts, further increasing its
-security. For example, the info parameter may contain information about
-the user being dealt with, the part of the protocol the key derivation
-function is being executed for or the like. :cite:`rfc5869`
+像提取阶段中的 :term:`盐值` 一样，"info" 参数完全可选，但实际上可以大大
+增加应用程序的安全性。"info" 参数旨在包含使用密钥派生函数的特定于
+应用程序的上下文。像 :term:`盐值` 一样，它会使密钥派生函数在不同上下文中
+产生不同的值，进一步提高其安全性。例如，info 参数可能包含关于所处理的
+用户、执行密钥派生函数的协议部分或类似内容的信息。

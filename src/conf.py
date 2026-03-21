@@ -25,10 +25,18 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
     "sphinxcontrib.rsvgconverter",
-    "sphinx.ext.imgmath",
+    # "sphinx.ext.imgmath",  # Disabled: use MathJax instead for better Chinese support
     "admonition_templates",
     "subfig",
 ]
+
+# Use MathJax for math rendering (better Chinese support, no image generation needed)
+mathjax_config = {
+    'TeX': {
+        'extensions': ['AMSmath.js', 'AMSsymbols.js'],
+        'equationNumbers': {'autoNumber': 'AMS', 'useLabelIds': True}
+    }
+}
 
 # number figures
 numfig = True
@@ -107,6 +115,8 @@ def read_latex_template(name: str) -> str:
 imgmath_latex_preamble = read_latex_source("imgmath")
 imgmath_image_format = "svg"
 imgmath_font_size = 16
+imgmath_latex = "xelatex"
+imgmath_latex_args = ['-no-pdf']  # Required for xelatex to produce DVI instead of PDF
 
 # whether to show the page number after references
 latex_show_pagerefs = True

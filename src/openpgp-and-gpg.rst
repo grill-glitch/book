@@ -3,86 +3,64 @@ OpenPGP and GPG
 
 .. _description-10:
 
-Description
-~~~~~~~~~~~
+描述
+~~~~
 
-OpenPGP is an open standard that describes a method for encrypting and
-signing messages. GPG is the most popular implementation of that
-standard [#]_, available under a free software license.
+OpenPGP 是一个描述加密和签名消息方法的开放标准。GPG 是该标准最流行
+的实现，在自由软件许可下提供。
 
 .. [#]
-   GPG 2 also implements S/MIME, which is unrelated to the OpenPGP
-   standard. This chapter only discusses OpenPGP.
+   GPG 2 还实现了 S/MIME，这与 OpenPGP 标准无关。本章仅讨论 OpenPGP。
 
-Unlike TLS, which focuses on data in motion, OpenPGP focuses on data at
-rest. A TLS session is active: bytes fly back and forth as the peers set
-up the secure channel. An OpenPGP interaction is, by comparison, static:
-the sender computes the entire message up front using information shared
-ahead of time. In fact, OpenPGP doesn't insist that anything is *sent*
-at all: for example, it can be used to sign software releases.
+与专注于传输中数据的 TLS 不同，OpenPGP 专注于静态数据。TLS 会话是
+主动的：在对等方建立安全通道时，字节来回传输。相比之下，OpenPGP
+交互是静态的：发送方使用预先共享的信息预先计算整个消息。事实上，
+OpenPGP 并不要求*发送*任何内容：例如，它可用于签名软件发布。
 
-Like TLS, OpenPGP is a hybrid cryptosystem. Users have key pairs
-consisting of a public key and a private key. Public key algorithms are
-used both for signing and encryption. Symmetric key algorithms are used
-to encrypt the message body; the symmetric key itself is protected using
-:term:`public-key encryption`. This also makes it easy to encrypt a message for
-multiple recipients: only the symmetric key has to be encrypted multiple
-times.
+与 TLS 一样，OpenPGP 是一个混合密码系统。用户拥有由公钥和私钥组成
+的密钥对。公钥算法同时用于签名和加密。对称密钥算法用于加密消息正文；
+对称密钥本身使用 :term:`public-key encryption` 保护。这也使得加密给多个
+收件人的消息变得容易：只需要多次加密对称密钥。
 
-The web of trust
-~~~~~~~~~~~~~~~~
+信任网
+~~~~~~
 
-Earlier, we saw that TLS typically uses trusted root certificates to
-establish that a particular peer is who they claim to be. OpenPGP does
-not operate using such trusted roots. Instead, it relies on a system
-called the Web of Trust: a friend-of-a-friend honor system that relies
-on physical meetings where people verify identities.
+早些时候，我们看到 TLS 通常使用可信根证书来建立特定对等方是其声称
+的身份。OpenPGP 不使用这种可信根操作。相反，它依赖于称为信任网的
+系统：一种依赖实体会面的朋友的朋友荣誉系统，人们在其中验证身份。
 
-The simplest case is a directly trusted key. If we meet up in person, we
-can verify each other's identities. Perhaps we know each other, or
-perhaps we'd check some form of identification. Then, we sign each
-other's keys.
+最简单的情况是直接信任的密钥。如果我们亲自见面，我们可以验证彼此
+的身份。也许我们彼此认识，或者我们会检查某种形式的身份证明。然后，
+我们互相签名。
 
-Because I know the key is yours, I know that you can read the messages
-encrypted by it, and the other way around. Provided you don't share your
-key, I know that *only* you can read those messages. No-one can replace
-my copy of your key, because they wouldn't be able to forge my signature
-on it.
+因为我知道密钥是你的，我知道你能用它解密加密的消息，反之亦然。前提
+是你没有分享你的密钥，我知道*只有*你能阅读这些消息。没人能替换我
+持有的你的密钥副本，因为他们无法伪造我在其上的签名。
 
-There's a direct trust link between the two of us, and we can
-communicate securely.
+我们之间存在直接信任链接，我们可以安全通信。
 
 .. figure:: ./Illustrations/PGP/WebOfTrustDirect.svg
    :align: center
 
-A slightly more complicated case is when a friend of yours would like to
-send me a message. We've never met: he's never signed my key, nor have I
-signed theirs. However, I have signed your key, and vice versa. You've
-signed your friend's key, and vice versa. Your friend can choose to
-leverage your assertion that I'm indeed the person in possession of that
-key you signed, and use that to communicate with me securely.
+稍微复杂一点的情况是你的朋友想给我发消息。我们从未见过：他从未签名
+我的密钥，我也没签名他的。然而，我签名了你的密钥，反之亦然。你签名
+了你朋友的密钥，反之亦然。你的朋友可以选择利用你对我确实是持有你
+签名的那个密钥的持有者的断言，并用它安全地与我通信。
 
 .. figure:: ./Illustrations/PGP/WebOfTrustIndirect.svg
    :align: center
 
-You might wonder how your friend would ever see signatures that you
-placed on my key. This is because keys and signatures are typically
-uploaded to a network of key servers, making them freely available to
-the world.
+你可能会想你的朋友如何能看到你放在我密钥上的签名。这是因为密钥和
+签名通常上传到密钥服务器网络，使它们对世界免费可用。
 
-The above system can be extended to multiple layers of friends. It
-relies in no small part in communities being linked by signatures, which
-is why many community events include key signing parties, where people
-sign each other's keys. For large events, such as international
-programming conferences, this system is very effective. The main
-weakness in this system are “islands” of trust: individuals or small
-groups with no connections to the rest of the web.
+上述系统可以扩展到多层朋友。它在很大程度上依赖于社区被签名连接的
+情况，这就是为什么许多社区活动包含密钥签名派对，人们在那互相签名
+密钥。对于大型活动，如国际编程会议，这个系统非常有效。该系统的主要
+弱点是信任"孤岛"：与信任网其余部分没有连接的个人或小团体。
 
 .. figure:: ./Illustrations/PGP/WebOfTrustIslands.svg
    :align: center
 
-Of course, this is only the default way to use OpenPGP. There's nothing
-stopping you from shipping a particular public key as a part of a
-software package, and using that to sign messages or verify messages.
-This is analogous to how you might want to ship a key with a client
-certificate, or a custom root CA certificate, with TLS.
+当然，这只是使用 OpenPGP 的默认方式。没有什么能阻止你将特定公钥作为
+软件包的一部分分发，并使用它来签名消息或验证消息。这类似于你可能
+想要随客户端证书或自定义根 CA 证书一起分发密钥，使用 TLS。

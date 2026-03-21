@@ -1,5 +1,5 @@
-Complete cryptosystems
-======================
+完整密码系统
+============
 
 .. toctree::
 

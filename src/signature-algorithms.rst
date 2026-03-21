@@ -106,7 +106,7 @@ If either of these happen to be 0 (a rare event, with 1 in :math:`q`
 odds, and :math:`q` being a pretty large number), pick a different
 :math:`k`.
 
-TODO: Talk about k\ :sup:`-1`, the modular inverse (see #52)
+TODO: 谈谈 k\ :sup:`-1`，模逆元（见 #52）
 
 Verifying a signature
 ^^^^^^^^^^^^^^^^^^^^^
@@ -245,8 +245,8 @@ algebra:
 Again, :math:`H(m)` is public, plus the attacker needed it to compute
 :math:`k`, anyway. They've already computed :math:`k`, and :math:`s` is
 plucked straight from the signature. That just leaves us with
-:math:`r^{-1} \pmod q` (read as: “the modular inverse of :math:`r`
-modulo :math:`q`”), but that can be computed efficiently as well. (For
+:math:`r^{-1} \pmod q` (read as: "the modular inverse of :math:`r`
+modulo :math:`q`"), but that can be computed efficiently as well. (For
 more information, see the appendix on modular arithmetic; keep in mind
 that :math:`q` is prime, so the modular inverse can be computed
 directly.) That means that the attacker, once they've discovered the
@@ -292,8 +292,8 @@ obvious way to design such a scheme would be to make sure that the
 recipient (or, in fact, anyone else) could have computed an identical
 value.
 
-Such messages can be repudiated; such a scheme is often called “deniable
-authentication”. While it authenticates the sender to the intended
+Such messages can be repudiated; such a scheme is often called "deniable
+authentication". While it authenticates the sender to the intended
 recipient, the sender can later deny (to third parties) having sent the
 message. Equivalently, the recipient can't convince anyone else that the
 sender sent that particular message.

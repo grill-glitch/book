@@ -71,230 +71,184 @@ speed argument given above.
 RSA
 ~~~
 
-As we already mentioned, RSA is one of the first practical
-:term:`public-key encryption` schemes. It remains the most common one to this
-day.
+正如我们前面提到的，RSA 是最早的实用 :term:`public-key encryption` 方案之一。
+直到今天，它仍然是最常见的方案。
 
-Encryption and decryption
-^^^^^^^^^^^^^^^^^^^^^^^^^
+加密和解密
+^^^^^^^^^^^^
 
-RSA encryption and decryption relies on modular arithmetic. You may want
-to review the :ref:`modular arithmetic primer <modular-arithmetic>`
-before continuing.
+RSA 加密和解密依赖于模算术。在继续之前，您可能想要复习一下
+:ref:`模算术入门 <modular-arithmetic>`。
 
-This section describes the simplified math problem behind RSA, commonly
-referred to as “textbook RSA”. By itself, this doesn't produce a secure
-encryption scheme. We'll see a secure construction called OAEP that
-builds on top of it in a later section.
+本节描述 RSA 背后的简化数学问题，通常称为"教科书 RSA"。单独来看，
+这不会产生安全的加密方案。我们将在后面一节看到建立在它之上的安全构造
+称为 OAEP。
 
-In order to generate a key, you pick two large prime numbers :math:`p`
-and :math:`q`. These numbers have to be picked at random, and in secret.
-You multiply them together to produce the modulus :math:`N`, which is
-public. Then, you pick an *encryption exponent* :math:`e`, which is also
-public. Usually, this value is either 3 or 65537. Because those numbers
-have a small number of ``1``'s in their binary expansion, you can
-compute the exponentiation more efficiently. Put together,
-:math:`(N, e)` is the public key. Anyone can use the public key to
-encrypt a message :math:`M` into a ciphertext :math:`C`:
+为了生成密钥，您选择两个大素数 :math:`p` 和 :math:`q`。这些数字必须
+随机选择，并且保密。您将它们相乘产生模数 :math:`N`，这是公开的。
+然后，您选择一个*加密指数* :math:`e`，这也是公开的。通常，这个值是
+3 或 65537。因为这些数字的二进制展开中只有很少的"1"，您可以更高效地
+计算幂运算。组合起来，:math:`(N, e)` 是公钥。任何人都可以使用公钥
+将消息 :math:`M` 加密成密文 :math:`C`：
 
 .. math::
 
    C \equiv M^e \pmod{N}
 
-The next problem is decryption. It turns out that there is a value
-:math:`d`, the *decryption exponent*, that can turn :math:`C` back into
-:math:`M`. That value is fairly easy to compute assuming that you know
-:math:`p` and :math:`q`, which we do. Using :math:`d`, you can decrypt
-the message like so:
+下一个问题是解密。事实证明，存在一个值 :math:`d`，*解密指数*，它
+可以将 :math:`C` 还原为 :math:`M`。假设您知道 :math:`p` 和 :math:`q`，
+这个值相当容易计算（我们知道）。使用 :math:`d`，您可以如下解密消息：
 
 .. math::
 
    M \equiv C^d \pmod{N}
 
-The security of RSA relies on that decryption operation being impossible
-without knowing the secret exponent :math:`d`, and that the secret
-exponent :math:`d` is very hard (practically impossible) to compute from
-the public key :math:`(N, e)`. We'll see approaches for breaking RSA in
-the next section.
+RSA 的安全性依赖于不知道秘密指数 :math:`d` 就无法执行解密操作，
+并且从公钥 :math:`(N, e)` 计算秘密指数 :math:`d` 非常困难（实际上
+不可能）。我们将在下一节看到攻击 RSA 的方法。
 
 Breaking RSA
 ^^^^^^^^^^^^
 
-Like many cryptosystems, RSA relies on the presumed difficulty of a
-particular mathematical problem. For RSA, this is the RSA problem,
-specifically: to find the plaintext message :math:`M`, given a
-ciphertext :math:`C`, and public key :math:`(N, e)` in the equation:
+与许多密码系统一样，RSA 依赖于特定数学问题的假定难度。对于 RSA，
+这是 RSA 问题，具体是：给定方程中的密文 :math:`C` 和公钥 :math:`(N, e)` 时
+找到明文消息 :math:`M`：
 
 .. math::
 
    C \equiv M^e \pmod{N}
 
-The easiest way we know how to do that is to factor :math:`N` back into
-:math:`p \cdot q`. Given :math:`p` and :math:`q`, the attacker can just repeat
-the process that the legitimate owner of the key does during key
-generation in order to compute the private exponent :math:`d`.
+我们知道的最简单方法是将 :math:`N` 分解成 :math:`p \cdot q`。给定
+:math:`p` 和 :math:`q`，攻击者只需重复密钥所有者在密钥生成期间所做的
+过程以计算私有指数 :math:`d`。
 
-Fortunately, we don't have an algorithm that can factor such large
-numbers in reasonable time. Unfortunately, we also haven't proven it
-doesn't exist. Even more unfortunate is that there is a theoretical
-algorithm, called Shor's algorithm, that *would* be able to factor such
-a number in reasonable time on a quantum computer. Right now, quantum
-computers are far from practical, but it does appear that if someone in
-the future manages to build one that's sufficiently large, RSA becomes
-ineffective.
+幸运的是，我们没有算法能在合理时间内分解如此大的数字。不幸的是，
+我们也没有证明它不存在。更不幸的是，存在一个称为 Shor 算法的理论
+算法，它*将能够*在量子计算机上以合理时间分解这样的数字。现在，
+量子计算机远未达到实用，但确实看起来如果未来有人设法建造足够大的
+量子计算机，RSA 将变得无效。
 
-In this section, we have only considered a private key recovery attack
-that attacks the purely abstract mathematical RSA problem by factoring
-the modulus. In the next section, we will see all sorts of realistic
-attacks on RSA that rely on flaws in the *implementation*, rather than
-the mathematical problem stated above.
+在本节中，我们只考虑了通过分解模数攻击纯抽象数学 RSA 问题的私有
+密钥恢复攻击。在下一节，我们将看到依赖*实现*中缺陷的 RSA 各种现实
+攻击，而不是上面陈述的数学问题。
 
 Implementation pitfalls
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Right now, there are no known practical complete breaks against RSA.
-That's not to say that systems employing RSA aren't routinely broken.
-Like with most broken cryptosystems, there are plenty of cases where
-sound components, improperly applied, result in a useless system. For a
-more complete overview of the things that can go wrong with RSA
-implementations, please refer to :cite:`boneh:twentyyears`
-and :cite:`anderson:mindingyourpsandqs`. In this book, we'll
-just highlight a few interesting ones.
+现在，没有已知的针对 RSA 的实际完整破坏。这并不意味着使用 RSA 的
+系统不被 routinely 破坏。就像大多数被破坏的密码系统一样，有很多
+声音组件不适当应用导致无用系统的情况。有关 RSA 实现可能出错的事情
+的更完整概述，请参考 :cite:`boneh:twentyyears`
+和 :cite:`anderson:mindingyourpsandqs`。在这本书中，我们只高亮
+几个有趣的例子。
 
-PKCSv1.5 padding
+PKCSv1.5 填充
 ''''''''''''''''
 
 Salt
-''''
+'''''
 
-Salt [#]_ is a provisioning system written in Python. It has one major
-flaw: it has a module named ``crypt``. Instead of reusing existing
-complete cryptosystems, it implements its own, using RSA and AES
-provided by a third party package.
+Salt [#]_ 是一个用 Python 编写的配置系统。它有一个主要缺陷：它有一个
+名为 ``crypt`` 的模块。它不是重用现有的完整密码系统，而是实现自己的，
+使用第三方包提供的 RSA 和 AES。
 
 .. [#]
-   So, there's Salt the provisioning system, :term:`salt`\s the things used in
-   broken password stores, NaCl pronounced “salt” the cryptography
-   library, and NaCl which runs native code in some browsers, and
-   probably a bunch I'm forgetting. Can we stop naming things after it?
+   所以，有 Salt 配置系统，:term:`salt`\s 的在使用破碎的密码存储中使用的
+   东西，NaCl 发音"salt"的密码学库，以及在浏览器中运行原生代码的
+   NaCl，可能还有一堆我忘记的。我们可以停止以它命名事物吗？
 
-For a long time, Salt used a public exponent (:math:`e`) of 1, which
-meant the encryption phase didn't actually do anything:
-:math:`P^e \equiv P^1 \equiv P \pmod N`. This meant that the resulting ciphertext was in fact
-just the plaintext. While this issue has now been fixed, this only goes
-to show that you probably shouldn't implement your own cryptography.
-Salt currently also supports SSH as a transport, but the aforementioned
-DIY RSA/AES system remains, and is at time of writing still the
+长期以来，Salt 使用加密指数 (:math:`e`) 为 1，这意味着加密阶段
+实际上什么也没做：:math:`P^e \equiv P^1 \equiv P \pmod N`。这意味着
+结果密文实际上只是明文。虽然这个问题现在已经修复，但这只是表明
+您可能不应该实现自己的密码学。Salt 目前也支持 SSH 作为传输，但
+上述 DIY RSA/AES 系统仍然存在，并且在撰写时仍然是推荐和默认传输。
 recommended and the default transport.
 
 OAEP
 ^^^^
 
-OAEP, short for optimal asymmetric encryption padding, is the state of
-the art in RSA padding. It was introduced by Mihir Bellare and Phillip
-Rogaway in 1995. :cite:`bellarerogaway:oaep`. Its structure
-looks like this:
+OAEP，代表最优非对称加密填充，是 RSA 填充的最新技术。它由 Mihir
+Bellare 和 Phillip Rogaway 于 1995 年引入。它的结构如下所示：
 
 .. figure:: Illustrations/OAEP/Diagram.svg
    :align: center
 
-The thing that eventually gets encrypted is :math:`X \| Y`, which is
-:math:`n` bits long, where :math:`n` is the number of bits of :math:`N`,
-the RSA modulus. It takes a random block :math:`R` that's :math:`k` bits
-long, where :math:`k` is a constant specified by the standard. The
-message is first padded with zeroes to be :math:`n - k` bits long. If
-you look at the above “ladder”, everything on the left half is
-:math:`n - k` bits long, and everything on the right half is :math:`k`
-bits long. The random block :math:`R` and zero-padded message
-:math:`M \| 000\ldots` are combined using two “trapdoor” functions, :math:`G` and
-:math:`H`. A trapdoor function is a function that's very easy to compute
-in one direction and very hard to reverse. In practice, these are
-cryptographic hash functions; we'll see more about those later.
+最终被加密的东西是 :math:`X \| Y`，它是 :math:`n` 位长，其中 :math:`n`
+是 RSA 模数 :math:`N` 的位数。它接收一个 :math:`k` 位长的随机块
+:math:`R`，其中 :math:`k` 是标准指定的常数。消息首先用零填充以达到
+:math:`n - k` 位长。如果你看上面的"梯子"，左半部分的一切都是
+:math:`n - k` 位长，右半部分的一切都是 :math:`k` 位长。随机块 :math:`R`
+和零填充消息 :math:`M \| 000\ldots` 使用两个"陷门"函数 :math:`G` 和
+:math:`H` 组合。陷门函数是一个容易在一个方向计算但很难反转的函数。
+实际上，这些是密码学哈希函数；我们稍后会在书中看到更多关于它们的内容。
 
-As you can tell from the diagram, :math:`G` takes :math:`k` bits and
-turns them into :math:`n - k` bits, and :math:`H` is the other way
-around, taking :math:`n - k` bits and turning them into :math:`k` bits.
+从图中可以看出，:math:`G` 接收 :math:`k` 位并将其转换为 :math:`n - k`
+位，而 :math:`H` 相反，接收 :math:`n - k` 位并将其转换为 :math:`k` 位。
 
-The resulting blocks :math:`X` and :math:`Y` are concatenated, and the
-result is encrypted using the standard RSA encryption primitive, to
-produce the ciphertext.
+产生的块 :math:`X` 和 :math:`Y` 被连接，结果使用标准 RSA 加密原语
+加密，产生密文。
 
-To see how decryption works, we reverse all the steps. The recipient
-gets :math:`X \| Y` when decrypting the message. They know :math:`k`,
-since it is a fixed parameter of the protocol, so they can split up
-:math:`X \| Y` into :math:`X` (the first :math:`n - k` bits) and
-:math:`Y` (the final :math:`k` bits).
+为了了解解密如何工作，我们反转所有步骤。接收者在解密消息时得到
+:math:`X \| Y`。因为他们知道 :math:`k`，这是协议的固定参数，所以他们
+可以将 :math:`X \| Y` 分成 :math:`X`（第一个 :math:`n - k` 位）和
+:math:`Y`（最后的 :math:`k` 位）。
 
-In the previous diagram, the directions are for padding being applied.
-Reverse the arrows on the side of the ladder, and you can see how to
-revert the padding:
+在前面的图中，方向是针对应用填充的。反转梯子侧的箭头，您可以看到
+如何恢复填充：
 
-TODO: reverse arrows
+TODO: 反转箭头
 
-We want to get to :math:`M`, which is in :math:`M \| 000\ldots`. There's
-only one way to compute that, which is:
+我们想要到达 :math:`M`，它在 :math:`M \| 000\ldots` 中。只有一种方法
+计算它，即：
 
 .. math::
 
    M \| 000\ldots = X \xor G(R)
 
-Computing :math:`G(R)` is a little harder:
+计算 :math:`G(R)` 有点难：
 
 .. math::
 
    G(R) = G(H(X) \xor Y)
 
-As you can see, at least for some definitions of the functions :math:`H`
-and :math:`G`, we need all of :math:`X` and all of :math:`Y` (and hence
-the entire encrypted message) in order to learn anything about
-:math:`M`. There are many functions that would be a good choice for
-:math:`H` and :math:`G`; based on cryptographic hash functions, which
-we'll discuss in more detail later in the book.
+如您所见，至少对于函数 :math:`H` 和 :math:`G` 的某些定义，我们需要
+:math:`X` 的全部和 :math:`Y` 的全部（因此是整个加密消息）才能了解
+关于 :math:`M` 的任何信息。有许多函数可以是 :math:`H` 和 :math:`G`
+的良好选择；基于密码学哈希函数，我们将在书中后面更详细地讨论它们。
 
-Elliptic curve cryptography
+椭圆曲线密码学
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TODO: This
 
-Remaining problem: unauthenticated encryption
+剩余问题：未经验证的加密
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Most :term:`public-key encryption` schemes can only encrypt small chunks of data
-at a time, much smaller than the messages we want to be able to send.
+大多数 :term:`public-key encryption` 方案一次只能加密小数据块，
+比我们想要发送的消息小得多。它们通常也非常慢，比对称对应物慢得多。
+因此公钥密码系统几乎总是与秘密密钥密码系统结合使用。
 They are also generally quite slow, much slower than their symmetric
 counterparts. Therefore public-key cryptosystems are almost always used
 in conjunction with secret-key cryptosystems.
 
-When we discussed :term:`stream cipher`\s, one of the remaining issues that we
-were facing was that we still had to exchange secret keys with a large
-number of people. With public-key cryptosystems such as public
-encryption and :term:`key exchange` protocols, we've now seen two ways that we
-can solve that problem. That means that we can now communicate with
-anyone, using only public information, completely secure from
-eavesdroppers.
+当我们讨论 :term:`stream cipher`\s 时，我们仍然面临的剩余问题之一
+是我们仍然必须与大量人交换秘密密钥。使用公钥密码系统，如公共加密
+和 :term:`key exchange` 协议，我们现在已经看到了两种解决该问题的方法。
+这意味着我们现在可以仅使用公开信息与任何人通信，完全免受窃听者
+攻击。
 
-So far we've only been talking about encryption without any form of
-authentication. That means that while we can encrypt and decrypt
-messages, we cannot verify that the message is what the sender actually
-sent.
+到目前为止，我们只讨论了没有任何形式身份验证的加密。这意味着虽然
+我们可以加密和解密消息，我们无法验证消息是发送者实际发送的内容。
 
-While unauthenticated encryption may provide secrecy, we have already
-seen that without authentication an active attacker can generally modify
-valid encrypted messages successfully, despite the fact that they don't
-necessarily know the corresponding plaintext. Accepting these messages
-can often lead to secret information being leaked, meaning we don't even
-get secrecy. The CBC padding attacks we've already discussed illustrate
-this.
+虽然未经验证的加密可能提供保密性，我们已经知道没有身份验证，
+主动攻击者通常可以成功修改有效的加密消息，尽管他们不一定知道相应的
+明文。接受这些消息通常会导致机密信息泄露，意味着我们甚至得不到
+保密性。我们已经讨论的 CBC 填充攻击说明了这一点。
 
-As a result it has become evident that we need ways to authenticate as
-well as encrypt our secret communications. This is done by adding extra
-information to the message that only the sender could have computed.
-Just like encryption, authentication comes in both private-key
-(symmetric) and public-key (asymmetric) forms. Symmetric authentication
-schemes are typically called :term:`message authentication code`\s, while the
-public-key equivalent is typically called a signature.
+因此， evidently 我们需要身份验证以及加密我们的秘密通信的方法。这是
+通过向消息添加只有发送者才能计算的额外信息来完成的。就像加密一样，
+身份验证有两种形式：私钥（对称）和公钥（非对称）。对称身份验证方案
+通常称为 :term:`message authentication code`\s，而公钥等价物通常称为签名。
 
-First, we will introduce a new cryptographic primitive: hash functions.
-These can be used to produce both signature schemes as well as message
-authentication schemes. Unfortunately, they are also very often abused
-to produce entirely insecure systems.
+首先，我们将介绍一个新的密码学原语：哈希函数。这些可用于产生签名
+方案以及消息身份验证方案。不幸的是，它们也经常被滥用来产生完全不安全的系统。

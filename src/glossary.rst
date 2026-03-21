@@ -1,218 +1,191 @@
-Glossary
+术语表
 ========
 
 .. glossary::
    :sorted:
 
    AEAD
-      Authenticated Encryption with Associated Data
+      带关联数据的认证加密 (Authenticated Encryption with Associated Data)
 
    AES
-      Advanced Encryption Standard
+      高级加密标准 (Advanced Encryption Standard)
 
    AKE
-      authenticated key exchange
+      认证密钥交换 (authenticated key exchange)
 
    ARX
-      add, rotate, XOR
+      加、旋转、异或 (add, rotate, XOR)
 
    BEAST
-      Browser Exploit Against SSL/TLS
+      针对 SSL/TLS 的浏览器漏洞 (Browser Exploit Against SSL/TLS)
 
    CBC
-      cipher block chaining
+      密码分组链接 (cipher block chaining)
 
    CDN
-      content distribution network
+      内容分发网络 (content distribution network)
 
    CSPRNG
-      cryptographically secure pseudorandom number generator
+      密码学安全伪随机数生成器 (cryptographically secure pseudorandom number generator)
 
    CSRF
-      :term:`cross-site request forgery`
+      :term:`跨站请求伪造 <cross-site request forgery>`
 
    DES
-      Data Encryption Standard
+      数据加密标准 (Data Encryption Standard)
 
    FIPS
-      Federal Information Processing Standards
+      联邦信息处理标准 (Federal Information Processing Standards)
 
    GCM
-      Galois Counter Mode
+      Galois 计数器模式 (Galois Counter Mode)
 
    HKDF
-      HMAC-based (Extract-and-Expand) Key Derivation Function
+      基于 HMAC 的密钥派生函数 (HMAC-based (Extract-and-Expand) Key Derivation Function)
 
    HMAC
-      Hash-based Message Authentication Code
+      基于哈希的消息认证码 (Hash-based Message Authentication Code)
 
    HSTS
-      HTTP Strict Transport Security
+      HTTP 严格传输安全 (HTTP Strict Transport Security)
 
    IV
-      :term:`initialization vector`
+      :term:`初始化向量 <initialization vector>`
 
    KDF
-      key derivation function
+      密钥派生函数 (key derivation function)
 
    MAC
-      message authentication code
+      消息认证码 (message authentication code)
 
    MITM
-      man-in-the-middle
+      中间人攻击 (man-in-the-middle)
 
    OCB
-      offset codebook
+      偏移码本 (offset codebook)
 
    OTR
-      off-the-record
+      离 record (off-the-record)
 
    PRF
-      pseudorandom function
+      伪随机函数 (pseudorandom function)
 
    PRNG
-      pseudorandom number generator
+      伪随机数生成器 (pseudorandom number generator)
 
    PRP
-      pseudorandom permutation
+      伪随机置换 (pseudorandom permutation)
 
    RSA
-      Rivest Shamir Adleman
+      Rivest Shamir Adleman (RSA 算法命名源自三位发明者)
 
    SMP
-      socialist millionaire protocol
+      社会百万富翁协议 (socialist millionaire protocol)
 
    secret-key encryption
-      Encryption that uses the same key for both encryption and decryption. Also
-      known as symmetric-key encryption. Contrast with :term:`public-key encryption`
+      使用相同密钥进行加密和解密的加密。也称为对称密钥加密。
+      与 :term:`public-key encryption` 对比
 
    symmetric-key encryption
-      See :term:`secret-key encryption`
+      参见 :term:`secret-key encryption`
 
    keyspace
-      The set of all possible keys
+      所有可能密钥的集合
 
    block cipher
-      Symmetric encryption algorithm that encrypts and decrypts blocks of fixed size
+      对称加密算法，加密和解密固定大小的块
 
    substitution-permutation network
-      Generic design for block ciphers where the block is enciphered by repeated
-      substitutions and permutations
+      块密码的通用设计，其中块通过重复替换和置换进行加密
 
    stream cipher
-      Symmetric encryption algorithm that encrypts streams of arbitrary size
+      对称加密算法，加密任意大小的流
 
    mode of operation
    modes of operation
-      Generic construction that encrypts and decrypts streams, built from a
-      block cipher
+      通用构造，用于加密和解密流，由分组密码构建
 
    ECB mode
-      Electronic code book mode; mode of
-      operation where plaintext is separated into blocks that are
-      encrypted separately under the same key. The default mode in many
-      cryptographic libraries, despite many security issues
+      电子密码本模式；操作模式，其中明文被分成块，在相同密钥下分别加密。
+      尽管有许多安全问题，它是许多加密库的默认模式
 
    CBC mode
-      Cipher block chaining mode; common mode
-      of operation where the previous ciphertext block is XORed with the
-      plaintext block during encryption. Takes an initialization vector,
-      which assumes the role of the "block before the first block"
+      密码分组链接模式；常见的操作模式，其中前一个密文块在加密过程中
+      与明文块进行异或。采用初始化向量，它扮演"第一个块之前的块"的角色
 
    initialization vector
-      Data used to initialize some algorithms such as :term:`CBC mode`.
-      Generally not required to be secret, but required to be unpredictable.
-      Compare :term:`nonce`, :term:`salt`
+      用于初始化某些算法（如 :term:`CBC mode`）的数据。通常不需要保密，
+      但需要不可预测。与 :term:`nonce`、:term:`salt` 比较
 
    CTR mode
-      Counter mode; a :term:`nonce` combined with a counter produces a sequence
-      of inputs to the block cipher; the resulting ciphertext blocks are the keystream
+      计数器模式；:term:`nonce` 与计数器组合产生分组密码的输入序列；
+      结果密文块是密钥流
 
    nonce
-      **N**\umber used **once**. Used in many cryptographic protocols. Generally
-      does not have to be secret or unpredictable, but does have to be unique.
-      Compare :term:`initialization vector`, :term:`salt`
+      **N**umber used **once**。用于许多加密协议。通常不需要保密或
+      不可预测，但必须唯一。与 :term:`initialization vector`、:term:`salt` 比较
 
    AEAD mode
-      Class of :term:`block cipher` :term:`mode of operation` that provides
-      authenticated encryption, as well as authenticating some unencrypted
-      associated data
+      :term:`block cipher` :term:`mode of operation` 的一类，提供认证加密，
+      以及对未加密关联数据的认证
 
    OCB mode
-      Offset codebook mode; high-performance :term:`AEAD mode`, unfortunately
-      encumbered by patents
+      偏移码本模式；高性能 :term:`AEAD mode`，不幸受到专利限制
 
    GCM mode
-      Galois counter mode; :term:`AEAD mode` combining :term:`CTR mode` with a
+      Galois 计数器模式；:term:`AEAD mode` 结合 :term:`CTR mode` 与
       :term:`Carter-Wegman MAC`
 
    message authentication code
-      Small piece of information used to verify authenticity and integrity of a message.
-      Often called a tag
+      用于验证消息真实性和完整性的小段信息。常称为标签
 
    one-time MAC
-      :term:`message authentication code` that can only be used securely for a
-      single message. Main benefit is increased performance over re-usable :term:`MAC`
+      只能安全使用一次的消息的 :term:`message authentication code`。
+      主要优点是可重用 :term:`MAC` 上提高性能
 
    Carter-Wegman MAC
-      Reusable :term:`message authentication code` scheme built from a :term:`one-time MAC`.
-      Combines benefits of performance and ease of use
+      由 :term:`one-time MAC` 构建的可重用 :term:`message authentication code` 方案。
+      结合了性能和易用性的优点
 
    GMAC
-      :term:`message authentication code` part of :term:`GCM mode` used separately
+      :term:`GCM mode` 的一部分，可单独使用的 :term:`message authentication code`
 
    salt
-      Random data that is added to a cryptographic primitive (usually a one-way
-      function such as a cryptographic hash function or a key derivation
-      function) Customizes such functions to produce different outputs (provided
-      the salt is different). Can be used to prevent e.g. dictionary attacks.
-      Typically does not have to be secret, but secrecy may improve security
-      properties of the system. Compare :term:`nonce`, :term:`initialization vector`
+      添加到加密基元（通常是一个单向函数，如加密哈希函数或密钥派生函数）的随机数据。
+      定制这些函数以产生不同的输出（如果盐不同）。可用于防止字典攻击等。
+      通常不需要保密，但保密可能提高系统安全属性。与 :term:`nonce`、:term:`initialization vector` 比较
 
    public-key algorithm
-      Algorithm that uses a pair of two related but distinct keys. Also known
-      as :term:`asymmetric-key algorithm`. Examples include :term:`public-key
-      encryption` and most :term:`key exchange` protocols
-
+      使用一对相关但不同的密钥的算法。也称为 :term:`asymmetric-key algorithm`。
+      示例包括 :term:`public-key encryption` 和大多数 :term:`key exchange` 协议
 
    asymmetric-key algorithm
-      See :term:`public-key algorithm`
+      参见 :term:`public-key algorithm`
 
    public-key encryption
-      Encryption using a pair of distinct keys for encryption and decryption.
-      Also known as asymmetric-key encryption. Contrast with :term:`secret-key
-      encryption`
+      使用一对用于加密和解密的 Distinct 密钥的加密。也称为非对称密钥加密。
+      与 :term:`secret-key encryption` 对比
 
    asymmetric-key encryption
-      See :term:`public-key encryption`
-
+      参见 :term:`public-key encryption`
 
    key exchange
-      The process of exchanging keys across an insecure medium using a
-      particular cryptographic protocol. Typically designed to be secure against
-      eavesdroppers. Also known as key agreement
+      使用特定加密协议通过不安全介质交换密钥的过程。通常设计为
+      抵抗窃听者。也称为密钥协商
 
    key agreement
-      See :term:`key exchange`
+      参见 :term:`key exchange`
 
    oracle
-      A "black box" that will perform some computation for you
+      为你执行某些计算的"黑盒"
 
    encryption oracle
-      An :term:`oracle` that will encrypt some data
+      将加密某些数据的 :term:`oracle`
 
    OTR messaging
-      Off-the-record messaging, messaging protocol that intends to mimic the
-      properties of a real-life private conversation. Piggy-backs onto existing
-      instant messaging protocols
+      离 record 消息传递，旨在模拟真实私人会话属性的消息协议。
+      依附于现有的即时消息协议
 
    cross-site request forgery
-      Kind of attack where a malicious website tricks the browser into making
-      requests to another website. Can be prevented by properly authenticating
-      requests instead of relying on ambient authority such as session cookies
-
-
-.. raw:: latex
-
-   \renewcommand{\indexname}{Index}
-   \printindex
+      恶意网站欺骗浏览器向另一个网站发出请求的攻击类型。
+      可以通过正确验证请求而不是依赖会话 cookie 等环境权限来防止
