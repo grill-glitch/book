@@ -50,7 +50,7 @@
 中文版发布
 ==========
 
-- GitHub Release: https://github.com/grill-glitch/book/releases/tag/zh_CN-20260321-v4
+- GitHub Release: https://github.com/grill-glitch/book/releases/tag/zh_CN-20260321-v5
 - 在线浏览: https://crypto.notarobot.ggff.net
 
 贡献
