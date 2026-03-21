@@ -1,66 +1,29 @@
-Foreword
-========
+前言
+====
 
-About this book
----------------
+关于本书
+-------
 
-   Lots of people working in cryptography have no deep concern with real
-   application issues. They are trying to discover things clever enough to write
-   papers about.
+   “许多从事密码学工作的人对实际应用问题并不关心。他们只是在努力发现足够聪明的东西来写论文。”
 
-      *Whitfield Diffie*
+      *惠特菲尔德·迪菲*
 
-This book is intended as an introduction to cryptography for programmers
-of any skill level. It's a continuation of a talk of the same name,
-which was given by the author at PyCon 2013.
+这本书旨在为任何技能水平的程序员提供密码学入门。它是同名演讲的延续，该演讲由作者在 PyCon 2013 上发表。
 
-The structure of this book is very similar: it starts with very simple
-primitives, and gradually introduces new ones, demonstrating why they're
-necessary. Eventually, all of this is put together into complete,
-practical cryptosystems, such as TLS, GPG and :term:`OTR`.
+本书的结构非常相似：从非常简单的原语开始，逐步引入新的原语，并演示它们为何必要。最终，所有这些都被组合成完整的实用密码系统，例如 TLS、GPG 和 :term:`OTR`。
 
-The goal of this book is not to make anyone a cryptographer or a
-security researcher. The goal of this book is to understand how complete
-cryptosystems work from a bird's eye view, and how to apply them in real
-software.
+本书的目标不是让任何人成为密码学家或安全研究员。本书的目标是从宏观角度理解完整密码系统的工作原理，以及如何在真实软件中应用它们。
 
-The exercises accompanying this book focus on teaching cryptography by
-breaking inferior systems. That way, you won't just “know” that some
-particular thing is broken; you'll know exactly *how* it's broken, and
-that you, yourself, armed with little more than some spare time and your
-favorite programming language, can break them. By seeing how these
-ostensibly secure systems are actually completely broken, you will
-understand *why* all these primitives and constructions are necessary
-for complete cryptosystems. Hopefully, these exercises will also leave
-you with healthy distrust of DIY cryptography in all its forms.
+本书的练习题侧重于通过破坏劣质系统来教授密码学。这样，你就不会只是“知道”某个特定东西被破坏了；你会确切地知道*它*是如何被破坏的，并且你只要有少量空闲时间和你喜欢的编程语言，就可以自己破坏它们。通过观察这些表面安全的系统实际上是如何被完全破坏的，你将理解为什么所有这些原语和构造对于完整密码系统是必要的。希望这些练习也能让你对各种形式的 DIY 密码学保持健康的怀疑态度。
 
-For a long time, cryptography has been deemed the exclusive realm of
-experts. From the many internal leaks we've seen over the years of the
-internals of both large and small corporations alike, it has become
-obvious that that approach is doing more harm than good. We can no
-longer afford to keep the two worlds strictly separate. We must join
-them into one world where all programmers are educated in the basic
-underpinnings of information security, so that they can work together
-with information security professionals to produce more secure software
-systems for everyone. That does not make people such as penetration
-testers and security researchers obsolete or less valuable; quite the
-opposite, in fact. By sensitizing all programmers to security concerns,
-the need for professional security audits will become more apparent, not
-less.
+长期以来，密码学被认为是专家的专属领域。从这些年来我们看到的大大小小公司内部的许多泄露事件来看，很明显这种做法弊大于利。我们不能再让这两个世界严格分离。我们必须将它们合并为一个世界，在这个世界里，所有程序员都接受了信息安全基础方面的教育，以便他们能够与信息安全专业人员合作，为每个人生产更安全的软件系统。这并不会使渗透测试员和安全研究员等专业人员变得过时或价值降低；恰恰相反。通过让所有程序员关注安全问题，对专业安全审计的需求将变得更加明显。
 
-This book hopes to be a bridge: to teach everyday programmers from any
-field or specialization to understand just enough cryptography to do
-their jobs, or maybe just satisfy their appetite.
+本书希望成为一座桥梁：教导来自任何领域或专业的普通程序员理解足够的密码学来完成他们的工作，或者也许只是满足他们的求知欲。
 
-Advanced sections
------------------
+高级章节
+--------
 
-This book is intended as a practical guide to cryptography for
-programmers. Some sections go into more depth than they need to in order
-to achieve that goal. They're in the book anyway, just in case you're
-curious; but I generally recommend skipping these sections. They'll be
-marked like this:
-
+本书旨在作为程序员的实用密码学指南。有些章节的深度超过了实现这一目标所需的深度。它们还是被收录在书中，以防你好奇；但我通常建议跳过这些章节。它们将像这样被标记：
 
 .. declare_admonition::
    :name: advanced
@@ -70,55 +33,47 @@ marked like this:
       :width: 80
       :align: left
 
-   This is an optional, in-depth section. It almost certainly won't help you write better software,
-   so feel free to skip it. It is only here to satisfy your inner geek's curiosity.
+   这是一个可选的高级深入章节。它几乎肯定不会帮助你编写更好的软件，
+   所以可以自由跳过。它只存在于这里以满足你内心极客的好奇心。
 
 .. canned_admonition::
    :from_template: advanced
 
-Development
------------
+开发
+---
 
-The entire Crypto 101 project is publicly developed on GitHub under the
-``crypto101`` organization, including `this book
-<https://www.github.com/crypto101/book/>`_.
+整个 Crypto 101 项目在 GitHub 上公开开发，由 ``crypto101`` 组织管理，
+包括 `这本书 <https://www.github.com/crypto101/book/>`_。
 
-This is an early pre-release of this book. All of your questions,
-comments and bug reports are highly appreciated. If you don't understand
-something after reading it, or if a sentence has particularly clumsy
-wording, *that's a bug* and I would very much like to fix it! Of course,
-if I never hear about your issue, it's very hard for me to address…
+这是本书的早期预发行版本。我们非常感谢您的所有问题、评论和错误报告。
+如果您在阅读后仍有不理解的地方，或者某句话措辞特别笨拙，*那就是一个错误*，
+我非常希望能修复它！当然，如果我从未收到您的反馈，我就很难解决......
 
-The copy of this book that you are reading right now is based on the git
-commit with hash |version|, also known as |release|.
+您现在阅读的这本书副本基于 git 提交哈希 |version|，也称为 |release|。
 
-Acknowledgments
----------------
+致谢
+----
 
-This book would not have been possible without the support and
-contributions of many people, even before the first public release. Some
-people reviewed the text, some people provided technical review, and
-some people helped with the original talk. In no particular order:
+如果没有许多人的支持和贡献，本书不可能完成，甚至在首次公开发布之前就如此。
+有些人审阅了文本，有些人提供了技术审阅，还有一些人帮助了原始演讲。
+不分先后顺序：
 
--  My wife, Ewa
+-  我的妻子，Ewa
 -  Brian Warner
 -  Oskar Żabik
 -  Ian Cordasco
 -  Zooko Wilcox-O'Hearn
 -  Nathan Nguyen (@nathanhere)
 
-Following the public release, many more people contributed changes. I'd
-like to thank the following people in particular (again, in no
-particular order):
+公开发布后，又有更多的人贡献了更改。我要特别感谢以下人员（同样，不分顺序）：
 
--  coh2, for work on illustrations
--  TinnedTuna, for review work on the XOR section (and others)
--  dfc, for work on typography and alternative formats
--  jvasile, for work on typefaces and automated builds
--  hmmueller, for many, many notes and suggestions
--  postboy (Ivan Zuboff), for many reported issues
--  EdOverflow, for many contributions
--  gliptak (Gábor Lipták) for work on automating builds,
+-  coh2，负责插图工作
+-  TinnedTuna，负责审查 XOR 部分（及其他）
+-  dfc，负责排版和替代格式工作
+-  jvasile，负责字体和自动化构建工作
+-  hmmueller，提供了许多注释和建议
+-  postboy (Ivan Zuboff)，报告了许多问题
+-  EdOverflow，做出了许多贡献
+-  gliptak (Gábor Lipták) 负责自动化构建工作，
 
-as well as the huge number of people that contributed spelling, grammar
-and content improvements. Thank you!
+以及大量贡献拼写、语法和内容改进的人。感谢大家！

@@ -1,88 +1,69 @@
-Random number generators
-------------------------
+随机数生成器
+------------
 
-   The generation of random numbers is too important to be left to chance.
+   "随机数的生成太重要了，不能交给运气。"
 
-       *Robert R. Coveyou*
+       *罗伯特·R·科维尤*
 
-Introduction
-~~~~~~~~~~~~
+介绍
+~~~~
 
-Many cryptographic systems require random numbers. So far, we've just
-assumed that they're available. In this chapter, we'll go into more depth
-about the importance and mechanics of random numbers in cryptographic
-systems.
+许多密码系统需要随机数。到目前为止，我们只是假设它们可用。
+在本章中，我们将更深入地探讨密码系统中随机数的重要性和机制。
 
-Producing random numbers is a fairly intricate process. Like with so
-many other things in cryptography, it's quite easy to get it completely
-wrong but have everything *look* completely fine to the untrained eye.
+产生随机数是一个相当复杂的过程。就像密码学中的许多其他事情一样，
+对于未经训练的眼睛来说，完全错误地把事情做好却让一切*看起来*完全正常是很容易的。
 
-There are three categories of random number generation that we'll
-consider separately:
+我们将分别考虑三类随机数生成：
 
--  True random number generators
--  Cryptographically secure pseudorandom number generators
--  Pseudorandom number generators
+-  真随机数生成器
+-  加密安全伪随机数生成器
+-  伪随机数生成器
 
-True random number generators
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+真随机数生成器
+~~~~~~~~~~~~~~
 
-   Any one who considers arithmetical methods of producing random digits
-   is, of course, in a state of sin.
+   "任何试图用算术方法产生随机数字的人都是当然处于罪恶状态中的人。"
 
-       *John von Neumann*
+       *约翰·冯·诺伊曼*
 
-John von Neumann, father of the modern model of computing, made an
-obvious point. We can't expect to produce random numbers using
-predictable, deterministic arithmetic. We need a source of randomness
-that isn't a consequence of deterministic rules.
+现代计算模型之父冯·诺伊曼指出了一个明显的观点。我们不能期望使用可预测的、
+确定性的算术来产生随机数。我们需要一个随机性来源，它不是确定性规则的结果。
 
-True random number generators get their randomness from physical
-processes. Historically, many systems have been used for producing such
-numbers. Systems like dice are still in common use today. However, for
-the amount of randomness we need for practical cryptographic algorithms,
-these are typically far too slow, and often quite unreliable.
+真随机数生成器从物理过程中获取随机性。历史上，许多系统被用于产生这样的数字。
+像骰子这样的系统今天仍然很常见。然而，对于实用密码算法所需的随机数量，
+这些通常太慢，而且往往相当不可靠。
 
-We've since come up with more speedy and reliable sources of randomness.
-There are several categories of physical processes that are used for
-hardware random number generation:
+我们已经想出了一些更快速、更可靠的随机性来源。有几种类别的物理过程用于硬件随机数生成：
 
--  Quantum processes
--  Thermal processes
--  Oscillator drift
--  Timing events
+-  量子过程
+-  热过程
+-  振荡器漂移
+-  定时事件
 
-Keep in mind that not all of these options necessarily generate
-high-quality, truly random numbers. We'll elaborate further on how they
-can be applied successfully anyway.
+请记住，并非所有这些选项必然产生高质量、真正随机的数字。
+我们将进一步详细说明它们如何成功应用。
 
-Radioactive decay
-^^^^^^^^^^^^^^^^^
-
-One example of a quantum physical process used to produce random numbers
-is radioactive decay. We know that radioactive substances will slowly
-decay over time. It's impossible to know when the next atom will decay;
-that process is entirely random. Detecting when such a decay has
-occurred, however, is fairly easy. By measuring the time between
-individual decays, we can produce random numbers.
-
-Shot noise
+放射性衰变
 ^^^^^^^^^^
 
-Shot noise is another quantum physical process used to produce random
-numbers. Shot noise is based on the fact that light and electricity are
-caused by the movement of indivisible little packets: photons in the
-case of light, and electrons in the case of electricity.
+用于产生随机数的一个量子物理过程的例子是放射性衰变。
+我们知道放射性物质会随时间慢慢衰变。不可能知道下一个原子何时衰变；
+这个过程是完全随机的。然而，检测这种衰变何时发生是相当容易的。
+通过测量单个衰变之间的时间，我们可以产生随机数。
 
-Nyquist noise
-^^^^^^^^^^^^^
+散粒噪声
+^^^^^^^^
 
-An example of a thermal process used to produce random numbers is
-Nyquist noise. Nyquist noise is the noise that occurs from charge
-carriers (typically electrons) traveling through a medium with a certain
-resistance. That causes a tiny current to flow through the resistor (or,
-alternatively put, causes a tiny voltage difference across the
-resistor).
+散粒噪声是另一种用于产生随机数的量子物理过程。散粒噪声基于光和电由不可分割的小包运动引起的事实：
+光的情况是光子，电的情况是电子。
+
+奈奎斯特噪声
+^^^^^^^^^^^
+
+用于产生随机数的热过程的一个例子是奈奎斯特噪声。
+奈奎斯特噪声是电荷载流子（通常是电子）通过具有一定电阻的介质传输时产生的噪声。
+这导致通过电阻器有微小电流流动（或者，换句话说，在电阻器两端产生微小电压差）。
 
 .. math::
 
@@ -92,68 +73,53 @@ resistor).
 
    v = \sqrt{4 k_B T R \Delta_f }
 
-These formulas may seem a little scary to those who haven't seen the
-physics behind them before, but don't worry too much: understanding them
-isn't really necessary to go along with the reasoning. These formulas
-are for the *root mean square*. If you've never heard that term before,
-you can roughly pretend that means “average”. :math:`\Delta f` is the
-bandwidth, :math:`T` is the temperature of the system in Kelvins,
-:math:`k_B` is Boltzmann's constant.
+对于那些以前没有见过这些物理学背后的人来说，这些公式可能有点吓人，
+但不要太担心：理解它们并不是继续推理所必需的。这些公式是针对*均方根*的。
+如果您以前没听说过这个术语，您可以大致假装那意思是"平均"。
+:math:`\Delta f` 是带宽，:math:`T` 是系统的开尔文温度，
+:math:`k_B` 是玻尔兹曼常数。
 
-As you can see from the formula, Nyquist noise is *thermal*, or
-temperature-dependent. Fortunately, an attacker generally can't use that
-property to break the generator: the temperature at which it would
-become ineffective is so low that the system using it has probably
-already failed at that point.
+从公式中您可以看到，奈奎斯特噪声是*热*的，或依赖于温度的。幸运的是，
+攻击者通常不能利用这个特性来破坏生成器：它变得无效的温度是如此之低，
+以至于使用它的系统可能在那时已经失败了。
 
-By evaluating the formula, we can see that Nyquist noise is quite small.
-At room temperature with reasonable assumptions (10 kHz bandwidth and a
-1k\ :math:`\Omega` resistor), the Nyquist voltage is in the order of
-several hundred nanovolts. Even if you round up liberally to a microvolt
-(a thousand nanovolts), that's still a thousandth of a thousandth of a
-volt, and even a tiny AA battery produces 1.5V.
+通过评估公式，我们可以看到奈奎斯特噪声相当小。在室温下合理的假设下
+（10 kHz 带宽和 1k\ :math:`\Omega` 电阻），奈奎斯特电压在几百纳伏量级。
+即使您大方地近似到微伏（一千纳伏），那仍然是千分之一伏特，
+甚至一个小号 AA 电池产生 1.5V。
 
-While the formulas describe the root mean square, the value you can
-measure will be randomly distributed. By repeatedly measuring it, we can
-produce high-quality random numbers. For most practical applications,
-thermal noise numbers are quite high quality and relatively unbiased.
+虽然公式描述的是均方根，但您测量的值将是随机分布的。通过重复测量它，
+我们可以产生高质量的随机数。对于大多数实际应用，热噪声数字质量相当高
+且相对无偏。
 
-TODO: we've never actually explained the word entropy; “resistance an
-attacker perceives” is necessary in a good definition
+TODO：我们从未真正解释过"熵"这个词；"攻击者感知的抵抗力"是好的定义所必需的
 
-TODO: explain synchronous stream ciphers as CSPRNGs
+TODO：解释同步流密码作为 CSPRNG
 
-Cryptographically secure pseudorandom generators
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+加密安全伪随机生成器
+~~~~~~~~~~~~~~~~~~~~~~
 
-While we'll see several examples of cryptographically secure
-pseudorandom generators in the next few sections, keep in mind that they
-are all just algorithms that *could* be used. As an application
-developer, you should *never* be making a choice between one of them.
+虽然我们将在接下来的几节中看到几个加密安全伪随机生成器的例子，
+但请记住它们都只是*可以*被使用的算法。作为应用程序开发人员，
+您应该*从不*在它们之间做出选择。
 
-Instead, in the few cases you really want to pick a random number
-manually, you should *always* use the cryptographically secure random
-number generator provided by your operating system: ``/dev/urandom`` on
-\*NIX (Linux, BSDs, and OS X), or ``CryptGenRandom`` on Windows. Python
-provides handy interfaces to these in the form of ``os.urandom`` and
-``random.SystemRandom``.
+相反，在您真正想手动挑选随机数的少数情况下，您应该*始终*使用操作系统提供的
+加密安全随机数生成器：\*NIX（Linux、BSD 和 OS X）上的 ``/dev/urandom``，
+或 Windows 上的 ``CryptGenRandom``。Python 以 ``os.urandom`` 和
+``random.SystemRandom`` 的形式提供了这些的便捷接口。
 
-While they can be implemented securely, try to avoid using userspace
-cryptographically secure random number generators such as the one in
-OpenSSL. There are far more things that can go wrong with them, usually
-involving their internal state: either they remain uninitialized, poorly
-initialized, or end up re-using the same state in different locations.
-In all of these cases, the resulting cryptosystem is completely and
-utterly broken.
+虽然它们可以安全实现，但尽量避免使用用户空间的加密安全伪随机数生成器，
+例如 OpenSSL 中的那个。有更多事情可能出问题，通常涉及它们内部状态：
+要么它们未初始化、初始化不良，或者在不同的位置重复使用相同状态。
+在所有这些情况下，由此产生的密码系统是完全和彻底破坏的。
 
-TODO: talk about the FUD in the Linux man page for urandom
+TODO：谈谈 Linux urandom 手册页中的恐惧
 
 .. canned_admonition::
    :from_template: advanced
 
-   Since this is a specific cryptographically secure
-   pseudorandom number generator algorithm, you don't actually need to
-   know how it works to write good software. Just use ~urandom~.
+   由于这是一个特定的加密安全伪随机数生成器算法，您实际上不需要知道
+   它如何工作就能写出好软件。只需使用 ~urandom~。
 
 Yarrow
 ~~~~~~
@@ -161,21 +127,18 @@ Yarrow
 .. canned_admonition::
    :from_template: advanced
 
-The Yarrow algorithm is a cryptographically secure pseudorandom number
-generator.
+Yarrow 算法是一种加密安全伪随机数生成器。
 
-TODO: actually explain Yarrow
+TODO：实际上解释 Yarrow
 
-This algorithm is used as the CSPRNG for FreeBSD, and was inherited by
-Mac OS X. On both of these operating systems, it's used to implement
-``/dev/random``. Unlike on Linux, ``/dev/urandom`` is just an alias for
-``/dev/random``.
+该算法被用作 FreeBSD 的 CSPRNG，并被 Mac OS X 继承。在这两个操作系统上，
+它被用来实现 ``/dev/random``。与 Linux 不同，``/dev/urandom`` 只是
+``/dev/random`` 的别名。
 
 Blum Blum Shub
 ~~~~~~~~~~~~~~
 
-TODO: explain this, and why it's good (provable), but why we don't use
-it (slow)
+TODO：解释这个，以及为什么它好（可证明），但我们为什么不使用它（慢）
 
 ``Dual_EC_DRBG``
 ~~~~~~~~~~~~~~~~
@@ -183,330 +146,227 @@ it (slow)
 .. canned_admonition::
    :from_template: advanced
 
-``Dual_EC_DRBG`` is a NIST standard for a cryptographically secure
-pseudorandom bit generator. It sparked a large amount of controversy:
-despite being put forth as an official, federal cryptographic standard,
-it quickly became evident that it wasn't very good.
+``Dual_EC_DRBG`` 是 NIST 的加密安全伪随机位生成器标准。它引发了大量争议：
+尽管作为官方的联邦密码标准提出，它很快被证明不是很好。
 
-Cryptanalysis eventually demonstrated that the standard could contain a
-back door hidden in the constants specified by the standard, potentially
-allowing an unspecified attacker to completely break the random number
-generator.
+密码分析最终证明该标准可能在其规范中指定的常数中存在后门，潜在地允许
+某个未指明的攻击者完全破坏随机数生成器。
 
-Several years afterwards, leaked documents suggested a backdoor in an
-unnamed NIST standard released in the same year as ``Dual_EC_DRBG``,
-fueling the suspicions further. This led to an official recommendation
-from the standards body to stop using the standard, which was previously
-unheard of under such circumstances.
+幾年後，泄露的文件暗示了在同一年发布的未具名 NIST 标准中存在后门，
+这进一步加剧了怀疑。这导致了该标准被官方建议停止使用，在这样的情况下这是前所未有的。
 
-Background
-^^^^^^^^^^
+背景
+^^^^
 
-For a long time, the official standards produced by NIST lacked good,
-modern cryptographically secure pseudorandom number generators. It had a
-meager choice, and the ones that had been standardized had several
-serious flaws.
+长期以来，NIST 生产的官方标准缺乏良好的、现代的加密安全伪随机数生成器。
+它的选择很少，而且已经标准化的那些有几个严重的缺陷。
 
-NIST hoped to address this issue with a new publication called SP
-800-90, that contained several new cryptographically secure pseudorandom
-number generators. This document specified a number of algorithms, based
-on different cryptographic primitives:
+NIST 希望通过名为 SP 800-90 的新出版物解决这个问题，该出版物包含几个新的
+加密安全伪随机数生成器。该文件指定了基于不同密码原语的多种算法：
 
-#. Cryptographic hash functions
+#. 加密哈希函数
 #. HMAC
-#. Block ciphers
-#. Elliptic curves
+#. 分组密码
+#. 椭圆曲线
 
-Right off the bat, that last one jumps out. Using elliptic curves for
-random number generation was unusual. Standards like these are expected
-to be state-of-the-art, while still staying conservative. Elliptic
-curves had been considered before in an academic context, but that was a
-far cry from being suggested as a standard for common use.
+首先，最后一个跳出来。在随机数生成中使用椭圆曲线是不寻常的。人们期望这类标准是最先进的，
+同时仍然保持保守。椭圆曲线在学术背景下被考虑过，但那是远非建议作为常用标准。
 
-There is a second reason elliptic curves seem strange. HMAC and block
-ciphers are obviously symmetric algorithms. Hash functions have their
-applications in asymmetric algorithms such as digital signatures, but
-aren't themselves asymmetric. Elliptic curves, on the other hand, are
-exclusively used for asymmetric algorithms: signatures, key exchange,
-encryption.
+有第二个原因使椭圆曲线看起来奇怪。HMAC 和分组密码明显是对称算法。
+哈希函数在非对称算法（如数字签名）中有应用，但它们本身不是非对称的。
+椭圆曲线，另一方面，专门用于非对称算法：签名、密钥交换、加密。
 
-That said, the choice didn't come entirely out of the blue. A choice for
-a cryptographically secure pseudorandom number generator with a strong
-number-theoretical basis isn't unheard of: Blum Blum Shub is a perfect
-example. Those generators are typically much slower than the
-alternatives. ``Dual_EC_DRBG``, for example, is three orders of
-magnitude slower than its peers presented in the same standard. The idea
-is that the extra confidence inspired by the stronger mathematical
-guarantees is worth the performance penalty. For example, we're fairly
-confident that factoring numbers is hard, but we're a lot less sure
-about our hash functions and ciphers. RSA came out in 1977 and has stood
-the test of time quite well since then. DES came out two years later,
-and is now considered completely broken. MD4 and MD5 came out over a
-decade later, and are completely broken as well.
+话说回来，这个选择并非完全凭空而来。选择具有强数论基础的加密安全伪随机数生成器并非闻所未闻：
+Blum Blum Shub 就是一个完美的例子。这些生成器通常比替代品慢得多。
+``Dual_EC_DRBG`` 例如，比同标准中介绍的其他算法慢三个数量级。
+想法是更强的数学保证带来的额外信心值得性能损失。例如，我们对因式分解很难相当有信心，
+但我们对自己的哈希函数和密码就不那么确定了。RSA 诞生于 1977 年并经受住了时间的考验。
+DES 在两年后问世，现在被认为完全被破坏。MD4 和 MD5 在十年多后问世，也完全被破坏了。
 
-The problem is, though, that the standard didn't actually provide the
-security proof. The standard specifies the generator but then merely
-suggests that it would be at least as hard as solving the elliptic curve
-discrete log problem. Blum Blum Shub, by contrast, has a proof that
-shows that breaking it is at least as hard as solving the quadratic
-residuosity problem. The best algorithm we have for that is factoring
-numbers, which we're fairly sure is pretty hard.
+然而，问题是标准实际上没有提供安全证明。标准指定了生成器但仅仅建议它至少和
+解决椭圆曲线离散对数问题一样难。相比之下，Blum Blum Shub 有一个证明表明
+破坏它至少和解决二次剩余问题一样难。我们有的最好算法是因式分解数字，我们相当确定那是很难的。
 
-The omission of the proof is a bit silly, because there's no reason
-you'd use a pseudorandom number generator as slow as ``Dual_EC_DRBG``
-unless you had proof that you were getting something in return for the
-performance hit.
+这个遗漏有点愚蠢，因为除非您从性能损失中获得一些回报，
+否则没有理由使用像 ``Dual_EC_DRBG`` 这样慢的伪随机数生成器。
 
-Cryptographers later did the homework that NIST should have provided in
-the specification :cite:`ecdrbg1` :cite:`ecdrbg2`.
-Those analyses quickly highlighted a few issues.
+密码学家后来做了 NIST 应该在规范中提供的功课 \ :cite:`ecdrbg1`\ \ :cite:`ecdrbg2`\ 。
+这些分析很快突出了几个问题。
 
-A quick overview of the algorithm
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+算法快速概览
+^^^^^^^^^^^^
 
-The algorithm consists of two parts:
+该算法由两部分组成：
 
-#. Generating pseudorandom points on the elliptic curve, which are
-   turned into the internal state of the generator;
-#. Turning those points into pseudorandom bits.
+#. 生成椭圆曲线上的伪随机点，它们被变成生成器的内部状态；
+#. 将这些点变成伪随机比特。
 
-We'll illustrate this graphically, with an illustration based on the
-work by Shumow and Ferguson, two cryptographers who highlighted some of
-the major issues with this algorithm:
+我们将用图形说明这一点，基于 Shumow 和 Ferguson 的工作，
+两位密码学家突出了该算法的一些主要问题：
 
 .. figure:: ./Illustrations/Dual_EC_DRBG/Diagram.svg
    :align: center
 
-Throughout the algorithm, :math:`\phi` is a function that takes a curve
-point and turns it into an integer. The algorithm needs two given points
-on the curve: :math:`P` and :math:`Q`. These are fixed, and defined in
-the specification. The algorithm has an internal state :math:`s`. When
-producing a new block of bits, the algorithm turns :math:`s` into a
-different value :math:`r` using the :math:`\phi` function and elliptic
-curve scalar multiplication with :math:`P`:
+在整个算法中，:math:`\phi` 是一个接收曲线点并将其转换为整数的函数。
+算法需要曲线上两个给定点：:math:`P` 和 :math:`Q`。这些是固定的，由规范定义。
+算法有内部状态 :math:`s`。当产生新的一块比特时，算法使用 :math:`\phi`
+函数和椭圆曲线标量乘法将 :math:`s` 转换为不同的值 :math:`r`：
 
 .. math::
 
    r = \phi(sP)
 
-That value, :math:`r`, is used both for producing the output bits and
-updating the internal state of the generator. In order to produce the
-output bits, a different elliptic curve point, :math:`Q`, is used. The
-output bits are produced by multiplying :math:`r` with :math:`Q`, and
-running the result through a transformation :math:`\theta`:
+这个值 :math:`r` 同时用于产生输出比特和更新生成器的内部状态。为了产生输出比特，
+使用不同的椭圆曲线点 :math:`Q`。通过将 :math:`r` 与 :math:`Q` 相乘并将结果
+通过变换 :math:`\theta` 来产生输出比特：
 
 .. math::
 
    o = \theta(\phi(rQ))
 
-In order to perform the state update, :math:`r` is multiplied with
-:math:`P` again, and the result is converted to an integer. That integer
-is used as the new state :math:`s`.
+为了执行状态更新，:math:`r` 再次与 :math:`P` 相乘。结果转换为整数。
+该整数作为新状态 :math:`s` 使用。
 
 .. math::
 
    s = \phi(rP)
 
-Issues and question marks
-^^^^^^^^^^^^^^^^^^^^^^^^^
+问题和问号
+^^^^^^^^^^^^^
 
-First of all, :math:`\phi` is extremely simple: it just takes the
-:math:`x` coordinate of the curve point, and discards the :math:`y`
-coordinate. That means that it's quite easy for an attacker who sees the
-output value of :math:`\phi` to find points that could have produced
-that value. In itself, that's not necessarily a big deal; but, as we'll
-see, it's one factor that contributes to the possibility of a backdoor.
+首先，:math:`\phi` 极其简单：它只取曲线点的 :math:`x` 坐标，并丢弃 :math:`y` 坐标。
+这意味着攻击者看到 :math:`\phi` 的输出值时很容易找到可能产生该值的点。
+就其本身而言，这不一定是大问题；但正如我们将看到的，它是后门可能性的一个贡献因素。
 
-Another flaw was shown where points were turned into pseudorandom bits.
-The :math:`\theta` function simply discards the 16 most significant
-bits. Previous designs discarded significantly more: for 256-bit curves
-such as these, they discarded somewhere in the range of 120 and 175
-bits.
+另一个缺陷出现在点被转换成伪随机比特的地方。:math:`\theta` 函数只是丢弃 16 个最高有效位。
+之前的设计丢弃了显著更多：对于 256 位曲线（如这些），丢弃了大约 120 到 175 位。
 
-Failing to discard sufficient bits gave the generator a small bias. The
-next-bit property was violated, giving attackers a better than 50%
-chance of guessing the next bit correctly. Granted, that chance was only
-about one in a thousand better than 50%; but that's still unacceptable
-for what's supposed to be the state-of-the-art in cryptographically
-secure pseudorandom number generators.
+丢弃足够的位对生成器造成了小偏差。下一个比特性质被违反，给攻击者超过 50% 的机会
+正确猜测下一个比特。当然，这个机会只比 50% 好约千分之一；但这对应该是最先进的
+加密安全伪随机数生成器来说是不可接受的。
 
-Discarding only those 16 bits has another consequence. Because only 16
-bits were discarded, we only have to guess :math:`2^{16}` possibilities
-to find possible values of :math:`\phi(rQ)` that produced the output.
-That is a very small number: we can simply enumerate all of them. Those
-values are the outputs of :math:`\phi`, which as we saw just returns the
-:math:`x` coordinate of a point. Since we know it came from a point on
-the curve, we just have to check if our guess is a solution for the
-curve equation:
+只丢弃这 16 位还有另一个后果。因为只丢弃了 16 位，我们只需要猜测 :math:`2^{16}` 种可能性
+来找到可能产生输出值的 :math:`\phi(rQ)` 值。这是一个很小的数字：我们可以简单地枚举所有这些。
+这些值是 :math:`\phi` 的输出，正如我们所看到的，它只是返回点的 :math:`x` 坐标。
+由于我们知道它来自曲线上的点，我们只需检查我们的猜测是否是曲线方程的解：
 
 .. math::
 
    y^2 \equiv x^3 + ax + b \pmod p
 
-The constants :math:`a, b, p` are specified by the curve. We've just
-guessed a value for :math:`x`, leaving only one unknown, :math:`y`. We
-can solve that quite efficiently. We compute the right hand side and see
-if it's a perfect square:
-:math:`y^2 \equiv q \equiv \sqrt{x^3 + ax + b} \pmod p`. If it is,
-:math:`A = (x, \sqrt{q}) = (x, y)` is a point on the curve. This gives us a
-number of possible points :math:`A`, one of which is :math:`rQ` used to
-produce the output.
+曲线指定常数 :math:`a, b, p`。我们刚刚猜测了 :math:`x` 值，只留下一个未知数 :math:`y`。
+我们可以相当有效地解决它：我们计算右边并看它是否是完全平方数：
+:math:`y^2 \equiv q \equiv \sqrt{x^3 + ax + b} \pmod p`。如果是，:math:`A = (x, \sqrt{q}) = (x, y)`
+是曲线上的点。这给了我们可能的点 :math:`A` 的数量，其中一个是用于产生输出的 :math:`rQ`。
 
-This isn't a big deal at face value. To find the state of the algorithm,
-an attacker needs to find :math:`r`, so they can compute :math:`s`. They
-still need to solve the elliptic curve discrete log problem to find
-:math:`r` from :math:`rQ`, given :math:`Q`. We're assuming that problem
-is hard.
+表面上这没什么大不了的。要找到算法的状态，攻击者需要找到 :math:`r`，所以他们可以计算 :math:`s`。
+他们仍然需要解决椭圆曲线离散对数问题，给定 :math:`Q` 从 :math:`rQ` 找到 :math:`r`。
+我们假设这个问题是难的。
 
-Keep in mind that elliptic curves are primitives used for asymmetric
-encryption. That problem is expected to be hard to solve in general, but
-what if we have some extra information? What if there's a secret value
-:math:`e` so that :math:`eQ=P`?
+请记住椭圆曲线用于非对称加密的原始。通常认为这个问题一般情况下难解决，
+但如果我们有一些额外信息会怎样？如果存在秘密值 :math:`e` 使得 :math:`eQ=P` 会怎样？
 
-Let's put ourselves in the shoes of an attacker knowing :math:`e`. We
-repeat our math from earlier. One of those points :math:`A` we just
-found is the :math:`rQ` we're looking for. We can compute:
+让我们站在知道 :math:`e` 的攻击者的立场。我们重复之前的数学。我们刚找到的点 :math:`A`
+之一是我们要找的 :math:`rQ`。我们可以计算：
 
 .. math::
 
    \phi(eA) \equiv \phi(erQ) \equiv \phi(rP) \pmod p
 
-That last step is a consequence of the special relationship between
-:math:`e, P, Q`. That's pretty interesting, because :math:`\phi(rP)` is
-exactly the computation the algorithm does to compute :math:`s`, the new
-state of the algorithm! That means that an attacker that knows :math:`e`
-can, quite efficiently, compute the new state :math:`s` from any output
-:math:`o`, allowing them to predict all future values of the generator!
+最后一步是由于 :math:`e, P, Q` 之间的特殊关系。这很有趣，
+因为 :math:`\phi(rP)` 正是算法用于计算新状态 :math:`s` 的计算，
+也就是生成器的新状态！这意味着知道 :math:`e` 的攻击者可以相当高效地
+从任何输出 :math:`o` 计算新状态 :math:`s`，从而预测生成器的所有未来值！
 
-This assumes that the attacker knows which :math:`A` is the *right*
-:math:`A`. Because only 16 bits were discarded there are only 16 bits
-left for us to guess. That gives us :math:`2^{16}` candidate :math:`x`
-coordinates. Experimentally, we find that roughly half of the possible
-:math:`x` coordinates correspond to points on the curve, leaving us with
-:math:`2^{15}` possible curve points :math:`A`, one of which is
-:math:`rQ`. That's a pretty small number for a bit of computer-aided
-arithmetic: plenty small for us to try all options. We can therefore say
-that an attacker that does know the secret value :math:`e` most
-definitely can break the generator.
+这假设攻击者知道哪个 :math:`A` 是*正确的* :math:`A`。因为只丢弃了 16 位，
+我们只剩下 16 位可供猜测。这给了我们 :math:`2^{16}` 候选 :math:`x` 坐标。
+实验上，我们发现大约一半的可能 :math:`x` 坐标对应于曲线上的点，给我们留下
+:math:`2^{15}` 个可能的曲线点 :math:`A`，其中一个是 :math:`rQ`。对于借助计算机的算术来说，
+这是一个相当小的数字：足够小，我们可以尝试所有选项。因此我们可以说知道秘密值 :math:`e` 的攻击者
+确实可以破坏生成器。
 
-So, we've now shown that if there is a magical :math:`e` for which
-:math:`eQ=P`, and you can pick :math:`P` and :math:`Q` (and you don't
-have to explain where you got them from), that you could break the
-generator. How do you pick such values?
+所以，我们现在已经证明如果存在一个神奇的 :math:`e` 使得 :math:`eQ=P`，
+并且你可以选择 :math:`P` 和 :math:`Q`（而且你不需要解释从哪里得到它们），
+那么你可以破坏生成器。你如何选择这样的值？
 
-To demonstrate just how possible it is, the researchers started from the
-NIST curve's :math:`P` and :math:`p` values, but came up with their own
-:math:`Q'`. They did this by starting with :math:`P`, picking a random
-:math:`d` (keeping it secret), and setting :math:`Q' = dP`. The trick is
-that there's an efficient algorithm for computing :math:`e` in
-:math:`eQ' = P` if you know the :math:`d` in :math:`Q' = dP`. This is the
-:math:`e` we need for our earlier attack. When they
-tried this out, they discovered that in all cases (that is, for many
-random :math:`d`), seeing 32 bytes of output was enough to determine the
-state :math:`s`.
+为了演示这多么可能，研究人员从 NIST 曲线的 :math:`P` 和 :math:`p` 值开始，
+但他们创建了自己的 :math:`Q'`。他们通过从 :math:`P` 开始，选择一个随机 :math:`d`
+（保持秘密），并设置 :math:`Q' = dP` 做到这一点。诀窍是存在有效的算法，
+如果你知道 :math:`Q' = dP` 中的 :math:`d`，可以计算 :math:`e` 使得 :math:`eQ' = P`。
+这就是我们早期攻击需要的 :math:`e`。当他们尝试这个时，他们发现在所有情况下
+（即对于许多随机 :math:`d`），看到 32 字节输出就足以确定状态 :math:`s`。
 
-All of this, of course, only demonstrates that it is possible for the
-specified values of :math:`P` and :math:`Q` to be special values with a
-secret back door. It doesn't provide any evidence that the *actual*
-values have a backdoor in them. However, given that the standard never
-actually explains *how* they got the magical value for :math:`Q`, it
-doesn't really inspire a lot of confidence. Typically, cryptographic
-standards use “nothing-up-my-sleeve” numbers, such as the value of some
-constant such as :math:`\pi` or the natural logarithm base, :math:`e`.
+当然，所有这些只证明了指定的 :math:`P` 和 :math:`Q` 值有可能是带有秘密后门的特殊值。
+它没有提供任何证据表明*实际的*值有后门。然而，鉴于标准从未实际解释*如何*得到
+神奇的 :math:`Q` 值，它并没有真正激发很多信心。通常，密码学标准使用"袖中无物"数字，
+例如像圆周率 :math:`\pi` 或自然对数的底，:math:`e` 这样的常数值。
 
-If someone does know the backdoor, the consequences are obviously
-devastating. We've already argued for the necessity of cryptographically
-secure pseudorandom number generators: having a broken one essentially
-means that all cryptosystems that use this generator are completely and
-utterly defeated.
+如果有人确实知道后门，后果显然是毁灭性的。我们已经论证了加密安全伪随机数生成器的必要性：
+有一个被破坏的生成器基本上意味着所有使用这个生成器的密码系统完全、彻底地被击败。
 
-There are two ways one might try to fix this particular algorithm:
+有两种方法可能尝试修复这个特定算法：
 
--  Make the :math:`\theta` function more complex to invert, rather than
-   just discarding 16 bits. This makes it harder to find candidate
-   points, and hence, harder to perform the attack. One obvious way
-   would be to discard more bits. Another option would be to use a
-   cryptographically secure hash, or a combination of both.
--  Generate random :math:`Q` every time you start the algorithm,
-   possibly by picking a random :math:`d` and setting :math:`Q = dP`. Of
-   course, :math:`d` has to be sufficiently large and truly random: if
-   :math:`\theta` is unchanged, and there are only a few values
-   :math:`d` can have, the attacker can just perform the above attack
-   for all values of :math:`d`.
+-  使 :math:`\theta` 函数更复杂以反转，而不是仅仅丢弃 16 位。这使得找到候选点更困难，
+   因此，进行攻击更困难。一个明显的方法是丢弃更多位。另一种选择是使用加密安全哈希，
+   或两者的组合。
+-  每次启动算法时生成随机 :math:`Q`，可能通过选择随机 :math:`d` 并设置 :math:`Q = dP`。
+   当然，:math:`d` 必须足够大和真正随机：如果 :math:`\theta` 未改变，而且 :math:`d` 只能
+   有很少的值，攻击者可以对我们上面攻击的所有 :math:`d` 值进行上述尝试。
 
-Both of these are really just band-aid solutions; it would be a much
-better idea to just use a different algorithm altogether. These
-suggestions don't resolve the issue that it's slow, exotic, and now a
-retracted standard.
+这些真的都只是创可贴解决方案；更好的主意是完全使用不同的算法。
+这些建议没有解决它慢、异国情调且现在是撤回标准的问题。
 
-Aftermath
-^^^^^^^^^
+后续影响
+^^^^^^^^
 
-TODO: Talk about RSA guy's comments + snowden leaks
+TODO：谈论 RSA 家伙的评论 + 斯诺登泄密
 
-Mersenne Twister
-~~~~~~~~~~~~~~~~
+梅森旋转算法
+~~~~~~~~~~~
 
-Mersenne Twister is a very common pseudorandom number generator. It has
-many nice properties, such as high performance, a huge period [#]_ of
-:math:`2^{19937} - 1 \approx 4 \cdot 10^{6001}`, and it passes all but
-the most demanding randomness tests. Despite all of these wonderful
-properties, it is *not* cryptographically secure.
+梅森旋转是一种非常常见的伪随机数生成器。它有许多很好的特性，
+例如高性能，巨大的周期 [#]_ 为 :math:`2^{19937} - 1 \approx 4 \cdot 10^{6001}`，
+并且它通过所有但最苛刻的随机性测试。尽管有所有这些美妙特性，它*不是*加密安全的。
 
 .. [#]
-   The period of a pseudorandom number generator is how many random
-   numbers it produces before the entire sequence repeats.
+   伪随机数生成器的周期是指它产生多重复之前产生多少个随机数。
 
-An in-depth look at the Mersenne Twister
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+深入了解梅森旋转
+^^^^^^^^^^^^^^^^^
 
 .. canned_admonition::
    :from_template: advanced
 
-To demonstrate why Mersenne Twister isn't cryptographically secure,
-we'll take a look at how the algorithm works. Fortunately, it's not very
-complex.
+为了演示为什么梅森旋转不是加密安全的，我们将看一下算法如何工作。
+幸运的是，它不是非常复杂。
 
-The standard Mersenne Twister algorithm operates on an internal state
-array :math:`S` consisting of 624 unsigned 32-bit integers, and an index
-:math:`i` pointing to the current integer. It consists of three steps:
+标准梅森旋转算法在内部状态数组 :math:`S` 上运行，由 624 个无符号 32 位整数组成，
+以及指向当前整数的索引 :math:`i`。它由三步组成：
 
-#. An optional initialization function, which produces an initial state
-   from a small random value called a *seed*.
-#. A state generation function, which produces a new state from the old
-   state.
-#. An extraction function, also called the *tempering* function, that
-   produces a random number from the current element of the state (the
-   element pointed at by the index :math:`i`).
+#. 可选的初始化函数，从小的随机值称为*种子*产生初始状态。
+#. 状态生成函数，从旧状态产生新状态。
+#. 提取函数，也称为*暂存*函数，从状态的当前元素（索引 :math:`i` 指向的元素）产生随机数。
 
-Whenever the extraction function is called, the index to the current
-integer is incremented. When all of the current elements of the state
-have been used to produce a number, the state generation function is
-called again. The state initialization function is called right
-before the first number is extracted.
+每次调用提取函数时，当前整数的索引都会递增。当状态的所有当前元素都用于产生数字时，
+再次调用状态生成函数。在第一个数字被提取之前立即调用状态初始化函数。
 
-So, to recap: the state is regenerated, then the extraction function
-goes over each of the elements in the state, until it runs out. This
-process repeats indefinitely.
+所以，回顾一下：状态被重新生成，然后提取函数遍历状态中的每个元素，直到用完。
+这个过程无限重复。
 
-TODO: illustrate
+TODO：图示
 
-We'll look at each of the parts briefly. The exact workings of them is
-outside the scope of this book, but we'll look at them just long enough
-to get some insight into why Mersenne Twister is unsuitable as a
-cryptographically secure random number generator.
+我们将简要查看每个部分。它们的确切工作原理超出了本书范围，
+但我们只看它们足够长的时间以深入了解为什么梅森旋转不适合作为加密安全随机数生成器。
 
-The initialization function
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+初始化函数
+^^^^^^^^^^^
 
-The initialization function creates an instance of Mersenne Twister's
-state array, from a small initial random number called a *seed*.
+初始化函数从小的初始随机数（称为*种子*）创建梅森旋转状态数组的实例。
 
-The array starts with the seed itself. Then, each next element is
-produced from a constant, the previous element, and the index of the new
-element. Elements are produced until there are 624 of them.
+数组以种子本身开始。然后，从常数、前一个元素和新元素的索引产生下一个元素。
+产生元素直到有 624 个。
 
-Here's the Python source code:
+这是 Python 源代码：
 
 .. code:: python
 
@@ -523,27 +383,21 @@ Here's the Python source code:
 
        return state
 
-For those of you who haven't worked with Python or its bitwise
-operators:
+对于还没有使用过 Python 或其位运算符的您：
 
--  ``>>`` and ``<<`` are right-shift and left-shift
--  ``&`` is binary AND: :math:`0 \& 0 = 0 \& 1 = 1 \& 0 = 0`, and
-   :math:`1 \& 1 = 1`.
--  ``^`` is binary XOR, ``^=`` XORs and assigns the result to the name
-   on the left-hand side, so ``x ^= k`` is the same thing as
-   ``x = x ^ k``.
+-  ``>>`` 和 ``<<`` 是右移和左移
+-  ``&`` 是二进制与：:math:`0 \& 0 = 0 \& 1 = 1 \& 0 = 0`，而 :math:`1 \& 1 = 1`
+-  ``^`` 是二进制异或，``^=`` 异或并将结果赋给左侧的名称，所以 ``x ^= k`` 等价于 ``x = x ^ k``
 
-REVIEW: Bitwise arithmetic appendix?
+审阅：位算术附录？
 
-The state regeneration function
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+状态再生函数
+^^^^^^^^^^^^^
 
-The state regeneration function takes the current state and produces a
-new state. It is called right before the first number is extracted, and
-every time all 624 elements of the state have been used up.
+状态再生函数接收当前状态并产生新状态。它在第一个数字被提取之前以及
+当状态的所有 624 个元素都被使用时调用。
 
-The Python source code for this function is fairly simple. Note that it
-modifies the state array in place, instead of returning a new one.
+这个函数的 Python 源代码相当简单。注意它原地修改状态数组，而不是返回新的。
 
 .. code:: python
 
@@ -558,24 +412,19 @@ modifies the state array in place, instead of returning a new one.
            if y % 2:
                s[i] ^= 0x9908b0df
 
-The ``%`` in an expression like ``s[(i + n) % 624]`` means that a next
-element of the state is looked at, wrapping around to the start of the
-state array if there is no next element.
+``%`` 在像 ``s[(i + n) % 624]`` 的表达式中意味着查看下一个状态元素，
+如果没有下一个元素则循环回状态数组的开头。
 
-The values ``0x80000000`` and ``0x7fffffff`` have a specific meaning
-when interpreted as sequences of 32 bits. ``0x80000000`` has only the
-first bit set; ``0x7fffffff`` has every bit except the first bit set.
-Because these are bitwise AND'ed together (``&``), this effectively
-means that after the first two lines in the loop, ``y`` consists of the
-first bit of the current state element and all the subsequent bits of
-the next element.
+值 ``0x80000000`` 和 ``0x7fffffff`` 当解释为 32 位序列时有特定含义。
+``0x80000000`` 只有第一位被设置；``0x7fffffff`` 除了第一位外所有位都被设置。
+因为这些进行按位与操作（``&``），这实际上意味着前两行之后，
+:math:`y` 由状态元素的第一个位和下一个元素的所有后续位组成。
 
-The tempering function
-^^^^^^^^^^^^^^^^^^^^^^
+暂存函数
+^^^^^^^^^
 
-The tempering function is applied to the current element of the state
-before returning it as the produced random number. It's easier to just
-show the code instead of explaining how it works:
+暂存函数应用于状态的当前元素，然后作为产生的随机数返回。
+展示代码比解释它如何工作更容易：
 
 .. code:: python
 
@@ -589,33 +438,20 @@ show the code instead of explaining how it works:
        y ^= uint32(y >> 18)
        return y
 
-It may not be obvious, especially if you're not used to binary
-arithmetic, but this function is *bijective* or *one-to-one*: each 32
-bit integer input maps to exactly one output, and vice versa: for each
-32 bit integer we get as an output there was exactly one 32 bit integer
-it could have come from. Because it uses right and left shifts, it might
-look like it throws away data at first glance, and hence can't possibly
-be reversible. It's true that those shifts throw some bits away,
-however, the critical operation here is the inline XOR (``^=``): those
-shifts are just used to compute masks that the value to be tempered is
-XOR'd with. The XOR operations themselves are reversible, and because
-each independent operation is reversible, their composition is too.
+可能不明显，特别是如果您不习惯二进制算术，但这个函数是*双射*或*一对一*的：
+每个 32 位整数输入映射到一个输出，反之亦然：对于每个 32 位整数输出，
+只有唯一一个 32 位整数可以产生它。因为它使用右移和左移，它可能看起来丢弃数据，
+但关键操作是内联异或（``^=``）：这些移位只是用来计算掩码，待暂存值与这些掩码异或。
+异或操作本身是可逆的，因为每个独立操作是可逆的，它们的组合也是。
 
-Because the tempering function is one-to-one, there is an inverse
-function: a function that gives you the untempered equivalent of a
-number. It may not be obvious to you how to construct that function
-unless you're a bitwise arithmetic wizard, but that's okay; in the worst
-case scenario we could still brute-force it. Suppose we just try every
-single 32 bit integer, and remember the result in a table. Then, when we
-get a result, we look it up in the table, and find the original. That
-table would have to be at least :math:`2^{32} \cdot 32` bits in length,
-or a good 17 gigabytes; big, but not impossibly so.
+因为暂存函数是一对一的，存在逆函数：给您一个数字未暂存等效的函数。
+除非您是位算术大师，否则如何构造这个函数可能对您不明显，但没关系；
+在最坏情况下我们仍然可以暴力破解它。假设我们只是尝试每一个 32 位整数，
+并将结果记录在表中。然后，当我们得到结果时，我们在表中查找它，并找到原始值。
+该表必须至少 :math:`2^{32} \cdot 32` 位长度，或大约 17 千兆字节；大，但不是不可能的。
 
-Fortunately, there's a much simpler method to compute the inverse of the
-temper function. We'll see why that's interesting when we evaluate the
-cryptographic security of the Mersenne Twister in the next section. For
-those interested in the result, the untempering function looks like
-this:
+幸运的是，有更简单的方法计算暂存函数的逆。当我们评估梅森旋转的加密安全性时，
+我们会看到为什么这有趣。对于感兴趣的人，未暂存函数如下：
 
 .. code:: python
 
@@ -646,39 +482,26 @@ this:
 
        return t
 
-Cryptographic security
-^^^^^^^^^^^^^^^^^^^^^^
+加密安全性
+^^^^^^^^^^
 
-Remember that for cryptographic security, it has to be impossible to
-predict future outputs or recover past outputs given present outputs.
-The Mersenne Twister doesn't have that property.
+记住对于加密安全性，给定当前输出，预测未来输出或恢复过去输出必须不可能。
+梅森旋转不具有这个特性。
 
-It's clear that pseudorandom number generators, both those
-cryptographically secure and those that aren't, are entirely defined by
-their internal state. After all, they are deterministic algorithms:
-they're just trying very hard to pretend not to be. Therefore, you could
-say that the principal difference between cryptographically secure and
-ordinary pseudorandom number generators is that the cryptographically
-secure ones shouldn't leak information about their internal state,
-whereas it doesn't matter for regular ones.
+很明显，伪随机数生成器，无论是加密安全还是非加密安全，都完全由其内部状态定义。
+毕竟，它们是确定性算法：它们只是在努力假装不是。因此，您可以说加密安全和非加密安全
+伪随机数生成器之间的主要区别在于加密安全的那些不应该泄漏关于其内部状态的信息，
+而普通的那些不介意是否泄漏。
 
-Remember that in Mersenne Twister, a random number is produced by taking
-the current element of the state, applying the tempering function, and
-returning the result. We've also seen that the tempering function has an
-inverse function. So, if I can see the output of the algorithm and apply
-the inverse of the tempering function, I've recovered one element out of
-the 624 in the state.
+记住在梅森旋转中，随机数通过取状态的当前元素，应用暂存函数然后返回结果来产生。
+我们也看到暂存函数有逆函数。所以，如果我能看到算法的输出并应用暂存函数的逆，
+我从状态的 624 个元素中恢复了一个元素。
 
-Suppose that I happen to be the only person seeing the outputs of the
-algorithm, and you begin at the start of the state, such as with a fresh
-instance of the algorithm, that means that I can clone the state by just
-having it produce 624 random numbers.
+假设我是唯一看到算法输出的人，并且您从状态开始，比如算法的新实例，
+那意味着我可以通过让它产生 624 个随机数来克隆状态。
 
-Even if an attacker doesn't see all 624 numbers, they can often still
-recreate future states, thanks to the simple relations between past
-states and future states produced by the state regeneration function.
+即使攻击者没有看到所有 624 个数字，他们通常仍然可以重建未来状态，
+感谢状态再生函数产生的过去状态和未来状态之间的简单关系。
 
-Again, this is not a weakness of Mersenne Twister. It's designed to be
-fast and have strong randomness properties. It is not designed to be
-unpredictable, which is the defining property of a cryptographically
-secure pseudorandom number generator.
+再次，这不是梅森旋转的弱点。它被设计为快速并有强随机性特性。
+它没有被设计成不可预测，这是加密安全伪随机数生成器的定义特性。

@@ -1,53 +1,40 @@
-Exclusive or
-------------
+异或运算
+--------
 
-Description
-~~~~~~~~~~~
+描述
+~~~~
 
-Exclusive or, often called “XOR”, is a Boolean [#boolean]_ binary [#binary]_ operator
-that is true when either the first input or the second input, but not
-both, are true.
+异或（XOR 是一种布尔 [#boolean]_ 二元 [#binary]_ 运算符，当第一个输入或第二个输入（但不能同时）为真时结果为真。
 
-Another way to think of XOR is as something called a “programmable
-inverter”: one input bit decides whether to invert the other input bit,
-or to just pass it through unchanged. “Inverting” bits is colloquially
-called “flipping” bits, a term we'll use often throughout the book.
+另一种理解 XOR 的方式是将其视为所谓的"可编程反相器"：一个输入位决定是否反转另一个输入位，或者保持不变。"反转"位通常称为"翻转"位，我们将在书中频繁使用这个术语。
 
 .. figure:: Illustrations/XOR/ProgrammableInverter.svg
-   :alt: a programmable inverter
+   :alt: 可编程反相器
    :align: center
 
-In mathematics and cryptography papers, exclusive or is generally
-represented by a cross in a circle: :math:`\xor`. We'll use the same
-notation in this book:
+在数学和密码学论文中，异或通常用圆圈中的叉表示：:math:`\xor`。我们将在本书中使用相同的符号：
 
 .. figure:: Illustrations/XOR/XOR.svg
    :align: center
    :alt: XOR
 
-The inputs and output here are named as if we're using XOR as an
-encryption operation. On the left, we have the plaintext bit
-:math:`P_i`. The :math:`i` is just an index, since we'll usually deal
-with more than one such bit. On top, we have the key bit :math:`k_i`,
-that decides whether or not to invert :math:`P_i`. On the right, we have
-the ciphertext bit, :math:`C_i`, which is the result of the XOR
-operation.
+这些输入和输出的命名方式就好像我们正在将 XOR 用作加密操作。在左侧，我们有明文位 :math:`P_i`。
+:math:`i` 只是一个索引，因为我们通常会处理多个这样的位。在上面，我们有密钥位 :math:`k_i`，
+它决定是否反转 :math:`P_i`。在右侧，我们有密文位 :math:`C_i`，它是 XOR 运算的结果。
 
 .. [#boolean]
-   Uses only “true” and “false” as input and output values.
+   仅使用"真"和"假"作为输入和输出值。
 
 .. [#binary]
-   Takes two parameters.
+   接受两个参数。
 
-A few properties of XOR
-~~~~~~~~~~~~~~~~~~~~~~~
+XOR 的一些特性
+~~~~~~~~~~~~~~
 
-Since we'll be dealing with XOR extensively during this book, we'll take
-a closer look at some of its properties. If you're already familiar with
-how XOR works, feel free to skip this section.
+由于我们将在整本书中大量使用 XOR，让我们仔细看看它的一些特性。
+如果您已经熟悉 XOR 的工作原理，可以跳过本节。
 
-We saw that the output of XOR is 1 when one input or the other (but not
-both) is 1:
+我们看到 XOR 的输出在两个输入（但不能同时）为 1 时为 1：
 
 .. math::
 
@@ -56,51 +43,47 @@ both) is 1:
    0 \xor 1 = 1 & 1 \xor 1 = 0
    \end{array}
 
-There are a few useful arithmetic tricks we can derive from that.
+我们可以从中推导出一些有用的算术技巧。
 
-#. XOR can be applied in any order:
+#. XOR 可以以任何顺序应用：
    :math:`a \xor (b \xor c) = (a \xor b) \xor c`
-#. The operands can be flipped around: :math:`a \xor b = b \xor a`
-#. Any bit XOR itself is 0: :math:`a \xor a = 0`. If :math:`a` is 0,
-   then :math:`0 \xor 0 = 0`; if :math:`a` is 1, then :math:`1 \xor 1 = 0`.
-#. Any bit XOR 0 is that bit again: :math:`a \xor 0 = a`. If :math:`a`
-   is 0, then :math:`0 \xor 0 = 0`; if :math:`a` is 1, then
-   :math:`1 \xor 0 = 1`.
+#. 操作数可以交换：:math:`a \xor b = b \xor a`
+#. 任何位与自身异或结果为 0：:math:`a \xor a = 0`。如果 :math:`a` 是 0，
+   那么 :math:`0 \xor 0 = 0`；如果 :math:`a` 是 1，那么 :math:`1 \xor 1 = 0`。
+#. 任何位与 0 异或仍然是该位：:math:`a \xor 0 = a`。如果 :math:`a` 是 0，
+   那么 :math:`0 \xor 0 = 0`；如果 :math:`a` 是 1，那么 :math:`1 \xor 0 = 1`。
 
-These rules imply that :math:`a \xor b \xor a = b`:
+这些规则意味着 :math:`a \xor b \xor a = b`：
 
 .. math::
 
    \begin{aligned}
-   a \xor b \xor a & = a \xor a \xor b & \; & \text{(second rule)} \\
-                   & = 0 \xor b        & \; & \text{(third rule)} \\
-                   & = b               & \; & \text{(fourth rule)}
+   a \xor b \xor a & = a \xor a \xor b & \; & \text{(第二规则)} \\
+                   & = 0 \xor b        & \; & \text{(第三规则)} \\
+                   & = b               & \; & \text{(第四规则)}
    \end{aligned}
 
-We use this property for XOR encryption. The first XOR :math:`a` can be thought of 
-as encrypting, and the second one as decrypting.
+我们将此特性用于 XOR 加密。第一个 XOR :math:`a` 可以被认为是加密，
+第二个是解密。
 
-Bitwise XOR
-~~~~~~~~~~~
+按位异或
+~~~~~~~~
 
-XOR, as we've just defined it, operates only on single bits or Boolean
-values. Since we usually deal with values comprised of many bits, most
-programming languages provide a “bitwise XOR” operator: an operator that
-performs XOR on the respective bits in a value.
+正如我们刚定义的，XOR 只在单个位或布尔值上操作。由于我们通常处理由许多位组成的值，
+大多数编程语言提供了"按位异或"运算符：对值中的各个位执行 XOR 运算。
 
-As an example, Python has the ``^`` (caret) operator performing
-bitwise XOR on integers. It first expresses two
-integers in binary [#binary-integer]_, and then performs XOR on their respective
-bits. Hence the name, *bitwise* XOR.
+例如，Python 有 ``^`` (插入符号) 运算符对整数执行按位异或。
+它首先将两个整数表示为二进制 [#binary-integer]_，然后对它们的对应位执行 XOR。
+因此得名 *按位* XOR。
 
 .. math::
 
    \begin{aligned}
    73 \xor 87 & = 0b1001001 \xor 0b1010111 \\
               & = \begin{array}{*{7}{C{\widthof{$\xor$}}}c}
-                      1    & 0    & 0    & 1    & 0    & 0    & 1    & \quad \text{(left)}\\
+                      1    & 0    & 0    & 1    & 0    & 0    & 1    & \quad \text{(左)}\\
                       \xor & \xor & \xor & \xor & \xor & \xor & \xor & \\
-                      1    & 0    & 1    & 0    & 1    & 1    & 1    & \quad \text{(right)}\\
+                      1    & 0    & 1    & 0    & 1    & 1    & 1    & \quad \text{(右)}\\
                   \end{array} \\
               & = \begin{array}{*{7}{C{\widthof{$\xor$}}}}
                       0    & 0    & 1    & 1    & 1    & 1    & 0
@@ -110,110 +93,81 @@ bits. Hence the name, *bitwise* XOR.
    \end{aligned}
 
 .. [#binary-integer]
-   Usually, numbers are internally stored in binary, so this
-   does not take any work. When a number is prefixed with
-   “0b” it means that the remaining digits are a binary representation.
+   通常，数字在内部以二进制存储，所以这不需要任何工作。
+   当数字以"0b"为前缀时，表示剩余数字是二进制表示。
 
-One-time pads
-~~~~~~~~~~~~~
+一次一密
+~~~~~~~~
 
-XOR may seem like an awfully simple, even trivial operator. Even so,
-there is an encryption scheme. It is called a one-time pad, which consists of
-a single operator with a sequence (“pad”) of random bits. The security of the
-scheme depends on using the pad only once. The sequence is called a pad
-because it was originally recorded on a physical, paper pad.
+XOR 看起来可能过于简单，甚至是平凡的运算符。尽管如此，它存在一种加密方案。
+它被称为一次一密，由一系列（"垫"）随机位组成。该方案的安全性取决于只使用一次垫。
+这个序列被称为"垫"，因为它最初记录在物理的纸垫上。
 
-The scheme is unique not only in its simplicity. It
-has the highest security guarantee possible. If the bits are truly
-random, they become unpredictable for an attacker. Additionally, if the pad is only
-used once, the attacker learns nothing about the plaintext when viewing
-a ciphertext. [#msg-exists]_
+该方案不仅因其简单性而独特。它具有可能最高的安全保证。如果这些位是真正随机的，
+它们对攻击者来说是不可预测的。此外，如果垫只使用一次，攻击者在查看密文时对明文一无所知。[#msg-exists]_
 
 .. [#msg-exists]
-   The attacker does learn that the message exists and the message length
-   in this simple scheme. While this typically is not too
-   important, there are situations where this matters. 
-   Secure cryptosystems exist to both hide the existence and the length of
-   a message.
+   在这个简单方案中，攻击者确实知道消息的存在和消息长度。
+   虽然这通常不是太重要，但在某些情况下这很重要。
+   安全密码系统的存在既隐藏消息的存在也隐藏消息的长度。
 
-
-Suppose we can translate our plaintext into a sequence of bits. We also
-have the pad of random bits, shared between the sender and the (one or
-more) recipients. We can compute the ciphertext by taking the bitwise
-XOR of the two sequences of bits.
+假设我们可以将明文转换为位序列。我们还有发送方和（一个或多个）接收方共享的随机位垫。
+我们可以通过取两个位序列的按位异或来计算密文。
 
 .. figure:: Illustrations/XOR/OTP.svg
    :align: center
    :alt: OTP
 
-If an attacker sees the ciphertext, we can prove that
-zero information is learned about the plaintext without the key. This property is
-called *perfect secrecy*. The proof can be understood intuitively. 
-Think of XOR as a programmable inverter, and look at a
-particular bit intercepted by Eve, the eavesdropper.
+如果攻击者看到密文，我们可以证明在没有密钥的情况下对明文没有获取任何信息。
+这种特性称为*完美保密*。这个证明可以直观理解。把 XOR 当作可编程反相器，
+看看 Eve（窃听者）拦截的特定位。
 
 .. figure:: Illustrations/XOR/OTPEve.svg
    :align: center
    :alt: OTP eve
 
-Let's say Eve sees that a particular ciphertext bit :math:`c_i` is 1.
-She has no idea if the matching plaintext bit :math:`p_i` was 0 or 1,
-because she has no idea if the key bit :math:`k_i` was 0 or 1. Since all
-of the key bits are truly random, both options are exactly equally
-probable.
+假设 Eve 看到特定的密文位 :math:`c_i` 是 1。她不知道对应的明文位 :math:`p_i` 是 0 还是 1，
+因为她不知道密钥位 :math:`k_i` 是 0 还是 1。由于所有密钥位都是真正随机的，两个选项的概率完全相同。
 
-Attacks on “one-time pads”
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+对"一次一密"的攻击
+~~~~~~~~~~~~~~~~~~
 
-The one-time pad security guarantee only holds if used correctly.
-First of all, the one-time pad must consist of truly random data.
-Secondly, the one-time pad can only be used once (hence the name).
-Unfortunately, most commercial products that claim to be “one-time pads”
-are snake oil [#snake-oil]_, and do not satisfy at least one of these two
-properties.
+一次一密的安全保证只有在正确使用时才成立。首先，一次一密必须由真正随机数据组成。
+其次，一次一密只能使用一次（因此得名）。不幸的是，大多数声称是"一次一密"的商用产品
+都是骗局 [#snake-oil]_，并且不满足上述至少一个特性。
 
 .. [#snake-oil]
-   “Snake oil” is a term for dubious products that claim
-   extraordinary benefits and features, yet do not realize any of
-   them.
+   "蛇油"是声称具有非凡优势和特性但实际上没有实现任何特性的可疑产品的术语。
 
-Not using truly random data
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+不使用真正随机数据
+^^^^^^^^^^^^^^^^^^
 
-The first issue is that various deterministic constructs 
-produce the one-time pad instead of using truly random data. That is not
-necessarily insecure: in fact, the most obvious example, a synchronous
-stream cipher, is something we will see later in the book. However, it
-does invalidate the “unbreakable” security property of one-time pads.
-The end user is better served by a more honest cryptosystem,
-not one that lies about its security properties.
+第一个问题是各种确定性构造产生的是一次一密而不是使用真正随机数据。
+这不一定不安全：实际上，最明显的例子，同步流密码，我们稍后会在书中看到。
+然而，它确实使一次一密的"不可破解"安全特性失效。最终用户应该使用
+更诚实的密码系统，而不是一个关于其安全特性撒谎的系统。
 
-Reusing the “one-time” pad
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+重复使用"一次"垫
+^^^^^^^^^^^^^^^^^^
 
-The other issue is with key reuse, which is much more serious. Suppose
-an attacker gets two ciphertexts with the same “one-time” pad. The
-attacker can then XOR the two ciphertexts, which is also the XOR of the
-plaintexts:
+另一个问题与密钥重复使用有关，这要严重得多。假设攻击者获得了使用相同"一次"垫的两个密文。
+然后攻击者可以对两个密文进行 XOR，这也是明文的 XOR：
 
 .. math::
 
    \begin{aligned}
    c_1 \xor c_2
-   &= (p_1 \xor k) \xor (p_2 \xor k) && (\text{definition})\\
-   &= p_1 \xor k \xor p_2 \xor k && (\text{reorder terms})\\
+   &= (p_1 \xor k) \xor (p_2 \xor k) && (\text{定义})\\
+   &= p_1 \xor k \xor p_2 \xor k && (\text{重排项})\\
    &= p_1 \xor p_2 \xor k \xor k && (a \xor b = b \xor a) \\
    &= p_1 \xor p_2 \xor 0 && (x \xor x = 0) \\
    &= p_1 \xor p_2 && (x \xor 0 = x)
    \end{aligned}
 
-At first sight, that may not seem like an issue. To extract either
-:math:`p_1` or :math:`p_2`, you'd need to cancel out the XOR operation,
-which means you need to know the other plaintext. The problem is that
-even the result of the XOR operation on two plaintexts contains quite a
-bit of information about the plaintexts themselves. We'll illustrate this
-visually with some images from a broken “one-time” pad process, starting
-with :numref:`fig-multitimepad`.
+乍一看，这似乎不是问题。为了提取 :math:`p_1` 或 :math:`p_2`，你需要消除 XOR 运算，
+这意味着你需要知道另一个明文。问题在于即使两个明文上的 XOR 运算结果也包含了
+相当多关于明文本身的信息。我们将通过一些来自被破坏的"一次"垫过程的图像来直观地说明这一点，
+从 :numref:`fig-multitimepad` 开始。
 
 .. figmatrix::
    :label: fig-multitimepad
@@ -223,63 +177,53 @@ with :numref:`fig-multitimepad`.
       :alt:
       :align: center
 
-      First plaintext.
+      第一个明文。
 
    .. subfigure:: ./Illustrations/KeyReuse/Crypto.png
       :alt:
       :align: center
 
-      Second plaintext.
+      第二个明文。
 
    .. subfigure:: ./Illustrations/KeyReuse/BrokenEncrypted.png
       :alt:
       :align: center
 
-      First ciphertext.
+      第一个密文。
 
    .. subfigure:: ./Illustrations/KeyReuse/CryptoEncrypted.png
       :alt:
       :align: center
 
-      Second ciphertext.
+      第二个密文。
 
    .. subfigure:: ./Illustrations/KeyReuse/Key.png
       :alt:
       :align: center
 
-      Reused key.
+      重复使用的密钥。
 
    .. subfigure:: ./Illustrations/KeyReuse/CiphertextsXOR.png
       :alt:
       :align: center
 
-      XOR of ciphertexts.
+      密文的 XOR。
 
-   Two plaintexts, the re-used key, their respective
-   ciphertexts, and the XOR of the ciphertexts. Plaintext information clearly
-   leaks through when we XOR the ciphertexts.
+  两个明文、重复使用的密钥、它们各自的密文以及密文的 XOR。
+  当我们对密文进行 XOR 时，明文信息明显泄漏。
 
-Crib-dragging
-^^^^^^^^^^^^^
+拖曳 crib
+^^^^^^^^^^^
 
-A classic approach to break multi-time pad systems is
-“crib-dragging.” Crib-dragging uses small sequences expected
-to occur with high probability. Those sequences are “cribs”. The
-name crib-dragging originates from the fact that these small “cribs” are
-dragged from left to right across each ciphertext, and from top to
-bottom across the ciphertexts, in the hope of finding a match.
-The matches form the sites of the start, or “crib”, if you will, of
-further decryption.
+破坏多次使用垫系统的经典方法是"拖曳 crib"。Crib-dragging 使用预期会高频出现的小序列。
+这些序列是"cribs"。"crib-dragging"这个名字源于这些小"cribs"被从左到右拖过每个密文，
+以及从上到下穿过密文，希望找到匹配。匹配形成进一步解密的起始位置，或"crib"。
 
-The idea is fairly simple. Suppose we have several encrypted messages
-:math:`C_i` encrypted with the same “one-time” pad :math:`K`
-[#capital-letters]_. If we could correctly guess the plaintext for one of the
-messages, let's say :math:`C_j`, we'd know :math:`K`:
+这个想法相当简单。假设我们有几条用相同"一次"垫 :math:`K` 加密的消息 [#capital-letters]_。
+如果我们能正确猜测其中一条消息的明文，比如 :math:`C_j`，我们就会知道 :math:`K`：
 
 .. [#capital-letters]
-   We use capital letters when referring to an entire message, as
-   opposed to just bits of a message.
-
+   当我们指整个消息时使用大写字母，与之相对的是仅仅指消息的位。
 
 .. math::
 
@@ -291,109 +235,74 @@ messages, let's say :math:`C_j`, we'd know :math:`K`:
    &= K
    \end{aligned}
 
-Since :math:`K` is the shared secret, we can use it to decrypt all
-other messages as if we are the recipient:
+由于 :math:`K` 是共享密钥，我们可以用它来解密所有其他消息，就像我们是接收者一样：
 
 .. math::
 
-   P_i = C_i \xor K \qquad \text{for all }i
+   P_i = C_i \xor K \qquad \text{对于所有 }i
 
-This typically does not work because we cannot
-guess an entire message. However, we can guess parts of a message.
+这通常不奏效，因为我们无法猜测整个消息。但是，我们可以猜测消息的部分内容。
 
-If we guess a few plaintext bits :math:`p_i` correctly for *any* of the
-messages, that reveals the key bits at that position for *all* of
-the messages, since :math:`k = c_i \xor p_i`. Hence, all of the
-plaintext bits at that position are revealed. Using that value for
-:math:`k`, we can compute the plaintext bits :math:`p_i = c_i \xor k`
-for all the other messages.
+如果我们正确猜测*任何*一条消息的一些明文位，这就会揭示所有消息在那个位置的密钥位，
+因为 :math:`k = c_i \xor p_i`。因此，该位置的所有明文位都被揭示。使用这个 :math:`k` 值，
+我们可以为所有其他消息计算明文位 :math:`p_i = c_i \xor k`。
 
-Guessing parts of the plaintext is easier than guessing the entire
-plaintext. Suppose we know that the plaintext is in English. There are
-sequences that will occur very commonly. For example (the
-:math:`\verb*| |` symbol denotes a space):
+猜测明文的部分比特比猜测整个明文更容易。假设我们知道明文是英文的。
+有些序列会非常常见。例如（:math:`\verb*| |` 符号表示空格）：
 
--  :math:`\verb*| the |` and variants such as :math:`\verb*|. The |`
--  :math:`\verb*| of |` and variants
--  :math:`\verb*| to |` and variants
--  :math:`\verb*| and |` (no variants; only occurs in the middle of a sentence)
--  :math:`\verb*| a |` and variants
+-  :math:`\verb*| the |` 及其变体如 :math:`\verb*|. The |`
+-  :math:`\verb*| of |` 及其变体
+-  :math:`\verb*| to |` 及其变体
+-  :math:`\verb*| and |`（无变体；只出现在句子中间）
+-  :math:`\verb*| a |` 及其变体
 
-We can make better guesses if more information is known about the plaintext.
-For example, if HTML is served over HTTP, we expect to see
-``Content-Type``, ``<a>``, and so on.
+如果对明文的更多信息已知，我们可以做出更好的猜测。例如，如果通过 HTTP 提供 HTML
+数据，我们希望看到 ``Content-Type``、``<a>`` 等。
 
-This only tells us which plaintext sequences are likely, giving us
-likely guesses. How can we tell if the guesses are correct? If
-our guess is correct, we know all the plaintexts at that position
-based on using the technique described earlier. We can simply look at
-those plaintexts and decide if they look correct.
+这只能告诉我们哪些明文序列是可能的，给了我们可能的猜测。我们如何知道猜测是否正确？
+如果我们的猜测正确，基于前面描述的技术，我们知道该位置的所有明文。我们只需查看这些明文并判断它们是否正确。
 
-In practice, the process needs to be automated because of all potential 
-guesses. Fortunately that is easy to do. For example,
-a simple but effective method is to count how often different
-symbols occur in the guessed plaintexts: if the messages contain English
-text, we expect to see a lot of letters e, t, a, o, i, n. If we
-see binary nonsense instead, we know that the guess was probably
-incorrect, or perhaps that message is actually binary data.
+实际上，由于所有潜在的猜测，这个过程需要自动化。幸运的是这很容易做到。
+例如，一个简单但有效的方法是计算猜测明文中不同符号出现的频率：
+如果消息包含英文文本，我们希望看到很多字母 e、t、a、o、i、n。如果我们看到二进制乱码，
+就知道猜测可能不正确，或者那条消息实际上是二进制数据。
 
-These small, highly probable sequences are known as “cribs” because
-they are the start of a larger decryption process. Suppose your crib,
-``the``, was successful and found the five-letter sequence ``t thr`` in
-another message. You can use a dictionary to find common words
-starting with ``thr``, such as ``through``. If that is a correct guess,
-it can reveal four more bytes in all of the ciphertexts. This information can be
-useful for revealing more. Similarly, you can use the dictionary to find
-words ending in ``t``.
+这些小的、高度可能的序列被称为"cribs"，因为它们是更大解密过程的开始。
+假设你的 crib ``the`` 成功了并在另一条消息中找到了五个字母序列 ``t thr``。
+你可以使用字典查找以 ``thr`` 开头的常见单词，比如 ``through``。如果这是正确的猜测，
+它可以揭示所有密文中的另外四个字节。这些信息可能有助于揭示更多。
+类似地，你可以使用字典查找以 ``t`` 结尾的单词。
 
-This becomes greatly effective for plaintexts that we know more
-about. If HTTP data has the plaintext ``ent-Len``, then we
-can expand that to ``Content-Length:``. More bytes are easily revealed.
+当我们对明文的了解更多时，这会变得非常有效。如果 HTTP 数据的明文是 ``ent-Len``，
+那么我们可以扩展为 ``Content-Length:``。很容易揭示更多字节。
 
-While this technique works as soon as two messages are encrypted with
-the same key, it is clear that the process becomes simpler when more
-ciphertexts use the same key. Since all of the steps become more
-effective, we get:
+虽然只要两条消息用相同的密钥加密，这种技术就有效，但很明显，当更多密文使用相同密钥时，
+这个过程会变得更简单。由于所有步骤都变得更有效，我们得到：
 
--  More cribbing positions.
--  More plaintext bytes revealed with each successful crib and
-   guess. This leads to more guessing options elsewhere.
--  More ciphertexts available for any given position. This simplifies guess
-   validation and at times increases accuracy.
+-  更多 crib 位置。
+-  每次成功的 crib 和猜测揭示更多的明文字节。这导致其他地方的更多猜测选项。
+-  对于任何给定位置可用的更多密文。这简化了猜测验证，有时提高准确性。
 
-We have reviewed simple ideas for breaking multi-time pads. While they are
-already quite effective, people invent more effective
-methods by applying advanced, statistical models using natural
-language analysis. This further demonstrates just how broken
-multi-time pads are. :cite:`mason:nltwotimepads`
+我们回顾了破坏多次使用垫的简单想法。虽然它们已经相当有效，但人们通过应用使用自然语言分析的
+高级统计模型发明了更有效的方法。这进一步证明了多次使用垫是多么被破坏。\ :cite:`mason:nltwotimepads`
 
-Remaining problems
-~~~~~~~~~~~~~~~~~~
+剩余问题
+~~~~~~~~
 
-Real one-time pads, implemented properly, have an extremely strong
-security guarantee. It would appear, then, that cryptography is over:
-encryption is a solved problem, and we can all go home. Obviously,
-that is not the case.
+真正实现的一次一密具有极强的安全保证。那么，看起来密码学结束了：加密是一个已解决的问题，
+我们都可以回家了。显然，事实并非如此。
 
-One-time pads are rarely used for being horribly impractical.
-The key is at least as large as all information you would like transmitted,
-*put together*. Plus, the keys must be exchanged securely, ahead
-of time, with all people you would like to communicate with. We would like to
-communicate securely with everyone on the Internet, and that is a very
-large number of people. Furthermore, since the keys must consist of
-truly random data for the security property to hold, key generation is
-difficult and time-consuming without specialized hardware.
+一次一密很少使用，因为它们非常不切实际。密钥至少与您希望传输的所有*总*信息一样大。
+此外，密钥必须提前与所有希望通信的人安全交换。我们希望与互联网上的每个人安全通信，
+那是一个非常庞大的人数。此外，由于密钥必须由真正随机数据组成才能保持安全特性，
+密钥生成在没有专用硬件的情况下是困难且耗时的。
 
-One-time pads pose a trade-off. An advantage is that a one-time pad is an algorithm with a solid
-information-theoretic security guarantee. The guarantee is not available with any
-other system. On the other hand, the key exchange requirements are exteremely impractical. 
-However, throughout this book,
-we will see that secure symmetric encryption algorithms are not the pain point of modern
-cryptosystems. Cryptographers have designed many such algorithms.
-Practical key management, on the other hand, is one of the toughest challenges facing
-modern cryptography. One-time pads may solve a problem, but it is the
-wrong problem.
+一次一密提出了一个权衡。一个优点是一次一密是具有坚实的信息论安全保证的算法。
+没有任何其他系统提供这种保证。另一方面，密钥交换要求极其不切实际。
+然而，纵观全书，
+我们将看到安全对称加密算法不是现代密码系统的痛点。密码学家已经设计了许多这样的算法。
+另一方面，实用的密钥管理是现代密码学面临的最严峻挑战之一。
+一次一密可能解决了一个问题，但是错误的问题。
 
-One-time pads may have practical use, but they are obviously not a panacea. We need
-a system with both manageable key sizes and the capability of maintaining secrecy at the same time.
-Additionally, a system to negotiate keys over the Internet with complete strangers is necessary.
+一次一密可能有实际用途，但它们显然不是万灵药。我们需要一个同时具有可管理的密钥大小
+和保持保密能力的系统。此外，需要一种在互联网上与完全陌生人协商密钥的系统。
