@@ -78,18 +78,7 @@ def depart_subfigure_tex(self, node):
 
     # replace the start tag
     base_output = r"\\begin{figure}\[[a-z]*\]"
-    width = node.get("width")
-    if width is None:
-        # Try to get width from parent figmatrix
-        parent = node.parent
-        while parent is not None:
-            if isinstance(parent, figmatrix):
-                width = parent.get("width", 0.5)
-                break
-            parent = parent.parent
-        if width is None:
-            width = 0.5  # default fallback
-    replacement = r"\\begin{subfigure}[t]{%s\\linewidth}" % width
+    replacement = r"\\begin{subfigure}[t]{%s\\linewidth}" % node.get("width", 0.5)
     figoutput = re.sub(base_output, replacement, figoutput)
     # replace the end tag
     figoutput = figoutput.replace(r"\end{figure}", r"\end{subfigure}")
@@ -135,21 +124,9 @@ def depart_subfigure_html(self, node):
     self.add_fignumber = self.__saved_add_fignumber
 
     figoutput = "".join(self.body)
-    # Get width from node with fallback to figmatrix parent's width or default 0.5
-    width = node.get("width")
-    if width is None:
-        # Try to get width from parent figmatrix
-        parent = node.parent
-        while parent is not None:
-            if isinstance(parent, figmatrix):
-                width = parent.get("width", 0.5)
-                break
-            parent = parent.parent
-        if width is None:
-            width = 0.5  # default fallback
     figoutput = figoutput.replace(
         'class="figure',
-        'style="width: %g%%" class="subfigure' % (float(width) * 100),
+        'style="width: %g%%" class="subfigure' % (float(node.get("width", 0.5)) * 100),
     )
     self.body = self.__body
     self.body.append(figoutput)
@@ -212,6 +189,14 @@ class FigmatrixDirective(Directive):
 
         if self.content:
             self.state.nested_parse(self.content, self.content_offset, node)
+            # Flatten block_quote wrapper if present (parser wraps content in block_quote)
+            new_children = []
+            for child in list(node.children):
+                if isinstance(child, nodes.block_quote):
+                    new_children.extend(child.children)
+                else:
+                    new_children.append(child)
+            node.children = new_children
             caption_nodes = []
             for child in node.children:
                 if isinstance(child, nodes.paragraph):
@@ -237,6 +222,15 @@ class FigmatrixDirective(Directive):
         if label is not None:
             node['names'].append(label)
             self.state.document.note_explicit_target(node, node)
+
+        # Set width and subfig_i on subfigure children (workaround for doctree_read timing)
+        subfig_i = 0
+        for child in list(node.children):
+            if isinstance(child, subfigure):
+                child["width"] = node.get("width", 0.5)
+                child["subfig_i"] = subfig_i
+                subfig_i += 1
+
         return [node]
 
 
@@ -270,9 +264,8 @@ def doctree_read(app, doctree):
                         figure_node.insert(0, prevnode)
                         removed_nodes += 1
 
-                # Ensure width is set on subfigure
-                if "width" not in figure_node:
-                    figure_node["width"] = figmatrix_node.get("width", 0.5)
+                width = figmatrix_node.get("width", 0.5)
+                figure_node["width"] = width
                 figure_node["subfig_i"] = subfig_i
                 doc_subfigures[node_id(figure_node)] = (figmatrix_id, subfig_i)
                 subfig_i += 1
