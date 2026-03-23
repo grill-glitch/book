@@ -30,10 +30,11 @@ extensions = [
 ]
 
 # Use MathJax for math rendering (HTML only; EPUB will show raw LaTeX)
-mathjax_config = {
-    'TeX': {
-        'extensions': ['AMSmath.js', 'AMSsymbols.js'],
-        'equationNumbers': {'autoNumber': 'AMS', 'useLabelIds': True}
+mathjax3_config = {
+    'tex': {
+        'macros': {
+            'xor': '{\\oplus}',
+        }
     }
 }
 

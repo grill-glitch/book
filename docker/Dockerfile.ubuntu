@@ -21,7 +21,9 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     python3-sphinxcontrib.bibtex \
     python3-sphinxcontrib.svg2pdfconverter \
     ghostscript \
-    xindy; \
+    xindy \
+    python3-pip; \
+    pip3 install --no-cache-dir sphinx-rtd-theme; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
